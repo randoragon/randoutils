@@ -1,4 +1,4 @@
-# randoutils
+# rando utils
 
 This repository holds source code for some small utility programs I've written
 to help with various tasks. Typically I use shell or python scripts, and those
