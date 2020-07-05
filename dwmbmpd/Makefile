@@ -1,7 +1,7 @@
 include config.mk
 
-all: dwmblocks-mpd.c
-	cc ${INCS} ${LIBS} dwmblocks-mpd.c -o ../bin/dwmblocks-mpd
+all: dwmbmpd.c
+	cc ${INCS} ${LIBS} dwmbmpd.c -o ../bin/dwmbmpd
 
 run:
-	../bin/dwmblocks-mpd
+	../bin/dwmbmpd
