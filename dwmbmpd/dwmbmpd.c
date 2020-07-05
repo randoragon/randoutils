@@ -96,9 +96,9 @@ int main(int argc, char **argv)
         char *errmsg = (char *)mpd_connection_get_error_message(conn);
         mpd_connection_free(conn);
         if (strlen(errmsg)) {
-            die("failed to establish connection to MPD");
-        } else {
             die(errmsg);
+        } else {
+            die("failed to establish connection to MPD");
         }
     }
 
