@@ -6,5 +6,9 @@ FT_LIBS = -lfreetype
 FC_INCS = 
 FC_LIBS = -lfontconfig
 
-INCS = ${FT_INCS} ${FC_INCS}
-LIBS = ${FT_LIBS} ${FC_LIBS}
+# mpdclient
+MPD_INCS =
+MPD_LIBS = -lmpdclient
+
+INCS = ${FT_INCS} ${FC_INCS} ${MPD_INCS}
+LIBS = ${FT_LIBS} ${FC_LIBS} ${MPD_LIBS}

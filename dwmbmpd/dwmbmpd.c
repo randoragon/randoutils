@@ -6,18 +6,18 @@
 // freetype2: https://www.freetype.org/freetype2/docs/
 #include <freetype2/ft2build.h>
 #include FT_FREETYPE_H
+// mpd: https://www.musicpd.org/doc/libmpdclient/
+#include <mpd/client.h>
 
 #define FONTNAME "DejaVu Sans"
 #define FONTSIZE 9
-
-FT_Library lib;
-FT_Face face;
-char *fntpath;
+#define MPD_PORT 6601
 
 void die(char *msg)
 {
-    char fullmsg[100] = "dwmblocks-mpd: ";
+    char fullmsg[100] = "dwmbmpd: ";
     strcat(fullmsg, msg);
+    strcat(fullmsg, "\n");
     fprintf(stderr, fullmsg);
     exit(EXIT_FAILURE);
 }
@@ -58,15 +58,52 @@ char *LocateFont(const char *name)
 int main(int argc, char **argv)
 {
     // Find font file path using fontconfig
+    char *fntpath;
     if ((fntpath = LocateFont(FONTNAME)) == NULL) {
         die("failed to locate font file");
     }
-    printf("path: %s", fntpath);
 
     // Intialize freetype library
+    FT_Library lib;
     if (FT_Init_FreeType(&lib)) {
         die("failed to initialize library");
     }
+
+    // Load font face
+    FT_Face face;
+    switch(FT_New_Face(lib, fntpath, 0, &face)) {
+        case FT_Err_Unknown_File_Format:
+            die("failed to load font: unknown file format");
+            break;
+        case 0:
+            break;
+        default:
+            die("failed to load font");
+            break;
+    }
+
+    // Set font face size
+    if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, 0, 72)) {
+        die("failed to set font size");
+    }
+
+    // Connect to MPD
+    struct mpd_connection *conn = mpd_connection_new(NULL, 0, 0);
+    if (conn == NULL) {
+        die("failed to establish connection to MPD");
+    }
+    if (mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
+        char *errmsg = (char *)mpd_connection_get_error_message(conn);
+        mpd_connection_free(conn);
+        if (strlen(errmsg)) {
+            die("failed to establish connection to MPD");
+        } else {
+            die(errmsg);
+        }
+    }
+
+    // Close MPD connection
+    mpd_connection_free(conn);
 
     return EXIT_SUCCESS;
 }
