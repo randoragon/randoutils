@@ -43,7 +43,7 @@ typedef struct
     const char *artist, *title;
     int pos, duration;
     float progress;
-    int isplaying;
+    enum mpd_state state;
 } SongInfo;
 
 // source: https://github.com/lc-soft/LCUI/blob/d52bae5b0368f2d780c980f0e59badcd40c87dfe/src/font/fontconfig.c#L42-L71
@@ -89,22 +89,24 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
     struct mpd_status *mpdstatus;
     if ((mpdstatus = mpd_recv_status(conn)) == NULL)
         return 2;
-    enum mpd_state mpdstate = mpd_status_get_state(mpdstatus);
-	if (mpdstate == MPD_STATE_PLAY || mpdstate == MPD_STATE_PAUSE) {
-		if (!mpd_response_next(conn))
-            return 3;
 
-        info->isplaying = (mpdstate == MPD_STATE_PLAY);
-		struct mpd_song *song = mpd_recv_song(conn);
-		if (song != NULL) {
-            // Poll the rest from MPD itself
-            info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
-            info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
-            info->pos      = mpd_status_get_elapsed_time(mpdstatus);
-            info->duration = mpd_status_get_total_time(mpdstatus);
-            info->progress = info->pos / (float)info->duration;
-		}
-	}
+    info->state = mpd_status_get_state(mpdstatus);
+	if (info->state == MPD_STATE_UNKNOWN) {
+        return 4;
+    }
+
+    if (!mpd_response_next(conn))
+        return 3;
+
+    struct mpd_song *song = mpd_recv_song(conn);
+    if (song != NULL) {
+        // Poll the rest from MPD itself
+        info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+        info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+        info->pos      = mpd_status_get_elapsed_time(mpdstatus);
+        info->duration = mpd_song_get_duration(song);
+        info->progress = info->pos / (float)info->duration;
+    }
 
 	if (mpd_status_get_error(mpdstatus) != NULL)
 		fprintf(stderr, "dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
@@ -199,15 +201,23 @@ int main(int argc, char **argv)
     char str[CMDLENGTH] = "",
          sep[] = " - ";
     strcat(str, PADDING);
-    strcat(str, info.isplaying ? " " : " ");
-    sprintf(str + strlen(str), "%02d", info.pos / 60);
-    strcat(str, ":");
-    sprintf(str + strlen(str), "%02d", info.pos % 60);
-    strcat(str, "/");
-    sprintf(str + strlen(str), "%02d", info.duration / 60);
-    strcat(str, ":");
-    sprintf(str + strlen(str), "%02d", info.duration % 60);
-    strcat(str, " ");
+    if (info.state != MPD_STATE_STOP) {
+        strcat(str, info.state == MPD_STATE_PLAY ? " " : " ");
+        sprintf(str + strlen(str), "%02d", info.pos / 60);
+        strcat(str, ":");
+        sprintf(str + strlen(str), "%02d", info.pos % 60);
+        strcat(str, "/");
+        sprintf(str + strlen(str), "%02d", info.duration / 60);
+        strcat(str, ":");
+        sprintf(str + strlen(str), "%02d", info.duration % 60);
+        strcat(str, " ");
+    } else {
+        strcat(str, " ");
+        sprintf(str + strlen(str), "%02d", info.duration / 60);
+        strcat(str, ":");
+        sprintf(str + strlen(str), "%02d", info.duration % 60);
+        strcat(str, " ");
+    }
     int spaceleft   = CMDLENGTH - strlen(str) - strlen(PADDING) - 1;
     int spacewanted = strlen(info.artist) + strlen(sep) + strlen(info.title) + 1;
     assert(spaceleft > spacewanted && spaceleft > MAXLENGTH);
