@@ -49,7 +49,7 @@ typedef struct
 // source: https://github.com/lc-soft/LCUI/blob/d52bae5b0368f2d780c980f0e59badcd40c87dfe/src/font/fontconfig.c#L42-L71
 // (MIT License as of writing this program)
 char *locateFont(const char *name) 
-{ 
+{
     char *path = NULL; 
     size_t path_len; 
 
@@ -97,12 +97,6 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
         info->isplaying = (mpdstate == MPD_STATE_PLAY);
 		struct mpd_song *song = mpd_recv_song(conn);
 		if (song != NULL) {
-            // Construct absolute path to current song file
-            char *homedir       = getenv("HOME");
-            const char *relpath = mpd_song_get_uri(song);
-            char *path          = (char *)malloc(strlen(homedir) + strlen(MPD_LIBPATH) + strlen(relpath) + 1);
-            sprintf(path, "%s/%s/%s", homedir, MPD_LIBPATH, relpath);
-
             // Poll the rest from MPD itself
             info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
             info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
