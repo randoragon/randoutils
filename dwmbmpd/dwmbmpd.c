@@ -12,12 +12,13 @@
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9
-#define MPD_LIBPATH "Music" /* path relative to home dir */
+#define MPD_LIBPATH "Music"     /* path relative to home dir */
+#define PADDING     6           /* the amount of text padding (in pixels) for the formatted block */
 #define COL_BG      "#111111"
 #define COL_FG      "#ABABAB"
 #define ELLIPSIS    "…"
-#define MAXLENGTH   40   /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
-#define CMDLENGTH   1024 /* this must be equal to CMDLENGTH in dwmblocks.c */
+#define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
+#define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
 
 void die(char *msg)
 {
@@ -166,20 +167,38 @@ int main(int argc, char **argv)
         die("failed to fetch song info");
     }
 
-    // Construct output string
-    char str[CMDLENGTH] = "  ",
-         sep[] = " - ";
+    // Close MPD connection
+    mpd_connection_free(conn);
+
+    // Construct visible and formatted strings
+    char str[CMDLENGTH] = "",
+         out[CMDLENGTH] = "",
+         sep[] = " - ",
+         pad[10] = "^f";
+    sprintf(pad + 2, "%d", PADDING), strcat(pad, "^");
+    strcat(out, "^c"), strcat(out, COL_FG), strcat(out, "^");
+    strcat(out, "^b"), strcat(out, COL_BG), strcat(out, "^");
+    strcat(out, pad);
     strcat(str, info.isplaying ? " " : " ");
+    strcat(out, info.isplaying ? " " : " ");
     sprintf(str + strlen(str), "%02d", info.pos / 60);
+    sprintf(out + strlen(out), "%02d", info.pos / 60);
     strcat(str, ":");
+    strcat(out, ":");
     sprintf(str + strlen(str), "%02d", info.pos % 60);
+    sprintf(out + strlen(out), "%02d", info.pos % 60);
     strcat(str, " ");
-    int spaceleft   = CMDLENGTH - strlen(str) - strlen("  ") - 1;
+    strcat(out, " ");
+    int spaceleft   = CMDLENGTH - strlen(out) - strlen(pad) - 1;
     int spacewanted = strlen(info.artist) + strlen(sep) + strlen(info.title) + 1;
+    assert(spaceleft > spacewanted && spaceleft > MAXLENGTH);
     if (spacewanted - 1 <= MAXLENGTH) {
         strcat(str, info.artist);
+        strcat(out, info.artist);
         strcat(str, sep);
+        strcat(out, sep);
         strcat(str, info.title);
+        strcat(out, info.title);
     } else {
         // Artist and title shall both have the same amount of space available,
         // equal to half of the total space left in str (minus the terminator and rpadding).
@@ -204,14 +223,15 @@ int main(int argc, char **argv)
             strcpy(substr, info.title);
         }
         strcat(str, substr);
+        strcat(out, substr);
     }
-    strcat(str, "  ");
+    strcat(out, pad);
+
+    // Buffer overflow protection
     str[CMDLENGTH - 1] = '\0';
+    out[CMDLENGTH - 1] = '\0';
 
-    printf("%s\n", str);
-
-    // Close MPD connection
-    mpd_connection_free(conn);
+    printf("str: %s\nout: %s\n", str, out);
 
     return EXIT_SUCCESS;
 }
