@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,8 +14,12 @@
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9
-#define SONG_MAXLEN 30
 #define MPD_LIBPATH "Music" /* path relative to home dir */
+#define COL_BG      "#111111"
+#define COL_FG      "#ABABAB"
+#define ELLIPSIS    "…"
+#define MAXLENGTH   40   /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
+#define CMDLENGTH   1024 /* this must be equal to CMDLENGTH in dwmblocks.c */
 
 void die(char *msg)
 {
@@ -61,6 +66,8 @@ char *locateFont(const char *name)
                 FcResultMatch) { 
             path_len = strlen((char *)file); 
             path = (char *)malloc(path_len + 1); 
+            if (path == NULL)
+                die("malloc failed");
             strncpy(path, (char *)file, path_len); 
             path[path_len] = 0; 
         } 
@@ -94,6 +101,7 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
             const char *relpath = mpd_song_get_uri(song);
             char *path          = (char *)malloc(strlen(homedir) + strlen(MPD_LIBPATH) + strlen(relpath) + 1);
             sprintf(path, "%s/%s/%s", homedir, MPD_LIBPATH, relpath);
+            printf("path: %s\n", path);
 
             // Extract tags directly from song file
             ID3v2_tag *tag = load_tag(path);
@@ -121,6 +129,8 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
 
 int main(int argc, char **argv)
 {
+    assert(MAXLENGTH <= CMDLENGTH);
+
     // Find font file path using fontconfig
     char *fntpath;
     if ((fntpath = locateFont(FONTNAME)) == NULL) {
@@ -152,7 +162,6 @@ int main(int argc, char **argv)
     }
 
     // Connect to MPD
-    char song[SONG_MAXLEN];
     struct mpd_connection *conn = mpd_connection_new(NULL, 0, 0);
     if (conn == NULL) {
         die("failed to establish connection to MPD");
@@ -166,6 +175,51 @@ int main(int argc, char **argv)
     if (fetchSongInfo(&info, conn)) {
         die("failed to fetch song info");
     }
+    printf("artist: %s\ntitle: %s\n", info.artist, info.title);
+
+    // Construct output string
+    char str[CMDLENGTH] = "  ",
+         sep[] = " - ";
+    strcat(str, info.isplaying ? " " : " ");
+    sprintf(str + strlen(str), "%02d", info.pos / 60);
+    strcat(str, ":");
+    sprintf(str + strlen(str), "%02d", info.pos % 60);
+    strcat(str, " ");
+    int spaceleft   = CMDLENGTH - strlen(str) - strlen("  ") - 1;
+    int spacewanted = strlen(info.artist) + strlen(sep) + strlen(info.title) + 1;
+    if (spacewanted - 1 <= MAXLENGTH) {
+        strcat(str, info.artist);
+        strcat(str, sep);
+        strcat(str, info.title);
+    } else {
+        // Artist and title shall both have the same amount of space available,
+        // equal to half of the total space left in str (minus the terminator and rpadding).
+        // If either artist or title exceed their respective boundaries, put an ellipsis.
+        int substrlen = (MAXLENGTH < spaceleft - 1) ? MAXLENGTH : spaceleft - 1;
+        char *substr = (char *)malloc((substrlen + 1) * sizeof(char));
+        if (substr == NULL)
+            die("malloc failed");
+        memset(substr, 0, substrlen + 1);
+        int maxlen = (substrlen - strlen(sep)) / 2;
+        if (strlen(info.artist) > maxlen) {
+            strncpy(substr, info.artist, maxlen - strlen(ELLIPSIS));
+            strcat(substr, ELLIPSIS);
+        } else {
+            strcpy(substr, info.artist);
+        }
+        strcat(substr, sep);
+        if (strlen(info.title) > maxlen) {
+            strncpy(substr + strlen(substr), info.title, maxlen - strlen(ELLIPSIS));
+            strcat(substr, ELLIPSIS);
+        } else {
+            strcpy(substr, info.title);
+        }
+        strcat(str, substr);
+    }
+    strcat(str, "  ");
+    str[CMDLENGTH - 1] = '\0';
+
+    printf("%s\n", str);
 
     // Close MPD connection
     mpd_connection_free(conn);
