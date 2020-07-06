@@ -9,6 +9,8 @@
 #include FT_FREETYPE_H
 // mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
 #include <mpd/client.h>
+// taglib: https://github.com/taglib/taglib/blob/master/bindings/c/tag_c.h
+#include <taglib/tag_c.h>
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9
@@ -102,8 +104,15 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
             printf("path: %s\n", path);
 
             // Extract tags directly from song file
-            info->artist = "artist";
-            info->title  = "title";
+            TagLib_File *file = taglib_file_new(path);
+            if (!taglib_file_is_valid(file)) {
+                die("taglib: invalid file");
+            }
+            TagLib_Tag *tag = taglib_file_tag(file);
+            info->artist = taglib_tag_artist(tag);
+            info->title  = taglib_tag_title(tag);
+            taglib_file_free(file);
+            
 
             // Poll the rest from MPD itself
             info->pos      = mpd_status_get_elapsed_time(mpdstatus);
