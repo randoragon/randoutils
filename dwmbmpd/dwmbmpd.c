@@ -7,18 +7,20 @@
 // freetype2: https://www.freetype.org/freetype2/docs/
 #include <freetype2/ft2build.h>
 #include FT_FREETYPE_H
+#include FT_GLYPH_H
 // mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
 #include <mpd/client.h>
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9
 #define MPD_LIBPATH "Music"     /* path relative to home dir */
-#define PADDING     6           /* the amount of text padding (in pixels) for the formatted block */
+#define PADDING     " "
 #define COL_BG      "#111111"
 #define COL_FG      "#ABABAB"
 #define ELLIPSIS    "…"
 #define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
 #define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
+#define BAR_HEIGHT  20          /* must be equal to "user_bh" in dwm's config.h */
 
 void die(char *msg)
 {
@@ -118,6 +120,35 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
     return 0;
 }
 
+int fontTextWidth(FT_Face face, const char *text)
+{
+    if (!strlen(text)) {
+        return 0;
+    }
+    int w = 0;
+    FT_Glyph glyph;
+    FT_UInt  prev, curr = 0;
+    FT_Bool  usekerning = FT_HAS_KERNING(face);
+    for (int i = 0; i < strlen(text); i++) {
+        prev = curr;
+        curr = FT_Get_Char_Index(face, text[i]);
+        if (FT_Load_Glyph(face, curr, FT_LOAD_DEFAULT)) {
+            return -1;
+        }
+        if (FT_Get_Glyph(face->glyph, &glyph)) {
+            return -2;
+        }
+        if (usekerning && prev && curr) {
+            FT_Vector kerning;
+            FT_Get_Kerning(face, prev, curr, FT_KERNING_DEFAULT, &kerning);
+            w += kerning.x >> 6;
+        }
+        w += face->glyph->advance.x >> 6;
+        FT_Done_Glyph(glyph);
+    }
+    return w;
+}
+
 int main(int argc, char **argv)
 {
     assert(MAXLENGTH <= CMDLENGTH);
@@ -170,35 +201,26 @@ int main(int argc, char **argv)
     // Close MPD connection
     mpd_connection_free(conn);
 
-    // Construct visible and formatted strings
+    // Construct visible string first (needed for progress bar measurements)
     char str[CMDLENGTH] = "",
-         out[CMDLENGTH] = "",
-         sep[] = " - ",
-         pad[10] = "^f";
-    sprintf(pad + 2, "%d", PADDING), strcat(pad, "^");
-    strcat(out, "^c"), strcat(out, COL_FG), strcat(out, "^");
-    strcat(out, "^b"), strcat(out, COL_BG), strcat(out, "^");
-    strcat(out, pad);
+         sep[] = " - ";
+    strcat(str, PADDING);
     strcat(str, info.isplaying ? " " : " ");
-    strcat(out, info.isplaying ? " " : " ");
     sprintf(str + strlen(str), "%02d", info.pos / 60);
-    sprintf(out + strlen(out), "%02d", info.pos / 60);
     strcat(str, ":");
-    strcat(out, ":");
     sprintf(str + strlen(str), "%02d", info.pos % 60);
-    sprintf(out + strlen(out), "%02d", info.pos % 60);
+    strcat(str, "/");
+    sprintf(str + strlen(str), "%02d", info.duration / 60);
+    strcat(str, ":");
+    sprintf(str + strlen(str), "%02d", info.duration % 60);
     strcat(str, " ");
-    strcat(out, " ");
-    int spaceleft   = CMDLENGTH - strlen(out) - strlen(pad) - 1;
+    int spaceleft   = CMDLENGTH - strlen(str) - strlen(PADDING) - 1;
     int spacewanted = strlen(info.artist) + strlen(sep) + strlen(info.title) + 1;
     assert(spaceleft > spacewanted && spaceleft > MAXLENGTH);
     if (spacewanted - 1 <= MAXLENGTH) {
         strcat(str, info.artist);
-        strcat(out, info.artist);
         strcat(str, sep);
-        strcat(out, sep);
         strcat(str, info.title);
-        strcat(out, info.title);
     } else {
         // Artist and title shall both have the same amount of space available,
         // equal to half of the total space left in str (minus the terminator and rpadding).
@@ -223,15 +245,21 @@ int main(int argc, char **argv)
             strcpy(substr, info.title);
         }
         strcat(str, substr);
-        strcat(out, substr);
     }
-    strcat(out, pad);
-
+    strcat(str, PADDING);
+    
     // Buffer overflow protection
     str[CMDLENGTH - 1] = '\0';
-    out[CMDLENGTH - 1] = '\0';
 
-    printf("str: %s\nout: %s\n", str, out);
+    // Construct formatted string
+    int  textw          = fontTextWidth(face, str);
+    int  scaledw        = (int)(info.progress * textw);
+    char out[CMDLENGTH] = "";
+    strcat(out, "^c"), strcat(out, COL_FG), strcat(out, "^");
+    strcat(out, str);
+    sprintf(out + strlen(out), "^f%d^^r%d,%d,%d,%d^^f%d^", -textw, 0, BAR_HEIGHT - 2, scaledw, 2, textw);
+
+    printf("%s\n", out);
 
     return EXIT_SUCCESS;
 }
