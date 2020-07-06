@@ -9,8 +9,6 @@
 #include FT_FREETYPE_H
 // mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
 #include <mpd/client.h>
-// taglib: https://github.com/taglib/taglib/blob/master/bindings/c/tag_c.h
-#include <taglib/tag_c.h>
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9
@@ -101,29 +99,18 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
             const char *relpath = mpd_song_get_uri(song);
             char *path          = (char *)malloc(strlen(homedir) + strlen(MPD_LIBPATH) + strlen(relpath) + 1);
             sprintf(path, "%s/%s/%s", homedir, MPD_LIBPATH, relpath);
-            printf("path: %s\n", path);
-
-            // Extract tags directly from song file
-            TagLib_File *file = taglib_file_new(path);
-            if (!taglib_file_is_valid(file)) {
-                die("taglib: invalid file");
-            }
-            TagLib_Tag *tag = taglib_file_tag(file);
-            info->artist = taglib_tag_artist(tag);
-            info->title  = taglib_tag_title(tag);
-            taglib_file_free(file);
-            
 
             // Poll the rest from MPD itself
+            info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+            info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
             info->pos      = mpd_status_get_elapsed_time(mpdstatus);
             info->duration = mpd_status_get_total_time(mpdstatus);
             info->progress = info->pos / (float)info->duration;
-			mpd_song_free(song);
 		}
 	}
 
 	if (mpd_status_get_error(mpdstatus) != NULL)
-		printf("dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
+		fprintf(stderr, "dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
 
 	mpd_status_free(mpdstatus);
 
@@ -178,7 +165,6 @@ int main(int argc, char **argv)
     if (fetchSongInfo(&info, conn)) {
         die("failed to fetch song info");
     }
-    printf("artist: %s\ntitle: %s\n", info.artist, info.title);
 
     // Construct output string
     char str[CMDLENGTH] = "  ",
