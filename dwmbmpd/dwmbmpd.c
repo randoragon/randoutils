@@ -12,11 +12,13 @@
 #include <mpd/client.h>
 
 #define FONTNAME    "DejaVu Sans"
-#define FONTSIZE    9
+#define FONTSIZE    9           /* font height in points */
+#define MON_DPI     102         /* the monitor's DPI - https://www.pxcalc.com */
 #define MPD_LIBPATH "Music"     /* path relative to home dir */
 #define PADDING     " "
 #define COL_BG      "#111111"
 #define COL_FG      "#ABABAB"
+#define COL_DK      "#666666"
 #define ELLIPSIS    "…"
 #define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
 #define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
@@ -175,7 +177,7 @@ int main(int argc, char **argv)
     }
 
     // Set font face size
-    if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, 0, 72)) {
+    if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, 0, MON_DPI)) {
         die("failed to set font size");
     }
 
@@ -200,9 +202,10 @@ int main(int argc, char **argv)
     // Construct visible string first (needed for progress bar measurements)
     char str[CMDLENGTH] = "",
          sep[] = " - ";
-    strcat(str, PADDING);
+    int  offset;
     if (info.state != MPD_STATE_STOP) {
         strcat(str, info.state == MPD_STATE_PLAY ? " " : " ");
+        offset = strlen(str);
         sprintf(str + strlen(str), "%02d", info.pos / 60);
         strcat(str, ":");
         sprintf(str + strlen(str), "%02d", info.pos % 60);
@@ -213,12 +216,13 @@ int main(int argc, char **argv)
         strcat(str, " ");
     } else {
         strcat(str, " ");
+        offset = strlen(str);
         sprintf(str + strlen(str), "%02d", info.duration / 60);
         strcat(str, ":");
         sprintf(str + strlen(str), "%02d", info.duration % 60);
         strcat(str, " ");
     }
-    int spaceleft   = CMDLENGTH - strlen(str) - strlen(PADDING) - 1;
+    int spaceleft   = CMDLENGTH - strlen(str) - 1;
     int spacewanted = strlen(info.artist) + strlen(sep) + strlen(info.title) + 1;
     assert(spaceleft > spacewanted && spaceleft > MAXLENGTH);
     if (spacewanted - 1 <= MAXLENGTH) {
@@ -250,18 +254,21 @@ int main(int argc, char **argv)
         }
         strcat(str, substr);
     }
-    strcat(str, PADDING);
     
     // Buffer overflow protection
     str[CMDLENGTH - 1] = '\0';
 
     // Construct formatted string
-    int  textw          = fontTextWidth(face, str);
+    int  textw          = fontTextWidth(face, str + offset);
     int  scaledw        = (int)(info.progress * textw);
     char out[CMDLENGTH] = "";
     strcat(out, "^c"), strcat(out, COL_FG), strcat(out, "^");
+    strcat(out, PADDING);
     strcat(out, str);
     sprintf(out + strlen(out), "^f%d^^r%d,%d,%d,%d^^f%d^", -textw, 0, BAR_HEIGHT - 2, scaledw, 2, textw);
+    strcat(out, "^c"), strcat(out, COL_DK), strcat(out, "^");
+    sprintf(out + strlen(out), "^f%d^^r%d,%d,%d,%d^^f%d^", -textw + scaledw, 0, BAR_HEIGHT - 1, textw - scaledw, 1, textw - scaledw);
+    strcat(out, PADDING);
 
     printf("%s\n", out);
 
