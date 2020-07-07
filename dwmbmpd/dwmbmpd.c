@@ -1,3 +1,17 @@
+/*************************************************************
+ *                  dwmblocks mpd addon
+ *
+ * Author: Randoragon <randoragongamedev@gmail.com>
+ *
+ * This program produces output for dwmblocks which ends up
+ * getting displayed on the dwm status bar. The output is
+ * formatted with extra eye candy for the status2d patch.
+ * For more details see my dwm and dwmblocks builds.
+ *
+ * dwm:       https://github.com/randoragon/dwm
+ * dwmblocks: https://github.com/randoragon/dwmblocks
+ */
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
