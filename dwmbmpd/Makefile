@@ -1,10 +1,10 @@
 include config.mk
 
-all: dwmbmpd.c
-	cc dwmbmpd.c ${INCS} ${LIBS} -o ../bin/dwmbmpd
+all: $(OBJS)
+	$(CC) $(OBJS) $(INCS) $(LIBS) -o ../bin/dwmbmpd
 
-debug:
-	cc dwmbmpd.c ${INCS} ${LIBS} -g -o debug.out
+debug: $(OBJS)
+	$(CC) $(OBJS) $(INCS) $(LIBS) -g -o debug.out
 
 run:
 	../bin/dwmbmpd

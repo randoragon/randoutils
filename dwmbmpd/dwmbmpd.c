@@ -11,6 +11,8 @@
 // mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
 #include <mpd/client.h>
 
+#include "utf8.h"
+
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9           /* font height in points */
 #define MON_DPI     102         /* the monitor's DPI - https://www.pxcalc.com */
@@ -118,18 +120,25 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
     return 0;
 }
 
-int fontTextWidth(FT_Face face, const char *text)
+/* Assumes input is encoded as UTF-8 */
+int fontTextWidth(FT_Face face, char *u8text)
 {
-    if (!strlen(text)) {
+    // No text equals zero width
+    if (!u8text) {
         return 0;
     }
+
+    // Convert from UTF-8 to UTF-32 for convenience
+    u_int32_t *u32text = (u_int32_t *)malloc((u8_strlen(u8text) + 1) * sizeof(u_int32_t));
+    u8_toucs(u32text, u8_strlen(u8text) + 1, u8text, strlen(u8text) + 1);
+
     int w = 0;
     FT_Glyph glyph;
     FT_UInt  prev, curr = 0;
     FT_Bool  usekerning = FT_HAS_KERNING(face);
-    for (int i = 0; i < strlen(text); i++) {
+    for (int i = 0; i < u8_strlen(u8text); i++) {
         prev = curr;
-        curr = FT_Get_Char_Index(face, text[i]);
+        curr = FT_Get_Char_Index(face, u32text[i]);
         if (FT_Load_Glyph(face, curr, FT_LOAD_DEFAULT)) {
             return -1;
         }
@@ -144,6 +153,8 @@ int fontTextWidth(FT_Face face, const char *text)
         w += face->glyph->advance.x >> 6;
         FT_Done_Glyph(glyph);
     }
+
+    free(u32text);
     return w;
 }
 
@@ -176,7 +187,10 @@ int main(int argc, char **argv)
             break;
     }
 
-    // Set font face size
+    // Set font face encoding and size
+    if (FT_Select_Charmap(face , ft_encoding_unicode)) {
+        die("failed to set font encoding");
+    }
     if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, 0, MON_DPI)) {
         die("failed to set font size");
     }
