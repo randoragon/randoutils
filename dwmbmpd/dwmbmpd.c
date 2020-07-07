@@ -10,13 +10,16 @@
 #include FT_GLYPH_H
 // mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
 #include <mpd/client.h>
+// xlib: https://www.x.org/releases/current/doc/libX11/libX11/libX11.html
+#include <X11/Xlib.h>
 
 #include "utf8.h"
 
 #define FONTNAME    "DejaVu Sans"
 #define FONTSIZE    9           /* font height in points */
-#define MON_DPI     102         /* the monitor's DPI - https://www.pxcalc.com */
 #define MPD_LIBPATH "Music"     /* path relative to home dir */
+//#define MON_HDPI  96          /* uncomment this to explicitly set monitor horizontal DPI in case of incorrect rendering */
+//#define MON_VDPI  96          /* uncomment this to explicitly set monitor vertical   DPI in case of incorrect rendering */
 #define PADDING     " "
 #define COL_BG      "#111111"
 #define COL_FG      "#ABABAB"
@@ -25,6 +28,8 @@
 #define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
 #define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
 #define BAR_HEIGHT  20          /* must be equal to "user_bh" in dwm's config.h */
+
+#define MM_TO_IN(x) ((int)((float)x * 0.03937))
 
 void die(char *msg)
 {
@@ -162,6 +167,30 @@ int main(int argc, char **argv)
 {
     assert(MAXLENGTH <= CMDLENGTH);
 
+    // Find out monitor's horizontal and vertical DPI
+    int mon_hdpi, mon_vdpi;
+#ifdef MON_HDPI
+    mon_hdpi = MON_HDPI;
+#endif
+#ifdef MON_VDPI
+    mon_vdpi = MON_VDPI;
+#endif
+#if !defined MON_HDPI || !defined MON_VDPI
+    int monw_px, monh_px, monw_mm, monh_mm;
+    Display *d = XOpenDisplay(NULL);
+#ifndef MON_HDPI
+    monw_px  = XDisplayWidth(d, 0);
+    monw_mm  = XDisplayWidthMM(d, 0);
+    mon_hdpi = monw_px / MM_TO_IN(monw_mm);
+#endif
+#ifndef MON_VDPI
+    monh_px  = XDisplayHeight(d, 0);
+    monh_mm  = XDisplayHeightMM(d, 0);
+    mon_vdpi = monh_px / MM_TO_IN(monh_mm);
+#endif
+    XCloseDisplay(d);
+#endif
+
     // Find font file path using fontconfig
     char *fntpath;
     if ((fntpath = locateFont(FONTNAME)) == NULL) {
@@ -191,7 +220,7 @@ int main(int argc, char **argv)
     if (FT_Select_Charmap(face , ft_encoding_unicode)) {
         die("failed to set font encoding");
     }
-    if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, 0, MON_DPI)) {
+    if (FT_Set_Char_Size(face, 0, FONTSIZE * 64, mon_hdpi, mon_vdpi)) {
         die("failed to set font size");
     }
 
@@ -248,10 +277,9 @@ int main(int argc, char **argv)
         // equal to half of the total space left in str (minus the terminator and rpadding).
         // If either artist or title exceed their respective boundaries, put an ellipsis.
         int substrlen = (MAXLENGTH < spaceleft - 1) ? MAXLENGTH : spaceleft - 1;
-        char *substr = (char *)malloc((substrlen + 1) * sizeof(char));
+        char *substr = (char *)calloc(substrlen + 1, sizeof(char));
         if (substr == NULL)
-            die("malloc failed");
-        memset(substr, 0, substrlen + 1);
+            die("calloc failed");
         int maxlen = (substrlen - strlen(sep)) / 2;
         if (strlen(info.artist) > maxlen) {
             strncpy(substr, info.artist, maxlen - strlen(ELLIPSIS));
