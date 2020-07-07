@@ -19,3 +19,10 @@ full on japanese titles display rather well, so I'm not planning on fixing anyth
 
 - [status2d](https://dwm.suckless.org/patches/status2d/)
     - If you don't want the progress bar or the colored font you could edit the code and make it work without this patch
+
+---
+
+For more information check out my dwm and dwmblocks builds:
+
+- [dwm](https://github.com/randoragon/dwm)
+- [dwmblocks](https://github.com/randoragon/dwmblocks)
