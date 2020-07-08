@@ -30,7 +30,7 @@
 #include "utf8.h"
 
 #define FONTNAME    "DejaVu Sans"
-#define FONTSIZE    9           /* font height in points */
+#define FONTSIZE    8           /* font height in points */
 #define MPD_LIBPATH "Music"     /* path relative to home dir */
 //#define MON_HDPI  96          /* uncomment this to explicitly set monitor horizontal DPI in case of incorrect rendering */
 //#define MON_VDPI  96          /* uncomment this to explicitly set monitor vertical   DPI in case of incorrect rendering */
@@ -41,7 +41,7 @@
 #define ELLIPSIS    "…"
 #define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
 #define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
-#define BAR_HEIGHT  20          /* must be equal to "user_bh" in dwm's config.h */
+#define BAR_HEIGHT  19          /* must be equal to "user_bh" in dwm's config.h */
 
 #define MM_TO_IN(x) ((int)((float)x * 0.03937))
 
