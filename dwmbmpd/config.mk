@@ -1,6 +1,6 @@
 # general config
 CC = cc
-DEST = ~/.scripts/dwmblocks
+DEST = ~/dotfiles/scripts/.scripts/dwmblocks
 
 # freetype2
 FT_INCS = -I/usr/include/freetype2
