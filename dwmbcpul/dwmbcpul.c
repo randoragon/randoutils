@@ -41,6 +41,7 @@ unsigned readc[MAX_CORES] = {0};
 void die(const char *msg);
 void status_clear();
 void send();
+void termhandler(int signum);
 
 // Implementations
 void die(const char *msg)
@@ -94,8 +95,17 @@ void send()
     }
 }
 
+void termhandler(int signum)
+{
+    status_clear();
+    exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char **argv)
 {
+    signal(SIGTERM, termhandler);
+    signal(SIGINT, termhandler);
+
     // Obtain dwmblocks's PID
     if (argc != 2) {
         die("exactly one argument required (dwmblocks's PID)");
