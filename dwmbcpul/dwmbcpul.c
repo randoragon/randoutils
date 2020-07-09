@@ -5,8 +5,6 @@
  *  reason, this program takes an average of N number of readings
  *  in the span of 1 second and then that average is redirected
  *  to a file and a signal is sent to dwmblocks to read from there.
- *
- *  Requires dwmblocks's PID to be passed as an stdin argument!
  */
 
 #include <stdio.h>
@@ -30,7 +28,6 @@
 #define PAD  3
 
 // Variables
-pid_t dwmb_pid;
 char fpath[500];
 long double cores[MAX_CORES] = {0}; 
 long double cores_max[MAX_CORES];
@@ -57,7 +54,6 @@ void status_clear()
     FILE *file;
     if ((file = fopen(fpath, "w")) != NULL) {
         fclose(file);
-        kill(dwmb_pid, SIGRTMIN+DWMB_SIG);
     }
 }
 
@@ -90,9 +86,6 @@ void send()
             }
             fclose(file);
         }
-
-        // Signal dwmblocks to read new data from file
-        kill(dwmb_pid, SIGRTMIN+DWMB_SIG);
     }
 }
 
@@ -107,12 +100,6 @@ int main(int argc, char **argv)
     signal(SIGTERM, termhandler);
     signal(SIGINT, termhandler);
     prctl(PR_SET_PDEATHSIG, SIGTERM);
-
-    // Obtain dwmblocks's PID
-    if (argc != 2) {
-        die("exactly one argument required (dwmblocks's PID)");
-    }
-    dwmb_pid = atoi(argv[1]);
 
     // Construct destination file path
     const char *cachedir = getenv("XDG_CACHE_HOME");
