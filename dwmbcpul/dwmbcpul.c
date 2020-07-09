@@ -15,6 +15,7 @@
 #include <glob.h>       /* https://linux.die.net/man/3/glob */
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/prctl.h>
 #include <signal.h>
 
 #define READFREQ    8           /* how many readings to take (Hz) */
@@ -105,6 +106,7 @@ int main(int argc, char **argv)
 {
     signal(SIGTERM, termhandler);
     signal(SIGINT, termhandler);
+    prctl(PR_SET_PDEATHSIG, SIGTERM);
 
     // Obtain dwmblocks's PID
     if (argc != 2) {
