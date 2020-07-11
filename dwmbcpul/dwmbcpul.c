@@ -1,7 +1,7 @@
-/*                  dwmblocks CPU load module
+/*               dwmblocks CPU load/frequency module
  *
- *  CPU load changes very rapidly, too rapidly for a single check
- *  per second to be representative of the actual load. For that
+ *  Core frequency changes very rapidly, too rapidly for a single check
+ *  per second to be representative of the actual values. For that
  *  reason, this program takes an average of N number of readings
  *  in the span of 1 second and then that average is redirected
  *  to a file and a signal is sent to dwmblocks to read from there.
