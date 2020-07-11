@@ -28,7 +28,9 @@
 #define PAD  3
 
 // Variables
-char fpath[500];
+char fpath[100];
+FILE *avgl_file;
+FILE *core_file[MAX_CORES] = {0};
 long double cores[MAX_CORES] = {0}; 
 long double cores_max[MAX_CORES];
 float avgload;
@@ -40,12 +42,14 @@ void die(const char *msg);
 void status_clear();
 void send();
 void termhandler(int signum);
+void cleanup();
 
 // Implementations
 void die(const char *msg)
 {
     fprintf(stderr, "dwmbcpul: %s\n", msg);
     status_clear();
+    cleanup();
     exit(EXIT_FAILURE);
 }
 
@@ -86,7 +90,20 @@ void send()
 void termhandler(int signum)
 {
     status_clear();
+    cleanup();
     exit(EXIT_SUCCESS);
+}
+
+void cleanup()
+{
+    if (avgl_file) {
+        fclose(avgl_file);
+    }
+    for (int i = 0; i < sizeof(core_file) / sizeof(FILE *); i++) {
+        if (core_file[i]) {
+            fclose(core_file[i]);
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -110,7 +127,7 @@ int main(int argc, char **argv)
     }
     corec = pglob.gl_pathc;
 
-    // Get maximum clock speeds for each core
+    // Get maximum clock speeds and cache file pointers
     for (int i = 0; i < corec; i++) {
         FILE *file;
         char fp[100];
@@ -124,39 +141,46 @@ int main(int argc, char **argv)
             }
             fclose(file);
         }
+        strcpy(fp, pglob.gl_pathv[i]);
+        strcat(fp, "/scaling_cur_freq");
+        if ((core_file[i] = fopen(fp, "r")) == NULL) {
+            perror("dwmbcpul: failed to open core file: ");
+        }
+    }
+
+    // Cache avgload file pointer
+    if ((avgl_file = fopen("/proc/loadavg", "r")) == NULL) {
+        perror("dwmbcpul: failed to open loadavg file: ");
     }
 
     int n = 0;
     while (1) {
-        FILE *file;
         int ret;
 
         // Get current overall average load
-        if ((file = fopen("/proc/loadavg", "r"))) {
-            ret = fscanf(file, "%f", &avgload);
+        if (avgl_file) {
+            rewind(avgl_file);
+            ret = fscanf(avgl_file, "%f", &avgload);
             if (!ret || ret == EOF) {
-                perror("dwmbcpul: ");
+                perror("dwmbcpul: failed to parse loadavg: ");
             }
             avgload /= corec;
-            fclose(file);
+            fflush(avgl_file);
         }
 
         // Get current clock speeds
         for (int i = 0; i < corec; i++) {
-            char fp[100];
-            strcpy(fp, pglob.gl_pathv[i]);
-            strcat(fp, "/scaling_cur_freq");
-            fp[99] = '\0';
-            if ((file = fopen(fp, "r")) != NULL) {
+            if (core_file[i]) {
+                rewind(core_file[i]);
                 long double hz;
-                ret = fscanf(file, "%Lf", &hz);
+                ret = fscanf(core_file[i], "%Lf", &hz);
                 if (!ret || ret == EOF) {
-                    perror("dwmbcpul: ");
+                    perror("dwmbcpul: failed to parse scaling_cur_freq: ");
                     continue;
                 }
                 cores[i] += hz;
                 readc[i]++;
-                fclose(file);
+                fflush(core_file[i]);
             }
         }
 
@@ -173,5 +197,6 @@ int main(int argc, char **argv)
     }
 
     status_clear();
+    cleanup();
     return EXIT_SUCCESS;
 }
