@@ -1,15 +1,15 @@
 # dwmbcpul - a CPU load module for dwmblocks
 
-Supports up to 128 cores (for safety reasons), calculates average load
-from all cores and presents as percentage. Also calculates average load
-for each core separately and outputs as neat color bars.
+Takes recent average load from `/proc/loadavg`, then calculates
+frequency percentage for each core separately and outputs everything
+in a neatly formatted way.
 
 ![preview](preview.gif)
 
-Polling load information on a per-second basis is usually pointless, because
-the load changes so rapidly the information is very chaotic and random.
-This program aims to read load information with a given frequency, and then
-outputs the average per second, which is more reliable.
+Polling frequency information on a per-second basis is usually pointless, because
+it changes so rapidly that the output is very chaotic and semi-random.
+That's why this program reads everything a fixed number of times per second, and
+very full second it averages individual cores' frequencies for the output.
 
 The results are stored and updated in a cache file which has to be read directly
 by dwmblocks. The update interval is 1 second.

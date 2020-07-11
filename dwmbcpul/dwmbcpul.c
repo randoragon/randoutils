@@ -18,7 +18,7 @@
 
 #define READFREQ    8           /* how many readings to take (Hz) */
 #define CACHE_FILE  "dwmbcpul"  /* name of the file in cache dir  */
-#define MAX_CORES   128         /* no CPU should have 128 cores, but better safe than sorry */
+#define MAX_CORES   32          /* note that more cores means longer output */
 #define DWMB_SIG    8           /* dwmblocks's RTMIN+x update signal */
 
 #define ICON ""
