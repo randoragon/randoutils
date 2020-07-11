@@ -31,7 +31,7 @@
 char fpath[500];
 long double cores[MAX_CORES] = {0}; 
 long double cores_max[MAX_CORES];
-long double cores_load[MAX_CORES];
+float avgload;
 size_t corec;
 unsigned readc[MAX_CORES] = {0};
 
@@ -61,13 +61,6 @@ void send()
 {
     FILE *file;
     if ((file = fopen(fpath, "w")) != NULL) {
-        // Cache average load per core and get overall average
-        float avgload = 0;
-        for (int i = 0; i < corec; i++) {
-            cores_load[i] = (float)(cores[i] / cores_max[i] / readc[i]);
-            avgload += cores_load[i];
-        }
-        avgload /= corec;
 
         // Overwrite file contents with a new line beginning
         fprintf(file, "^c%s^%s^f1^^c%s^^f1^%d%%^f3^", COL1, ICON, COL2, (int)(avgload * 100));
@@ -78,9 +71,10 @@ void send()
             float max_h = BARH - (2 * PAD);
             for (int i = 0; i < corec; i++) {
                 char col[8];
-                sprintf(col, "#%02x%02x00", (int)(180 + (cores_load[i] * 75)), (int)(255 - (cores_load[i] * 255)));
+                float load = (float)(cores[i] / cores_max[i] / readc[i]);
+                sprintf(col, "#%02x%02x00", (int)(180 + (load * 75)), (int)(255 - (load * 255)));
                 col[7] = '\0';
-                int h = (int)(max_h * cores_load[i]);
+                int h = (int)(max_h * load);
                 int y = BARH - PAD - h;
                 fprintf(file, "^c%s^^r0,%d,2,%d^^f3^", col, y, h);
             }
@@ -134,16 +128,28 @@ int main(int argc, char **argv)
 
     int n = 0;
     while (1) {
+        FILE *file;
+        int ret;
+
+        // Get current overall average load
+        if ((file = fopen("/proc/loadavg", "r"))) {
+            ret = fscanf(file, "%f", &avgload);
+            if (!ret || ret == EOF) {
+                perror("dwmbcpul: ");
+            }
+            avgload /= corec;
+            fclose(file);
+        }
+
         // Get current clock speeds
         for (int i = 0; i < corec; i++) {
-            FILE *file;
             char fp[100];
             strcpy(fp, pglob.gl_pathv[i]);
             strcat(fp, "/scaling_cur_freq");
             fp[99] = '\0';
             if ((file = fopen(fp, "r")) != NULL) {
                 long double hz;
-                int ret = fscanf(file, "%Lf", &hz);
+                ret = fscanf(file, "%Lf", &hz);
                 if (!ret || ret == EOF) {
                     perror("dwmbcpul: ");
                     continue;
