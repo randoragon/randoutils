@@ -14,6 +14,13 @@ very full second it averages individual cores' frequencies for the output.
 The results are stored and updated in a cache file which has to be read directly
 by dwmblocks. The update interval is 1 second.
 
+## Status hiding
+
+My dwm and dwmblocks builds add a feature that lets you hide some modules so that
+processing power is spared instead of running pointless scripts in the background.
+This module supports that feature, read about more details
+[here](https://github.com/Randoragon/dwm#status-bar-rewrite) and [here](https://github.com/Randoragon/dwmblocks#persistent-modules).
+
 ## Required dwm patches
 
 - [status2d](https://dwm.suckless.org/patches/status2d/)

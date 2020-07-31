@@ -1,7 +1,7 @@
 include config.mk
 
 all: $(OBJS)
-	$(CC) $(OBJS) -o ../bin/dwmbcpul
+	$(CC) $(OBJS) -lrt -o ../bin/dwmbcpul
 
 install: all
 	mkdir -p -- $(DEST)

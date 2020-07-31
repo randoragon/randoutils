@@ -14,18 +14,27 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/prctl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #define READFREQ    8           /* how many readings to take (Hz) */
 #define CACHE_FILE  "dwmbcpul"  /* name of the file in cache dir  */
 #define MAX_CORES   32          /* note that more cores means longer output */
 #define DWMB_SIG    8           /* dwmblocks's RTMIN+x update signal */
+#define SHM_NAME "/dwmstatus"
+#define SHOW_BAR_BYTE 5         /* the byte denoting bar visibility */
+#define SHOW_STATUS_BYTE 6      /* the byte denoting status visibility */
 
 #define ICON ""
 #define COL1 "#BB4444"
 #define COL2 "#FF9999"
 #define BARH 19
 #define PAD  3
+
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define SHOW_STATUS (sharedmemory[SHOW_BAR_BYTE - 1] && sharedmemory[SHOW_STATUS_BYTE - 1])
 
 // Variables
 char fpath[100];
@@ -36,6 +45,8 @@ long double cores_max[MAX_CORES];
 float avgload;
 size_t corec;
 unsigned readc[MAX_CORES] = {0};
+char *sharedmemory;
+int sharedmemoryfd;
 
 // Declarations
 void die(const char *msg);
@@ -112,6 +123,19 @@ int main(int argc, char **argv)
     signal(SIGINT, termhandler);
     prctl(PR_SET_PDEATHSIG, SIGTERM);
 
+    /* initialize shared memory */
+    sharedmemoryfd = shm_open(SHM_NAME, O_RDWR, S_IRWXU|S_IRWXG);
+    if (sharedmemoryfd < 0) {
+        perror("dwmblocks: failed to open shared memory");
+        return EXIT_FAILURE;
+    }
+    sharedmemory = (char*)mmap(NULL, MAX(SHOW_BAR_BYTE, SHOW_STATUS_BYTE), PROT_READ|PROT_WRITE, MAP_SHARED, sharedmemoryfd, 0);
+    if (sharedmemory == NULL) {
+        fprintf(stderr, "dwmblocks: failed to run mmap");
+        return EXIT_FAILURE;
+    }
+
+
     // Construct destination file path
     const char *cachedir = getenv("XDG_CACHE_HOME");
     if (*cachedir) {
@@ -155,45 +179,49 @@ int main(int argc, char **argv)
 
     int n = 0;
     while (1) {
-        int ret;
+        if (SHOW_STATUS) {
+            int ret;
 
-        // Get current overall average load
-        if (avgl_file) {
-            rewind(avgl_file);
-            ret = fscanf(avgl_file, "%f", &avgload);
-            if (!ret || ret == EOF) {
-                perror("dwmbcpul: failed to parse loadavg: ");
-            }
-            avgload /= corec;
-            fflush(avgl_file);
-        }
-
-        // Get current clock speeds
-        for (int i = 0; i < corec; i++) {
-            if (core_file[i]) {
-                rewind(core_file[i]);
-                long double hz;
-                ret = fscanf(core_file[i], "%Lf", &hz);
+            // Get current overall average load
+            if (avgl_file) {
+                rewind(avgl_file);
+                ret = fscanf(avgl_file, "%f", &avgload);
                 if (!ret || ret == EOF) {
-                    perror("dwmbcpul: failed to parse scaling_cur_freq: ");
-                    continue;
+                    perror("dwmbcpul: failed to parse loadavg: ");
                 }
-                cores[i] += hz;
-                readc[i]++;
-                fflush(core_file[i]);
+                avgload /= corec;
+                fflush(avgl_file);
             }
-        }
 
-        // Every READFREQ'th iteration send results to dwmblocks
-        if (!(++n % READFREQ)) {
-            send();
+            // Get current clock speeds
             for (int i = 0; i < corec; i++) {
-                cores[i] = 0;
-                readc[i] = 0;
+                if (core_file[i]) {
+                    rewind(core_file[i]);
+                    long double hz;
+                    ret = fscanf(core_file[i], "%Lf", &hz);
+                    if (!ret || ret == EOF) {
+                        perror("dwmbcpul: failed to parse scaling_cur_freq: ");
+                        continue;
+                    }
+                    cores[i] += hz;
+                    readc[i]++;
+                    fflush(core_file[i]);
+                }
             }
-        }
 
-        usleep(1000000 / READFREQ);
+            // Every READFREQ'th iteration send results to dwmblocks
+            if (!(++n % READFREQ)) {
+                send();
+                for (int i = 0; i < corec; i++) {
+                    cores[i] = 0;
+                    readc[i] = 0;
+                }
+            }
+
+            usleep(1000000 / READFREQ);
+        } else {
+            usleep(1000000 / 2);
+        }
     }
 
     status_clear();
