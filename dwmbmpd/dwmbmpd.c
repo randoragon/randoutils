@@ -110,29 +110,36 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
         return 1;
 	}
     struct mpd_status *mpdstatus;
-    if ((mpdstatus = mpd_recv_status(conn)) == NULL)
+    if ((mpdstatus = mpd_recv_status(conn)) == NULL) {
         return 2;
+    }
 
     info->state = mpd_status_get_state(mpdstatus);
 	if (info->state == MPD_STATE_UNKNOWN) {
+        mpd_status_free(mpdstatus);
         return 4;
     }
 
-    if (!mpd_response_next(conn))
+    if (!mpd_response_next(conn)) {
+        mpd_status_free(mpdstatus);
         return 3;
-
-    struct mpd_song *song = mpd_recv_song(conn);
-    if (song != NULL) {
-        // Poll the rest from MPD itself
-        info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
-        info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
-        info->pos      = mpd_status_get_elapsed_time(mpdstatus);
-        info->duration = mpd_song_get_duration(song);
-        info->progress = info->pos / (float)info->duration;
     }
 
-	if (mpd_status_get_error(mpdstatus) != NULL)
-		fprintf(stderr, "dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
+    // Poll the rest from MPD itself
+    struct mpd_song *song;
+    if ((song = mpd_recv_song(conn)) == NULL) {
+        mpd_status_free(mpdstatus);
+        return 5;
+    }
+    info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+    info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+    info->pos      = mpd_status_get_elapsed_time(mpdstatus);
+    info->duration = mpd_song_get_duration(song);
+    info->progress = info->pos / (float)info->duration;
+
+	if (mpd_status_get_error(mpdstatus) != NULL) {
+        fprintf(stderr, "dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
+    }
 
 	mpd_status_free(mpdstatus);
 
