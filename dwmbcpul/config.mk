@@ -2,4 +2,4 @@
 CC = cc
 DEST = ~/dotfiles/scripts/.scripts/dwmblocks
 
-OBJS = dwmbcpul.c
+OBJS = dwmbcpul.o
