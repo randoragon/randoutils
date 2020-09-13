@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <errno.h>
 #include <malloc.h>
 #include "linkedlist.h"
 
