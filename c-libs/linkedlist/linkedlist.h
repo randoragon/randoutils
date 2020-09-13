@@ -10,8 +10,8 @@ struct LinkedList
 LinkedList *linkedListCreate();
 int linkedListAdd(LinkedList **list, void *data);
 int linkedListInsert(LinkedList **list, size_t index, void *data);
-int linkedListRemove(LinkedList **list, void *data);
-int linkedListRemoveAt(LinkedList **list, size_t index);
+void *linkedListGet(LinkedList **list, size_t index);
+int linkedListRemove(LinkedList **list, size_t index, int (*dtor)(void *));
 int linkedListDestroy(LinkedList **list, int (*dtor)(void *));
 size_t linkedListSize(LinkedList **list);
 
