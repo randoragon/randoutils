@@ -1,3 +1,6 @@
+#ifndef RND_LINKEDLIST_H
+#define RND_LINKEDLIST_H
+
 #include <stdlib.h>
 
 typedef struct RND_LinkedList RND_LinkedList;
@@ -16,3 +19,5 @@ int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *));
 size_t RND_linkedListSize(RND_LinkedList **list);
 
 int RND_linkedListDtorFree(void *data);
+
+#endif
