@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-std=c99
-OBJS=RND_LinkedList.o
+OBJS=example.o RND_LinkedList.o
 OUT=a.out
 
 all: main
