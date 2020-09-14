@@ -1,21 +1,26 @@
 CC=gcc
 CFLAGS=-std=c99
-OBJS=example.o RND_LinkedList.o
-OUT=a.out
+OBJS=RND_LinkedList.o
+OUT=librnd_linkedlist.so
 
 all: main
 
 main: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(OUT)
+	$(CC) $(CFLAGS) -shared $(OBJS) -o $(OUT)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $^ -o $@
+	$(CC) -c $(CFLAGS) -fpic $^ -o $@
 
 clean:
-	rm -f *.o $(OUT)
+	rm -f *.o
 
 debug: CFLAGS += -g -Og
 debug: clean all
 
 install: CFLAGS += -O3
 install: clean all
+	cp -- RND_LinkedList.h /usr/include/
+	cp -- $(OUT) /usr/lib/
+
+example: example.o
+	$(CC) $(CFLAGS) example.o -lrnd_linkedlist -o a.out

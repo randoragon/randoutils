@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "RND_LinkedList.h"
+#include <RND_LinkedList.h>
 
 int main(int argc, char **argv)
 {
