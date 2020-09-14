@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include <malloc.h>
-#include "linkedlist.h"
+#include "RND_LinkedList.h"
 
-LinkedList *linkedListCreate()
+RND_LinkedList *RND_linkedListCreate()
 {
     return NULL;
 }
 
-int linkedListAdd(LinkedList **list, void *data)
+int RND_linkedListAdd(RND_LinkedList **list, void *data)
 {
     if (*list) {
-        LinkedList *new, *last = *list;
+        RND_LinkedList *new, *last = *list;
         for (; last->next; last = last->next);
-        if (!(new = (LinkedList*)malloc(sizeof(LinkedList)))) {
+        if (!(new = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
             return 1;
         }
         new->data = data;
         last->next = new;
     } else {
-        if (!(*list = (LinkedList*)malloc(sizeof(LinkedList)))) {
+        if (!(*list = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
             return 1;
         }
         (*list)->data = data;
@@ -27,10 +27,10 @@ int linkedListAdd(LinkedList **list, void *data)
     return 0;
 }
 
-int linkedListInsert(LinkedList **list, size_t index, void *data)
+int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data)
 {
-    LinkedList *new;
-    if (!(new = (LinkedList*)malloc(sizeof(LinkedList)))) {
+    RND_LinkedList *new;
+    if (!(new = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
         return 1;
     }
     new->data = data;
@@ -39,7 +39,7 @@ int linkedListInsert(LinkedList **list, size_t index, void *data)
         new->next = *list;
         *list = new;
     } else {
-        LinkedList *prev = *list;
+        RND_LinkedList *prev = *list;
         for (int i = 0; i < index - 1; i++) {
             if (prev->next) {
                 prev = prev->next;
@@ -54,12 +54,12 @@ int linkedListInsert(LinkedList **list, size_t index, void *data)
     return 0;
 }
 
-void *linkedListGet(LinkedList **list, size_t index)
+void *RND_linkedListGet(RND_LinkedList **list, size_t index)
 {
     if (!*list) {
         return NULL;
     }
-    LinkedList *ret = *list;
+    RND_LinkedList *ret = *list;
     for (int i = 0; i < index; i++) {
         if (ret->next) {
             ret = ret->next;
@@ -70,7 +70,7 @@ void *linkedListGet(LinkedList **list, size_t index)
     return ret->data;
 }
 
-int linkedListRemove(LinkedList **list, size_t index, int (*dtor)(void *))
+int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *))
 {
     if (!*list) {
         return 1;
@@ -78,7 +78,7 @@ int linkedListRemove(LinkedList **list, size_t index, int (*dtor)(void *))
     if (index == 0) {
         *list = (*list)->next;
     } else {
-        LinkedList *prev = *list;
+        RND_LinkedList *prev = *list;
         for (int i = 0; i < index - 1; i++) {
             if (prev->next) {
                 prev = prev->next;
@@ -92,7 +92,7 @@ int linkedListRemove(LinkedList **list, size_t index, int (*dtor)(void *))
         if (dtor && dtor(prev->next->data)) {
             return 2;
         }
-        LinkedList *tmp;
+        RND_LinkedList *tmp;
         tmp = prev->next->next;
         free(prev->next);
         prev->next = tmp;
@@ -100,28 +100,29 @@ int linkedListRemove(LinkedList **list, size_t index, int (*dtor)(void *))
     return 0;
 }
 
-int linkedListDestroy(LinkedList **list, int (*dtor)(void *))
+int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
 {
-    LinkedList *i = *list;
+    RND_LinkedList *i = *list;
     while (i) {
-        LinkedList *j = i->next;
+        RND_LinkedList *j = i->next;
         if (dtor && dtor(i->data)) {
             return 1;
         }
         free(i);
         i = j;
     }
+    *list = NULL;
     return 0;
 }
 
-size_t linkedListSize(LinkedList **list)
+size_t RND_linkedListSize(RND_LinkedList **list)
 {
     size_t ret = 0;
-    for (LinkedList *e = *list; e; e = e->next, ret++);
+    for (RND_LinkedList *e = *list; e; e = e->next, ret++);
     return ret;
 }
 
-int linkedListDtorFree(void *data)
+int RND_linkedListDtorFree(void *data)
 {
     free(data);
     return 0;
@@ -135,16 +136,17 @@ int main(int argc, char **argv)
     *a = 2;
     *b = 3;
     *c = 4;
-    LinkedList *test = linkedListCreate();
-    linkedListInsert(&test, 0, a);
-    linkedListInsert(&test, 1, b);
-    linkedListInsert(&test, 2, c);
-    printf("LIST SIZE: %lu\n", linkedListSize(&test));
+    RND_LinkedList *test = RND_linkedListCreate();
+    RND_linkedListInsert(&test, 0, a);
+    RND_linkedListInsert(&test, 1, b);
+    RND_linkedListInsert(&test, 2, c);
+    RND_linkedListRemove(&test, 1, RND_linkedListDtorFree);
+    printf("LIST SIZE: %lu\n", RND_linkedListSize(&test));
     printf("ELEMENTS:\n");
-    for (int i = 0; i < linkedListSize(&test); i++) {
-        printf("\t%d\n", *((int*)linkedListGet(&test, i)));
+    for (int i = 0; i < RND_linkedListSize(&test); i++) {
+        printf("\t%d\n", *((int*)RND_linkedListGet(&test, i)));
     }
-    linkedListDestroy(&test, linkedListDtorFree);
+    RND_linkedListDestroy(&test, RND_linkedListDtorFree);
 
     return EXIT_SUCCESS;
 }

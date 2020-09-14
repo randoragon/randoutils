@@ -11,15 +11,15 @@ Create and destroy a list with elements [1, 2, 3]:
 
 ```c
 int a = 1, b = 2, c = 3;
-LinkedList *list = linkedListCreate();
-linkedListAdd(&list, &a);
-linkedListAdd(&list, &b);
-linkedListInsert(&list, 2, &c);
-printf("Second element is %d", *((int*)linkedListGet(&list, 1)));
-linkedListDestroy(&list, NULL);
+RND_LinkedList *list = RND_linkedListCreate();
+RND_linkedListAdd(&list, &a);
+RND_linkedListAdd(&list, &b);
+RND_linkedListInsert(&list, 2, &c);
+printf("Second element is %d", *((int*)RND_linkedListGet(&list, 1)));
+RND_linkedListDestroy(&list, NULL);
 ```
 
-The second argument of `linkedListDestroy` is a pointer to a destructor function:
+The second argument of `RND_linkedListDestroy` is a pointer to a destructor function:
 
 ```c
 typedef struct Example Example;
@@ -41,8 +41,8 @@ int main()
     char *str = (char*)malloc(sizeof(char));
     elem->str = str;
 
-    LinkedList *list = linkedListCreate();
-    linkedListAdd(&list, elem);
-    linkedListDestroy(&list, dtor);
+    RND_LinkedList *list = RND_linkedListCreate();
+    RND_linkedListAdd(&list, elem);
+    RND_linkedListDestroy(&list, dtor);
 }
 ```
