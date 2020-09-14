@@ -5,7 +5,22 @@
 This is a small self-written library implementing a linked list struct and related functions.
 I wrote it so that I can use it in my other C projects.
 
-## Example Usages
+## Installation
+
+Run the following code, if necessary as root:
+
+```sh
+make install
+```
+
+The header file will be copied to `/usr/include/` and the library file to `/usr/lib/`.
+
+## Usage
+
+Make sure to include `<RND_LinkedList>` and link with `librnd_linkedlist.so` (usually this is done
+by passing the `-lrnd_linkedlist` flag to the compiler).
+
+## Examples
 
 Create and destroy a list with elements [1, 2, 3]:
 
