@@ -22,6 +22,10 @@ done by passing the `-lrnd_linkedlist` flag to the compiler).
 
 ## Examples
 
+For details and more functions please refer to the source code, it should be intuitive enough
+for anyone having a grasp on linked lists. The examples shown here are only a portion of the
+library.
+
 Create and destroy a list with elements [1, 2, 3]:
 
 ```c
@@ -59,5 +63,23 @@ int main()
     RND_LinkedList *list = RND_linkedListCreate();
     RND_linkedListAdd(&list, elem);
     RND_linkedListDestroy(&list, dtor);
+}
+```
+
+Also note that `RND_linkedListGet` is only meant to be used for single retrievals, it is
+very inefficient for iterative purposes, so do NOT do the following:
+
+```c
+for (int i = 0; i < SIZE; i++) {
+    RND_linkedListGet(&list, i); // this is BAD!
+    ...
+}
+```
+
+Instead, rely on the implementation of the list and do this:
+
+```c
+for (RND_LinkedList *elem = list; list; list = list->next) {
+    ...
 }
 ```

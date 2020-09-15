@@ -16,8 +16,8 @@ int main(int argc, char **argv)
     RND_linkedListRemove(&test, 1, RND_linkedListDtorFree);
     printf("LIST SIZE: %lu\n", RND_linkedListSize(&test));
     printf("ELEMENTS:\n");
-    for (int i = 0; i < RND_linkedListSize(&test); i++) {
-        printf("\t%d\n", *((int*)RND_linkedListGet(&test, i)));
+    for (RND_LinkedList *elem = test; elem; elem = elem->next) {
+        printf("\t%d\n", *((int*)elem->data));
     }
     RND_linkedListDestroy(&test, RND_linkedListDtorFree);
 
