@@ -75,7 +75,12 @@ int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *
         return 1;
     }
     if (index == 0) {
+        if (dtor && dtor((*list)->data)) {
+            return 2;
+        }
+        RND_LinkedList *tmp = *list;
         *list = (*list)->next;
+        free(tmp);
     } else {
         RND_LinkedList *prev = *list;
         for (int i = 0; i < index - 1; i++) {
