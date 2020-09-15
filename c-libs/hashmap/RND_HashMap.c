@@ -69,7 +69,7 @@ void *RND_hashMapGet(RND_HashMap *map, char *key)
     for (size_t i = 0; i < RND_linkedListSize(&list); i++) {
         RND_HashMapPair *pair = (RND_HashMapPair*)RND_linkedListGet(&list, i);
         if (pair && strcmp(pair->key, key) == 0) {
-            return pair;
+            return pair->value;
         }
     }
     return NULL;

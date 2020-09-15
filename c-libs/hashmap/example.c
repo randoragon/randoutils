@@ -30,12 +30,12 @@ int main(int argc, char **argv)
     add(test, "dec 13th", 7);
     add(test, "dec 14th", 9);
 
-    void *result = RND_hashMapGet(test, "dec  1st");
+    int *result = RND_hashMapGet(test, "dec  1st");
     if (result)
-        printf("\nvalue of key \"dec  1st\": %d\n", *((int*)((RND_HashMapPair*)result)->value));
+        printf("\nvalue of key \"dec  1st\": %d\n", *result);
     result = RND_hashMapGet(test, "dec 11th");
     if (result)
-        printf("value of key \"dec 11th\": %d\n\n", *((int*)((RND_HashMapPair*)result)->value));
+        printf("value of key \"dec 11th\": %d\n\n", *result);
 
     printf("total hashmap elements stored: %lu\n\n", RND_hashMapSize(test));
 
