@@ -37,6 +37,7 @@ int main(int argc, char **argv)
     if (result)
         printf("value of key \"dec 11th\": %d\n\n", *result);
 
+    RND_hashMapRemove(test, "dec  2nd", RND_hashMapDtorFree);
     printf("total hashmap elements stored: %lu\n\n", RND_hashMapSize(test));
 
     printf("ALL ELEMENTS (ordered by hash function and chronology of adding):\n");
