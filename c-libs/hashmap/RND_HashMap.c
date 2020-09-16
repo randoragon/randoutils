@@ -116,15 +116,23 @@ RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index)
     return (RND_HashMapPair*)RND_linkedListGet(map->data + q - 1, s - (p - index));
 }
 
-int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
+int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*))
 {
     if (!map) {
         return 1;
     }
     for (size_t i = 0; i < map->size; i++) {
-        if (RND_linkedListDestroy(map->data + i, dtor)) {
+        if (RND_linkedListClear(map->data + i, dtor)) {
             return 2;
         }
+    }
+    return 0;
+}
+
+int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
+{
+    if (RND_hashMapClear(map, dtor)) {
+        return 1;
     }
     free(map->data);
     free(map);
