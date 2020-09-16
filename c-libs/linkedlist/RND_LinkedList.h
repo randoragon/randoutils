@@ -15,6 +15,7 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data);
 int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data);
 void *RND_linkedListGet(RND_LinkedList **list, size_t index);
 int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *));
+int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *));
 int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *));
 size_t RND_linkedListSize(RND_LinkedList **list);
 

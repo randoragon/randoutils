@@ -104,7 +104,7 @@ int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *
     return 0;
 }
 
-int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
+int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *))
 {
     RND_LinkedList *i = *list;
     while (i) {
@@ -117,6 +117,11 @@ int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
     }
     *list = NULL;
     return 0;
+}
+
+int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
+{
+    return RND_linkedListClear(list, dtor);
 }
 
 size_t RND_linkedListSize(RND_LinkedList **list)
