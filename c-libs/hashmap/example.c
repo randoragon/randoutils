@@ -42,6 +42,10 @@ int main(int argc, char **argv)
 
     printf("ALL ELEMENTS (ordered by hash function and chronology of adding):\n");
     for (size_t i = 0; i < RND_hashMapSize(test); i++) {
+        /* The hashmap isn't designed to be iterated through,
+         * so this loop on a large scale would perform very badly,
+         * but this is just an example to showcase the possibilities.
+         */
         RND_HashMapPair *ptr = RND_hashMapIndex(test, i);
         if (ptr) {
             printf("[%02lu] key: %s => %lu, val: %d\n", i, ptr->key, RND_hashMapDefaultHashFunction(ptr->key, test->size), *(int*)ptr->value);
