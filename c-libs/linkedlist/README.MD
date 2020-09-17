@@ -23,8 +23,8 @@ done by passing the `-lrnd_linkedlist` flag to the compiler).
 ## Examples
 
 For details and more functions please refer to the source code, it should be intuitive enough
-for anyone having a grasp on linked lists. The examples shown here are only a portion of the
-library.
+for anyone having a grasp on linked lists (also take a look at `example.c`).
+The examples shown here are only a portion of the library.
 
 Create and destroy a list with elements [1, 2, 3]:
 

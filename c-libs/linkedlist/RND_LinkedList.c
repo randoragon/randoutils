@@ -1,4 +1,5 @@
 #include <malloc.h>
+#include <stdio.h>
 #include "RND_LinkedList.h"
 
 RND_LinkedList *RND_linkedListCreate()
@@ -135,4 +136,58 @@ int RND_linkedListDtorFree(void *data)
 {
     free(data);
     return 0;
+}
+
+// Run a function for every list element
+int RND_linkedListMap(RND_LinkedList **list, int (*map)(RND_LinkedList*, size_t))
+{
+    if (!*list || !map) {
+        return 1;
+    }
+    size_t p = 0;
+    for (RND_LinkedList *q = *list; q; q = q->next, p++) {
+        if (map(q, p)) {
+            return 2;
+        }
+    }
+    return 0;
+}
+
+// Remove all elements yielding true from a filter function
+int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(void*))
+{
+    if (!*list || !filter) {
+        return 1;
+    }
+    size_t p = 0, q = 0;
+    for (RND_LinkedList *r = *list, *s = NULL; r; s = r, r = r->next, p++, q++) {
+        if (filter(r, q)) {
+            RND_linkedListRemove(list, p, dtor);
+            r = s;
+            p--;
+        }
+    }
+    return 0;
+}
+
+// Map function used for the default method of printing list contents
+int RND_linkedListPrintMap(RND_LinkedList *elem, size_t index)
+{
+    printf("| %5lu | %14p | %14p |\n", index, elem, elem->data);
+    return 0;
+}
+
+// Default method of printing list contents (for convenience)
+int RND_linkedListPrint(RND_LinkedList **list)
+{
+    /* The table will break visually if index exceeds 5 digits (99999)
+     * or if the pointers' hexadecimal representation exceeds 14 characters
+     * (which shouldn't be possible for 64-bit and lower CPUs).
+     */
+    printf("+-----------------------------------------+\n");
+    printf("| INDEX |    ADDRESS     |      DATA      |\n");
+    printf("|-------+----------------+----------------|\n");
+    int ret = RND_linkedListMap(list, RND_linkedListPrintMap);
+    printf("+-----------------------------------------+\n");
+    return ret;
 }
