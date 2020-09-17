@@ -27,6 +27,7 @@ size_t RND_hashMapSize(RND_HashMap *map);
 RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index);
 int RND_HashMapClear(RND_HashMap *map, int (*dtor)(void*));
 int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*));
+void RND_hashMapPrint(RND_HashMap *map);
 
 int RND_hashMapDtorFree(void *data);
 

@@ -149,3 +149,22 @@ int RND_hashMapDtorFree(void *data)
     free(data);
     return 0;
 }
+
+void RND_hashMapPrint(RND_HashMap *map)
+{
+    if (!map) {
+        return;
+    }
+    for (size_t i = 0; i < map->size; i++) {
+        printf("[%lu]: ", i);
+        if (map->data[i]) {
+            printf("\n");
+            for (RND_LinkedList *j = map->data[i]; j; j = j->next) {
+                RND_HashMapPair *pair = j->data;
+                printf("\t{ \"%s\": %p }\n", pair->key, pair->value);
+            }
+        } else {
+            printf("-----\n");
+        }
+    }
+}

@@ -48,6 +48,8 @@ int main(int argc, char **argv)
         }
     }
 
+    printf("\nview of the entire hashmap:\n");
+    RND_hashMapPrint(test);
     RND_hashMapDestroy(test, RND_hashMapDtorFree);
 
     return EXIT_SUCCESS;
