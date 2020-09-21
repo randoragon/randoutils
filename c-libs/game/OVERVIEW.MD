@@ -9,7 +9,7 @@ with what I want to do with the library.
 **NOTE:** Some of the concepts explained here may not be available in the
 library yet. Again, I'm writing this file mainly to organize everything in my head.
 
-## 0. Quick Rundown (TL;DR)
+## Quick Rundown (TL;DR)
 
 - Objects are immutable templates for creating mutable instances.
 - Event handlers are arrays of function pointers, accessed by object indices.
@@ -41,12 +41,12 @@ instance of that object. Creating a new object involves writing a new struct
 and populating it with member variables that an instance will need. For example:
 
 ```c
-struct ObjectPlayer
+typedef struct
 {
     int x, y;
     float health;
     char *name;
-};
+} ObjectPlayer;
 ```
 
 It is up to the user to pick an appropriate object index and keep track of it.

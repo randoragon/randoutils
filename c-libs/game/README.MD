@@ -13,6 +13,9 @@ of those things. Instead, it attempts to be a convenient wrapper for a programme
 they can organize features of other, lower level libraries (like SDL2) into convenient
 structures and workflows.
 
+Please refer to [OVERVIEW.MD](https://github.com/randoragon/randoutils/tree/master/c-libs/game/OVERVIEW.MD)
+and the source code for more details.
+
 ## Features
 
 WORK IN PROGRESS
