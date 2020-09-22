@@ -12,30 +12,34 @@
 // Type declarations
 typedef uint16_t RND_GameObjectIndex;
 typedef uint16_t RND_GameInstanceId;
-typedef int (*RND_Handlers[RND_OBJECT_MAX])(void*);
+typedef int (*RND_Handler)(void*);
+typedef struct RND_GameObjectMeta RND_GameObjectMeta;
 typedef struct RND_GameInstance RND_GameInstance;
 
-// Variable Declarations
-extern void *RND_objects[RND_OBJECT_MAX];
-extern RND_LinkedList *RND_instances;
-extern RND_LinkedList *RND_free_instance_ids;
-extern size_t RND_object_sizeof[RND_OBJECT_MAX];
-extern RND_Handlers RND_ctors, RND_dtors;
-
 // Structures
+struct RND_GameObjectMeta
+{
+    char *name;
+    size_t size;
+};
+
 struct RND_GameInstance
 {
-    RND_GameInstanceId id;
     RND_GameObjectIndex index;
     void *data;
 };
 
+// Variable Declarations
+extern RND_GameObjectMeta *RND_objects_meta;
+extern RND_GameInstance *RND_instances;
+extern RND_LinkedList *RND_free_instance_ids;
+extern RND_Handler *RND_ctors, *RND_dtors;
+
 // Functions
 int   RND_gameInit();
 void  RND_gameCleanup();
-void  RND_gameObjectAdd(RND_GameObjectIndex index, size_t size);
-void *RND_gameInstanceSpawn(RND_GameObjectIndex index);
-int   RND_gameInstanceDtor(void *data);
-void  RND_gameRunHandlers(RND_Handlers handlers);
+int   RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
+RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
+void  RND_gameRunHandlers(RND_Handler *handlers);
 
 #endif

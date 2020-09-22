@@ -1,112 +1,119 @@
 #include <RND_LinkedList.h>
 #include <RND_ErrMsg.h>
+#include <string.h>
 
 #include "RND_Game.h"
 
 // Variable Definitions
-void *RND_objects[RND_OBJECT_MAX];
-RND_LinkedList *RND_instances;
+RND_GameObjectMeta *RND_objects_meta;
+RND_GameInstance *RND_instances;
 RND_LinkedList *RND_free_instance_ids;
-size_t RND_object_sizeof[RND_OBJECT_MAX] = {0};
-RND_Handlers RND_ctors = {0},
-             RND_dtors = {0};
+RND_Handler *RND_ctors, *RND_dtors;
 
 // Function Definitions
 int  RND_gameInit()
 {
-    RND_instances = RND_linkedListCreate();
+    if (!(RND_objects_meta = (RND_GameObjectMeta*)calloc(RND_OBJECT_MAX, sizeof(RND_GameObjectMeta)))) {
+        RND_error("RND_gameInit: calloc");
+        return 1;
+    }
+    if (!(RND_instances = (RND_GameInstance*)calloc(RND_INSTANCE_MAX, sizeof(RND_GameInstance)))) {
+        RND_error("RND_gameInit: calloc");
+        return 1;
+    }
     RND_free_instance_ids = RND_linkedListCreate();
-    for (RND_GameInstanceId i = 0; i < RND_INSTANCE_MAX; i++) {
+    for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
         RND_GameInstanceId *id;
-        if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
-            RND_error("RND_gameInit: malloc\n");
+        if (!(id = (RND_GameInstanceId*)calloc(1, sizeof(RND_GameInstanceId)))) {
+            RND_error("RND_gameInit: calloc");
             return 1;
         }
         RND_linkedListAdd(&RND_free_instance_ids, id);
+    }
+    if (!(RND_ctors = (RND_Handler*)calloc(RND_OBJECT_MAX, sizeof(RND_Handler)))) {
+        RND_error("RND_gameInit: calloc");
+    }
+    if (!(RND_dtors = (RND_Handler*)calloc(RND_OBJECT_MAX, sizeof(RND_Handler)))) {
+        RND_error("RND_gameInit: calloc");
     }
     return 0;
 }
 
 void RND_gameCleanup()
 {
-    RND_linkedListDestroy(&RND_instances, RND_gameInstanceDtor);
+    free(RND_objects_meta);
+    free(RND_instances);
     RND_linkedListDestroy(&RND_free_instance_ids, RND_linkedListDtorFree);
+    free(RND_ctors);
+    free(RND_dtors);
 }
 
-void  RND_gameObjectAdd(RND_GameObjectIndex index, size_t size)
+int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
 {
-    if (RND_object_sizeof[index]) {
+    if (RND_objects_meta[index].name) {
         RND_error("RND_gameObjectAdd: object index %u is already taken!", index);
-        return;
+        return 1;
     }
-    RND_object_sizeof[index] = size;
+    char *newname;
+    if (!(newname = (char*)malloc(sizeof(char) * strlen(name)))) {
+        RND_error("RND_gameObjectAdd: malloc");
+        return 2;
+    }
+    RND_objects_meta[index].name = name;
+    RND_objects_meta[index].size = size;
+    return 0;
 }
 
-void *RND_gameInstanceSpawn(RND_GameObjectIndex index)
+RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
 {
-    int error;
-    if (!RND_objects[index]) {
-        RND_error("RND_gameInstanceSpawn: object index %u not found in the RND_objects array", index);
-        return NULL;
+    if (!RND_objects_meta[index].name) {
+        RND_error("RND_gameInstanceSpawn: object indexed %u does not exist!", index);
+        return 0;
     }
     if (!RND_linkedListSize(&RND_free_instance_ids)) {
         RND_error("RND_gameInstanceSpawn: free_instance_ids list is empty!");
-        return NULL;
+        return 0;
     }
 
-    RND_GameInstance *new;
-    if (!(new = (RND_GameInstance*)malloc(sizeof(RND_GameInstance)))) {
-        RND_error("RND_gameInstanceSpawn: malloc");
-        return NULL;
-    }
-    if (!(new->data = malloc(RND_object_sizeof[index]))) {
-        RND_error("RND_gameInstanceSpawn: malloc");
-        free(new);
-        return NULL;
-    }
-    new->index = index;
     RND_GameInstanceId *id;
     if (!(id = RND_linkedListGet(&RND_free_instance_ids, 0))) {
         RND_error("RND_gameInstanceSpawn: RND_linkedListGet returned NULL");
-        free(new->data);
-        free(new);
-        return NULL;
+        return 0;
     }
-    new->id = *id;
+    if (RND_instances[*id].data) {
+        RND_error("RND_gameInstanceSpawn: instance id %u has unfreed memory!");
+        return 0;
+    }
+
+    RND_GameInstance *new = RND_instances + (*id);
+    new->index = index;
+    if (!(new->data = malloc(RND_objects_meta[index].size))) {
+        RND_error("RND_gameInstanceSpawn: malloc");
+        return 0;
+    }
+    int error;
     if ((error = RND_linkedListRemove(&RND_free_instance_ids, 0, RND_linkedListDtorFree))) {
         RND_error("RND_gameInstanceSpawn: RND_linkedListRemove returned %d", error);
         free(new->data);
-        free(new);
-        return NULL;
-    }
-    if ((error = RND_linkedListAdd(&RND_instances, new))) {
-        RND_error("RND_gameInstanceSpawn: RND_linkedListAdd returned %d", error);
-        free(new->data);
-        free(new);
-        return NULL;
+        return 0;
     }
     if (RND_ctors[index]) {
         if ((error = RND_ctors[index](new->data))) {
-            RND_warn("RND_gameInstanceSpawn: RND_ctors[%u] returned %d", index, error);
+            RND_warn("RND_gameInstanceSpawn: RND_ctors[%u] (%s) returned %d", index, RND_objects_meta[index].name, error);
         }
     }
-    return new->data;
+    return *id;
 }
 
-int RND_gameInstanceDtor(void *data)
+void RND_gameRunHandlers(RND_Handler *handlers)
 {
-    RND_GameInstance *inst = data;
-    return RND_dtors[inst->index]? RND_dtors[inst->index](inst->data) : 0;
-}
-
-void RND_gameRunHandlers(RND_Handlers handlers)
-{
-    int error;
-    for (RND_LinkedList *elem = RND_instances; elem; elem = elem->next) {
-        RND_GameInstance *inst = elem->data;
-        if (handlers[inst->index]) {
+    for (RND_GameInstanceId id = 0; id < RND_INSTANCE_MAX; id++) {
+        RND_GameInstance *inst = RND_instances + id;
+        if (inst->data && handlers[inst->index]) {
+            int error;
             if ((error = handlers[inst->index](inst->data))) {
-                RND_error("RND_gameRunHandlers: handler %p returned %d for instance %u of object %u", handlers, error, inst->id, inst->index);
+                RND_error("RND_gameRunHandlers: handler %p returned %d for instance id %u of object %u (%s)",
+                        handlers + inst->index, error, id, RND_objects_meta[inst->index].name);
             }
         }
     }

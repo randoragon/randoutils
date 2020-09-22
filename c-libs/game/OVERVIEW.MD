@@ -6,7 +6,7 @@ behind each struct, the intended workflow, etc. This is **not** a complete
 documentation, I just spill some of my thoughts in here to keep me on track
 with what I want to do with the library.
 
-**NOTE:** Some of the concepts explained here may not be available in the
+**NOTE:** Some of the concepts explained here may be outdated or not available in the
 library yet. Again, I'm writing this file mainly to organize everything in my head.
 
 ## Quick Rundown (TL;DR)
@@ -121,14 +121,34 @@ as you see fit.
 Once you've created an object, you can create an instance of it like so:
 
 ```c
-ObjectPlayer *p = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
+RND_GameInstanceId id = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
 ```
 
-`RND_gameInstanceSpawn()` will return a pointer to the resulting instance's
-object struct. The actual instance struct (`RND_GameInstance`) will be safely
-appended to the global `RND_instances` linked list (`RND_LinkedList`). But under
-normal circumstances the user shouldn't have to act on the `RND_instances`
-variable directly.
+`RND_gameInstanceSpawn()` will return a unique instance id which can be used
+in various instance functions. Pretty much all functions that operate on
+instances use the instance id as an identifier.
+
+### 2.3 The `RND_instances` Array
+
+All spawned instances that have not yet been despawned reside in a global
+`RND_instances` array. The array is composed of `RND_GameInstance` structs:
+
+```c
+struct RND_GameInstance
+{
+    RND_GameInstanceId id;
+    RND_GameObjectIndex index;
+    void *data;
+};
+
+```
+
+The array is indexed by instance ids with `id=0` reserved as "no instance".
+
+
+### 2.3 Accessing an Instance's Data
+
+
 
 ### 1.3 Handling Events
 
