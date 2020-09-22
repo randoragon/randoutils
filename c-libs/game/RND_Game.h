@@ -18,6 +18,7 @@ typedef struct RND_GameInstance RND_GameInstance;
 // Variable Declarations
 extern void *RND_objects[RND_OBJECT_MAX];
 extern RND_LinkedList *RND_instances;
+extern RND_LinkedList *RND_free_instance_ids;
 extern size_t RND_object_sizeof[RND_OBJECT_MAX];
 extern RND_Handlers RND_ctors, RND_dtors;
 
@@ -30,7 +31,7 @@ struct RND_GameInstance
 };
 
 // Functions
-void  RND_gameInit();
+int   RND_gameInit();
 void  RND_gameCleanup();
 void  RND_gameObjectAdd(RND_GameObjectIndex index, size_t size);
 void *RND_gameInstanceSpawn(RND_GameObjectIndex index);
