@@ -26,6 +26,7 @@ You will need to install these libraries as runtime dependencies:
 
 - [RND_LinkedList](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist)
 - [RND_HashMap](https://github.com/randoragon/randoutils/tree/master/c-libs/hashmap)
+- [RND_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
 
 Run the following code, if necessary as root:
 
