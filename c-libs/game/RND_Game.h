@@ -16,11 +16,10 @@ typedef int (*RND_Handlers[RND_OBJECT_MAX])(void*);
 typedef struct RND_GameInstance RND_GameInstance;
 
 // Variable Declarations
-extern void *objects[RND_OBJECT_MAX];
-extern RND_LinkedList *instances;
-extern size_t object_sizeof[RND_OBJECT_MAX];
-extern RND_Handlers ctors, dtors, steps, draws;
-
+extern void *RND_objects[RND_OBJECT_MAX];
+extern RND_LinkedList *RND_instances;
+extern size_t RND_object_sizeof[RND_OBJECT_MAX];
+extern RND_Handlers RND_ctors, RND_dtors;
 
 // Structures
 struct RND_GameInstance

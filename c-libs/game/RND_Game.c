@@ -4,38 +4,36 @@
 #include "RND_Game.h"
 
 // Variable Definitions
-void *objects[RND_OBJECT_MAX];
-RND_LinkedList *instances;
-size_t object_sizeof[RND_OBJECT_MAX] = {0};
-RND_Handlers ctors = {0},
-             dtors = {0},
-             steps = {0},
-             draws = {0};
+void *RND_objects[RND_OBJECT_MAX];
+RND_LinkedList *RND_instances;
+size_t RND_object_sizeof[RND_OBJECT_MAX] = {0};
+RND_Handlers RND_ctors = {0},
+             RND_dtors = {0};
 
 // Function Definitions
 void RND_gameInit()
 {
-    instances = RND_linkedListCreate();
+    RND_instances = RND_linkedListCreate();
 }
 
 void RND_gameCleanup()
 {
-    RND_linkedListDestroy(&instances, RND_gameInstanceDtor);
+    RND_linkedListDestroy(&RND_instances, RND_gameInstanceDtor);
 }
 
 void  RND_gameObjectAdd(RND_GameObjectIndex index, size_t size)
 {
-    if (object_sizeof[index]) {
+    if (RND_object_sizeof[index]) {
         fprintf(stderr, "RND_gameObjectAdd: object index %u is already taken!\n", index);
         return;
     }
-    object_sizeof[index] = size;
+    RND_object_sizeof[index] = size;
 }
 
 void *RND_gameInstanceSpawn(RND_GameObjectIndex index)
 {
-    if (!objects[index]) {
-        fprintf(stderr, "RND_gameInstanceSpawn: object index %u not found in the objects array\n", index);
+    if (!RND_objects[index]) {
+        fprintf(stderr, "RND_gameInstanceSpawn: object index %u not found in the RND_objects array\n", index);
         return NULL;
     }
     RND_GameInstance *new;
@@ -45,12 +43,12 @@ void *RND_gameInstanceSpawn(RND_GameObjectIndex index)
     }
     new->id = 0; // TODO: instance ID management
     new->index = index;
-    if (!(new->data = malloc(object_sizeof[index]))) {
+    if (!(new->data = malloc(RND_object_sizeof[index]))) {
         fprintf(stderr, "RND_gameInstanceSpawn: malloc\n");
         free(new);
         return NULL;
     }
-    RND_linkedListAdd(&instances, new);
+    RND_linkedListAdd(&RND_instances, new);
     return new->data;
 }
 
@@ -62,7 +60,7 @@ int RND_gameInstanceDtor(void *data)
 
 void RND_gameRunHandlers(RND_Handlers handlers)
 {
-    for (RND_LinkedList *elem = instances; elem; elem = elem->next) {
+    for (RND_LinkedList *elem = RND_instances; elem; elem = elem->next) {
         RND_GameInstance *inst = elem->data;
         if (handlers[inst->index]) {
             if (handlers[inst->index](inst->data)) {

@@ -88,12 +88,13 @@ int objectPlayerDtor(void *object) {
 }
 ```
 
-Once they're written, all you need to do is assign them to the `ctor` and `dtor`
-arrays. They are both built-in and globally included by the library:
+Once they're written, all you need to do is assign them to the `RND_ctors`
+and `RND_dtors` arrays. They are both built-in and globally included by
+the library:
 
 ```c
-ctors[OBJECT_INDEX_PLAYER] = objectPlayerCtor;
-dtors[OBJECT_INDEX_PLAYER] = objectPlayerDtor;
+RND_ctors[OBJECT_INDEX_PLAYER] = objectPlayerCtor;
+RND_dtors[OBJECT_INDEX_PLAYER] = objectPlayerDtor;
 ```
 
 If either the constructor or destructor returns non-0, an adequate warning
@@ -125,9 +126,9 @@ ObjectPlayer *p = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
 
 `RND_gameInstanceSpawn()` will return a pointer to the resulting instance's
 object struct. The actual instance struct (`RND_GameInstance`) will be safely
-appended to the global `instances` linked list (`RND_LinkedList`). But under
-normal circumstances the user shouldn't have to act on the `instances` list
-directly.
+appended to the global `RND_instances` linked list (`RND_LinkedList`). But under
+normal circumstances the user shouldn't have to act on the `RND_instances`
+variable directly.
 
 ### 1.3 Handling Events
 
