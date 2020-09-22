@@ -55,7 +55,7 @@ void *RND_gameInstanceSpawn(RND_GameObjectIndex index)
 int RND_gameInstanceDtor(void *data)
 {
     RND_GameInstance *inst = data;
-    return dtors[inst->index]? dtors[inst->index](inst->data) : 0;
+    return RND_dtors[inst->index]? RND_dtors[inst->index](inst->data) : 0;
 }
 
 void RND_gameRunHandlers(RND_Handlers handlers)
