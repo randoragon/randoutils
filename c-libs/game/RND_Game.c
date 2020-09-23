@@ -8,7 +8,7 @@
 RND_GameObjectMeta *RND_objects_meta;
 RND_GameInstance *RND_instances;
 RND_LinkedList *RND_free_instance_ids;
-RND_Handler *RND_ctors, *RND_dtors;
+RND_GameHandler *RND_ctors, *RND_dtors;
 
 // Function Definitions
 int  RND_gameInit()
@@ -30,10 +30,10 @@ int  RND_gameInit()
         }
         RND_linkedListAdd(&RND_free_instance_ids, id);
     }
-    if (!(RND_ctors = (RND_Handler*)calloc(RND_OBJECT_MAX, sizeof(RND_Handler)))) {
+    if (!(RND_ctors = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
         RND_error("RND_gameInit: calloc");
     }
-    if (!(RND_dtors = (RND_Handler*)calloc(RND_OBJECT_MAX, sizeof(RND_Handler)))) {
+    if (!(RND_dtors = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
         RND_error("RND_gameInit: calloc");
     }
     return 0;
@@ -62,6 +62,11 @@ int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
     RND_objects_meta[index].name = name;
     RND_objects_meta[index].size = size;
     return 0;
+}
+
+inline char *RND_gameObjectGetName(RND_GameObjectIndex index)
+{
+    return RND_objects_meta[index].name;
 }
 
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
@@ -105,7 +110,17 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
     return *id;
 }
 
-void RND_gameRunHandlers(RND_Handler *handlers)
+RND_GameHandler *RND_gameHandlersCreate()
+{
+    RND_GameHandler *new;
+    if (!(new = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
+        RND_error("RND_gameHandlersAdd: calloc");
+        return NULL;
+    }
+    return new;
+}
+
+void RND_gameHandlersRun(RND_GameHandler *handlers)
 {
     for (RND_GameInstanceId id = 0; id < RND_INSTANCE_MAX; id++) {
         RND_GameInstance *inst = RND_instances + id;

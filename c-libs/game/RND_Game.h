@@ -12,7 +12,7 @@
 // Type declarations
 typedef uint16_t RND_GameObjectIndex;
 typedef uint16_t RND_GameInstanceId;
-typedef int (*RND_Handler)(void*);
+typedef int (*RND_GameHandler)(void*);
 typedef struct RND_GameObjectMeta RND_GameObjectMeta;
 typedef struct RND_GameInstance RND_GameInstance;
 
@@ -33,13 +33,15 @@ struct RND_GameInstance
 extern RND_GameObjectMeta *RND_objects_meta;
 extern RND_GameInstance *RND_instances;
 extern RND_LinkedList *RND_free_instance_ids;
-extern RND_Handler *RND_ctors, *RND_dtors;
+extern RND_GameHandler *RND_ctors, *RND_dtors;
 
 // Functions
 int   RND_gameInit();
 void  RND_gameCleanup();
 int   RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
+inline char *RND_gameObjectGetName(RND_GameObjectIndex index);
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
-void  RND_gameRunHandlers(RND_Handler *handlers);
+RND_GameHandler *RND_gameHandlersCreate();
+void  RND_gameHandlersRun(RND_GameHandler *handlers);
 
 #endif

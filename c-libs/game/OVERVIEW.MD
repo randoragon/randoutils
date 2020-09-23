@@ -63,8 +63,15 @@ Once you have these two things, you can "add" the object and the library will
 remember it:
 
 ```c
-RND_gameObjectAdd(OBJECT_INDEX_PLAYER, sizeof(ObjectPlayer));
+RND_gameObjectAdd("ObjectPlayer", OBJECT_INDEX_PLAYER, sizeof(ObjectPlayer));
 ```
+
+The first argument is a string representing the object. This can be anything you
+want, but it cannot be empty. This string is used for example in warning/error
+messages to make it easier to identify objects, because for humans it's faster
+to recognize than an index number.
+
+You can obtain an object's name string from its index with `RND_gameObjectGetName`.
 
 ---
 
@@ -140,15 +147,24 @@ struct RND_GameInstance
     RND_GameObjectIndex index;
     void *data;
 };
-
 ```
 
 The array is indexed by instance ids with `id=0` reserved as "no instance".
+It is therefore possible to iterate through all existing instances and
+access their object structs by doing the following:
 
+```c
+for (RND_GameInstanceId id = 1; id < RND_INSTANCE_MAX; id++) {
+    RND_GameInstance *inst = RND_instances + id;
+    // For example, to set all players' health to 0:
+    if (inst->data && inst->index == OBJECT_INDEX_PLAYER) {
+        ((ObjectPlayer*)inst->data)->health = 0;
+    }
+}
+```
 
-### 2.3 Accessing an Instance's Data
-
-
+Instances that are not "alive" will have their data pointer equal to NULL
+(hence the `inst->data` condition inside the if statement).
 
 ### 1.3 Handling Events
 
@@ -157,17 +173,18 @@ For example, for each object type there's separate code that gets executed
 every step, but there also might be code that gets executed on button events,
 or some custom events orchestrated by the developer that run scripts.
 
-This library uses `RND_Handlers` to create arrays of function
-pointers. The functions behind these pointers intake pointers to object structs
-and return an integer error code (or 0 for success). This makes it easy to
-access a specific object's code associated with a specific event.
-
-Internally, `RND_Handlers` is just a typedef to an array of function pointers:
+This library uses the `RND_Handler` type to create arrays of function
+pointers. Internally, `RND_Handler` is just a typedef to a function pointer:
 
 ```c
-#define RND_OBJECT_MAX 0xffff
-...
-typedef int (*RND_Handlers[RND_OBJECT_MAX])(void*);
+typedef int (*RND_Handler)(void*);
+```
+
+A good example of handlers being used is the previously mentioned `RND_ctors`
+and `RND_dtors` variables. They are nothing more than arrays of handlers:
+
+```c
+RND_Handler *RND_ctors, *RND_dtors;
 ```
 
 ---
@@ -188,8 +205,12 @@ int objectPlayerEventButtonHandler(void *object)
 Then, initialize a new handlers array and add the handler to it:
 
 ```c
-RND_Handlers button_handlers = {0};
-button_handlers[OBJECT_INDEX_PLAYER] = objectPlayerEventButtonHandler;
+RND_Handler *button_handlers = RND_gameHandlersCreate();
+if (button_handlers) {
+    button_handlers[OBJECT_INDEX_PLAYER] = objectPlayerEventButtonHandler;
+} else {
+    fprintf(stderr, "failed to allocate array on the heap\n");
+}
 ```
 
 Finally, run all handlers stored this way when it's appropriate:
@@ -201,9 +222,8 @@ if (button_event_received) {
      * handler run with their unique copy of object struct data.
      * If any handler returns non-0, a warning will be printed to stderr.
      */
-    RND_gameRunHandlers(button_handlers);
+    RND_gameHandlersRun(button_handlers);
 }
-
 ```
 
 ---
