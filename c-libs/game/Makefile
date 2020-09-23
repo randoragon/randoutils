@@ -17,7 +17,7 @@ clean:
 
 install: CFLAGS += -O3
 install: clean all
-	cp -- RND_HashMap.h /usr/include/
+	cp -- RND_Game.h /usr/include/
 	cp -- $(OUT) /usr/lib/
 
 example: example.o
