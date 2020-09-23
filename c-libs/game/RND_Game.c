@@ -11,7 +11,7 @@ RND_LinkedList *RND_free_instance_ids;
 RND_GameHandler *RND_ctors, *RND_dtors;
 
 // Function Definitions
-int  RND_gameInit()
+int RND_gameInit()
 {
     if (!(RND_objects_meta = (RND_GameObjectMeta*)calloc(RND_OBJECT_MAX, sizeof(RND_GameObjectMeta)))) {
         RND_error("RND_gameInit: calloc");
@@ -41,8 +41,22 @@ int  RND_gameInit()
 
 void RND_gameCleanup()
 {
-    free(RND_objects_meta);
+    for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
+        RND_GameInstance *inst = RND_instances + i;
+        if (inst->data && RND_dtors[inst->index]) {
+            int error;
+            if ((error = RND_dtors[inst->index](inst->data))) {
+                RND_warn("RND_gameCleanup: object %d (%s)'s destructor returned %d for instance id %u",
+                        inst->index, RND_gameObjectGetName(inst->index), error, i);
+            }
+        }
+    }
     free(RND_instances);
+    for (RND_GameObjectIndex i = 0; i < RND_OBJECT_MAX; i++) {
+        if (RND_objects_meta[i].name)
+            free(RND_objects_meta[i].name);
+    }
+    free(RND_objects_meta);
     RND_linkedListDestroy(&RND_free_instance_ids, RND_linkedListDtorFree);
     free(RND_ctors);
     free(RND_dtors);
@@ -50,14 +64,18 @@ void RND_gameCleanup()
 
 int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
 {
+    if (!name) {
+        RND_error("RND_gameObjectAdd: name string must not be empty!");
+        return 1;
+    }
     if (RND_objects_meta[index].name) {
         RND_error("RND_gameObjectAdd: object index %u is already taken!", index);
-        return 1;
+        return 2;
     }
     char *newname;
     if (!(newname = (char*)malloc(sizeof(char) * strlen(name)))) {
         RND_error("RND_gameObjectAdd: malloc");
-        return 2;
+        return 3;
     }
     RND_objects_meta[index].name = name;
     RND_objects_meta[index].size = size;
