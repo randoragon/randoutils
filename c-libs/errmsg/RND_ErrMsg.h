@@ -1,11 +1,27 @@
 #ifndef RND_ERRMSG_H
 #define RND_ERRMSG_H
 
-#include <stdarg.h>
+#include <stdio.h>
 
-void RND_errmsgPrint(const char *fmt, va_list ap);
-void RND_info(const char *fmt, ...);
-void RND_warn(const  char *fmt, ...);
-void RND_error(const char *fmt, ...);
+#define RND_INFO(...) \
+    do { \
+        fprintf(stderr, "[INFO]  (%s:%d) ", __FILE__, __LINE__); \
+        fprintf(stderr, __VA_ARGS__); \
+        putc('\n', stderr); \
+    } while (0)
+
+#define RND_WARN(...) \
+    do { \
+        fprintf(stderr, "[WARN]  (%s:%d) ", __FILE__, __LINE__); \
+        fprintf(stderr, __VA_ARGS__); \
+        putc('\n', stderr); \
+    } while (0)
+
+#define RND_ERROR(...) \
+    do { \
+        fprintf(stderr, "[ERROR] (%s:%d) ", __FILE__, __LINE__); \
+        fprintf(stderr, __VA_ARGS__); \
+        putc('\n', stderr); \
+    } while (0)
 
 #endif
