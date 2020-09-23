@@ -135,6 +135,19 @@ RND_GameInstanceId id = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
 in various instance functions. Pretty much all functions that operate on
 instances use the instance id as an identifier.
 
+### 2.3 Killing an Instance
+
+Once an instance's job is finished, you should deallocate its memory and
+return its instance id to the pool of free ones. This can be accomplished
+by using the `RND_gameInstanceKill` function:
+
+```c
+RND_gameInstanceKill(id);
+```
+
+If no instance with the supplied id is alive, the function will print
+a warning message and peacefully exit, returning 0 for success.
+
 ### 2.3 The `RND_instances` Array
 
 All spawned instances that have not yet been despawned reside in a global
@@ -143,7 +156,7 @@ All spawned instances that have not yet been despawned reside in a global
 ```c
 struct RND_GameInstance
 {
-    RND_GameInstanceId id;
+    RND_GameInstanceId *id_ptr;
     RND_GameObjectIndex index;
     void *data;
 };
@@ -157,14 +170,14 @@ access their object structs by doing the following:
 for (RND_GameInstanceId id = 1; id < RND_INSTANCE_MAX; id++) {
     RND_GameInstance *inst = RND_instances + id;
     // For example, to set all players' health to 0:
-    if (inst->data && inst->index == OBJECT_INDEX_PLAYER) {
+    if (inst->id_ptr && inst->index == OBJECT_INDEX_PLAYER) {
         ((ObjectPlayer*)inst->data)->health = 0;
     }
 }
 ```
 
-Instances that are not "alive" will have their data pointer equal to NULL
-(hence the `inst->data` condition inside the if statement).
+Instances that are not "alive" will have their id pointer equal to NULL
+(hence the `inst->id_ptr` condition inside the if statement).
 
 ### 1.3 Handling Events
 

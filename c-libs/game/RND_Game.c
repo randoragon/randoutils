@@ -43,7 +43,8 @@ void RND_gameCleanup()
 {
     for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
         RND_GameInstance *inst = RND_instances + i;
-        if (inst->data && RND_dtors[inst->index]) {
+        if (inst->id_ptr && RND_dtors[inst->index]) {
+            free(inst->id_ptr);
             int error;
             if ((error = RND_dtors[inst->index](inst->data))) {
                 RND_warn("RND_gameCleanup: object %d (%s)'s destructor returned %d for instance id %u",
@@ -77,7 +78,7 @@ int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
         RND_error("RND_gameObjectAdd: malloc");
         return 3;
     }
-    RND_objects_meta[index].name = name;
+    RND_objects_meta[index].name = newname;
     RND_objects_meta[index].size = size;
     return 0;
 }
@@ -103,29 +104,46 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
         RND_error("RND_gameInstanceSpawn: RND_linkedListGet returned NULL");
         return 0;
     }
-    if (RND_instances[*id].data) {
-        RND_error("RND_gameInstanceSpawn: instance id %u has unfreed memory!");
-        return 0;
-    }
-
     RND_GameInstance *new = RND_instances + (*id);
+    new->id_ptr = id;
+    RND_linkedListRemove(&RND_free_instance_ids, 0, NULL);
     new->index = index;
     if (!(new->data = malloc(RND_objects_meta[index].size))) {
         RND_error("RND_gameInstanceSpawn: malloc");
         return 0;
     }
-    int error;
-    if ((error = RND_linkedListRemove(&RND_free_instance_ids, 0, RND_linkedListDtorFree))) {
-        RND_error("RND_gameInstanceSpawn: RND_linkedListRemove returned %d", error);
-        free(new->data);
-        return 0;
-    }
     if (RND_ctors[index]) {
+        int error;
         if ((error = RND_ctors[index](new->data))) {
             RND_warn("RND_gameInstanceSpawn: RND_ctors[%u] (%s) returned %d", index, RND_objects_meta[index].name, error);
         }
     }
     return *id;
+}
+
+int RND_gameInstanceKill(RND_GameInstanceId id)
+{
+    if (!RND_instances[id].id_ptr) {
+        RND_warn("RND_gameInstanceKill: instance id %u is not alive", id);
+        return 0;
+    }
+    RND_GameInstance *inst = RND_instances + id;
+    if (RND_dtors[inst->index]) {
+        int error;
+        if ((error = RND_dtors[inst->index](inst->data))) {
+            RND_error("RND_gameInstanceKill: RND_dtors[%u] (%s) returned %d for instance id %u",
+                    inst->index, RND_gameObjectGetName(inst->index), error, id);
+            return 1;
+        }
+    }
+    inst->data = NULL;
+    int error;
+    if ((error = RND_linkedListAdd(&RND_free_instance_ids, inst->id_ptr))) {
+        RND_error("RND_gameInstanceKill: RND_linkedListAdd returned %d for instance id %u", error, id);
+        return 2;
+    }
+    inst->id_ptr = NULL;
+    return 0;
 }
 
 RND_GameHandler *RND_gameHandlersCreate()

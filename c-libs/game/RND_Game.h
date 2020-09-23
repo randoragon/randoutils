@@ -25,6 +25,7 @@ struct RND_GameObjectMeta
 
 struct RND_GameInstance
 {
+    RND_GameInstanceId *id_ptr;
     RND_GameObjectIndex index;
     void *data;
 };
@@ -41,6 +42,7 @@ void  RND_gameCleanup();
 int   RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
 inline char *RND_gameObjectGetName(RND_GameObjectIndex index);
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
+int   RND_gameInstanceKill(RND_GameInstanceId id);
 RND_GameHandler *RND_gameHandlersCreate();
 void  RND_gameHandlersRun(RND_GameHandler *handlers);
 
