@@ -4,7 +4,7 @@ CFLAGS=-std=c99
 all: main
 
 main:
-	printf "This is just a header file, no need to compile\n"
+	@printf "This is just a header file, no need to compile\n"
 
 install:
 	cp -- RND_ErrMsg.h /usr/include/
