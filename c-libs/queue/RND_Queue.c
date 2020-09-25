@@ -32,16 +32,18 @@ void *RND_queuePeek(RND_Queue **queue)
     return (*queue)? (*queue)->data : NULL;
 }
 
-void *RND_queuePop(RND_Queue **queue)
+int RND_queuePop(RND_Queue **queue, int (*dtor)(void*))
 {
     if (!*queue) {
-        return NULL;
+        return 1;
     }
-    void *ret = (*queue)->data;
     RND_Queue *next = (*queue)->next;
+    if (dtor && dtor((*queue)->data)) {
+        return 2;
+    }
     free(*queue);
     *queue = next;
-    return ret;
+    return 0;
 }
 
 int RND_queueClear(RND_Queue **queue, int (*dtor)(void*))

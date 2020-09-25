@@ -33,10 +33,11 @@ int main(int argc, char **argv)
     push(&test, 9);
     RND_queuePrint(&test);
     int *val;
-    val = (int*)RND_queuePop(&test);
+    val = (int*)RND_queuePeek(&test);
+    printf("first number in line: %p -> %d\n", val, *val);
     RND_queuePrint(&test);
+    RND_queuePop(&test, RND_queueDtorFree);
     RND_queueDestroy(&test, RND_queueDtorFree);
-    free(val);
 
     return EXIT_SUCCESS;
 }

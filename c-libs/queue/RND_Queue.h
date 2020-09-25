@@ -14,7 +14,7 @@ struct RND_Queue
 RND_Queue *RND_queueCreate();
 int RND_queuePush(RND_Queue **queue, void *data);
 void *RND_queuePeek(RND_Queue **queue);
-void *RND_queuePop(RND_Queue **queue);
+int RND_queuePop(RND_Queue **queue, int (*dtor)(void*));
 int RND_queueClear(RND_Queue **queue, int (*dtor)(void*));
 int RND_queueDestroy(RND_Queue **queue, int (*dtor)(void*));
 size_t RND_queueSize(RND_Queue **queue);
