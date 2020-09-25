@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <RND_PriorityQueue.h>
 
 int push(RND_PriorityQueue **queue, int val, int priority)
@@ -33,11 +32,11 @@ int main(int argc, char **argv)
     push(&test, 7, 13);
     RND_priorityQueuePrint(&test);
     int *val;
-    val = (int*)RND_priorityQueuePop(&test);
-    printf("Popped element with lowest priority: %p -> %d\n", val, *val);
+    val = (int*)RND_priorityQueuePeek(&test);
+    printf("Peeked element with lowest priority: %p -> %d\n", val, *val);
+    RND_priorityQueuePop(&test, RND_priorityQueueDtorFree);
     RND_priorityQueuePrint(&test);
     RND_priorityQueueDestroy(&test, RND_priorityQueueDtorFree);
-    free(val);
 
     return EXIT_SUCCESS;
 }

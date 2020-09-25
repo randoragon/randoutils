@@ -46,17 +46,19 @@ void *RND_priorityQueuePeek(RND_PriorityQueue **queue)
     return (*queue)? (*queue)->data->data : NULL;
 }
 
-void *RND_priorityQueuePop(RND_PriorityQueue **queue)
+int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*))
 {
     if (!*queue) {
-        return NULL;
+        return 1;
     }
-    void *ret = (*queue)->data->data;
     RND_PriorityQueue *next = (*queue)->next;
+    if (dtor && dtor((*queue)->data->data)) {
+        return 2;
+    }
     free((*queue)->data);
     free(*queue);
     *queue = next;
-    return ret;
+    return 0;
 }
 
 int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*))
