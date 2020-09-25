@@ -7,9 +7,15 @@ main:
 	@printf -- "--- HASHMAP ---\n"
 	$(MAKE) -C hashmap $@
 	@printf -- "---------------\n\n"
+	@printf -- "--- STACK ---\n"
+	$(MAKE) -C stack $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- PRIORITY QUEUE ---\n"
+	$(MAKE) -C priorityqueue $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
@@ -24,9 +30,15 @@ clean:
 	@printf -- "--- HASHMAP ---\n"
 	$(MAKE) -C hashmap $@
 	@printf -- "---------------\n\n"
+	@printf -- "--- STACK ---\n"
+	$(MAKE) -C stack $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- PRIORITY QUEUE ---\n"
+	$(MAKE) -C priorityqueue $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
@@ -41,9 +53,15 @@ install:
 	@printf -- "--- HASHMAP ---\n"
 	$(MAKE) -C hashmap $@
 	@printf -- "---------------\n\n"
+	@printf -- "--- STACK ---\n"
+	$(MAKE) -C stack $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- PRIORITY QUEUE ---\n"
+	$(MAKE) -C priorityqueue $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
