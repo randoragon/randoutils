@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <RND_ErrMsg.h>
 #include "RND_Stack.h"
 
 RND_Stack *RND_stackCreate()
@@ -11,6 +12,7 @@ int RND_stackPush(RND_Stack **stack, void *data)
 {
     RND_Stack *first = *stack;
     if (!(*stack = (RND_Stack*)malloc(sizeof(RND_Stack)))) {
+        RND_ERROR("malloc");
         return 1;
     }
     (*stack)->data = data;
@@ -26,10 +28,13 @@ void *RND_stackPeek(RND_Stack **stack)
 int RND_stackPop(RND_Stack **stack, int (*dtor)(void*))
 {
     if (!*stack) {
+        RND_WARN("the stack is already empty");
         return 1;
     }
     RND_Stack *next = (*stack)->next;
-    if (dtor && dtor((*stack)->data)) {
+    int error;
+    if (dtor && (error = dtor((*stack)->data))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*stack)->data);
         return 2;
     }
     free(*stack);
@@ -42,7 +47,9 @@ int RND_stackClear(RND_Stack **stack, int (*dtor)(void*))
     RND_Stack *i = *stack;
     while (i) {
         RND_Stack *j = i->next;
-        if (dtor && dtor(i->data)) {
+        int error;
+        if (dtor && (error = dtor(i->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, i->data);
             return 1;
         }
         free(i);
@@ -74,11 +81,14 @@ int RND_stackDtorFree(void *data)
 int RND_stackMap(RND_Stack **stack, int (*map)(RND_Stack*, size_t))
 {
     if (!*stack || !map) {
+        RND_WARN("stack or map function empty");
         return 1;
     }
     size_t p = 0;
     for (RND_Stack *q = *stack; q; q = q->next, p++) {
-        if (map(q, p)) {
+        int error;
+        if ((error = map(q, p))) {
+            RND_ERROR("map function %p returned %d for element no. %lu (%p)", map, error, p, q);
             return 2;
         }
     }

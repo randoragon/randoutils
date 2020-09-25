@@ -14,9 +14,11 @@ int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority)
         RND_PriorityQueue *new, *next = *queue, *prev = NULL;
         for (; next && ((RND_PriorityQueuePair*)next->data)->priority <= priority; prev = next, next = next->next);
         if (!(new = (RND_PriorityQueue*)malloc(sizeof(RND_PriorityQueue)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         if (!(new->data = (RND_PriorityQueuePair*)malloc(sizeof(RND_PriorityQueuePair)))) {
+            RND_ERROR("malloc");
             free(new);
             return 1;
         }
@@ -29,9 +31,11 @@ int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority)
             *queue = new;
     } else {
         if (!(*queue = (RND_PriorityQueue*)malloc(sizeof(RND_PriorityQueue)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         if (!((*queue)->data = (RND_PriorityQueuePair*)malloc(sizeof(RND_PriorityQueuePair)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         (*queue)->data->priority = priority;
@@ -49,10 +53,13 @@ void *RND_priorityQueuePeek(RND_PriorityQueue **queue)
 int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*))
 {
     if (!*queue) {
+        RND_WARN("the queue is already empty");
         return 1;
     }
     RND_PriorityQueue *next = (*queue)->next;
-    if (dtor && dtor((*queue)->data->data)) {
+    int error;
+    if (dtor && (error = dtor((*queue)->data->data))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*queue)->data->data);
         return 2;
     }
     free((*queue)->data);
@@ -66,7 +73,9 @@ int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*))
     RND_PriorityQueue *i = *queue;
     while (i) {
         RND_PriorityQueue *j = i->next;
-        if (dtor && dtor(i->data->data)) {
+        int error;
+        if (dtor && (error = dtor(i->data->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, i->data->data);
             return 1;
         }
         free(i->data);
@@ -99,11 +108,14 @@ int RND_priorityQueueDtorFree(void *data)
 int RND_priorityQueueMap(RND_PriorityQueue **queue, int (*map)(RND_PriorityQueue*, size_t))
 {
     if (!*queue || !map) {
+        RND_WARN("queue or map function empty");
         return 1;
     }
     size_t p = 0;
     for (RND_PriorityQueue *q = *queue; q; q = q->next, p++) {
-        if (map(q, p)) {
+        int error;
+        if ((error = map(q, p))) {
+            RND_ERROR("map function %p returned %d for element no. %lu (%p)", map, error, p, q);
             return 2;
         }
     }

@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <RND_ErrMsg.h>
 #include "RND_Queue.h"
 
 RND_Queue *RND_queueCreate()
@@ -13,12 +14,14 @@ int RND_queuePush(RND_Queue **queue, void *data)
         RND_Queue *new, *last = *queue;
         for (; last->next; last = last->next);
         if (!(new = (RND_Queue*)malloc(sizeof(RND_Queue)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         new->data = data;
         last->next = new;
     } else {
         if (!(*queue = (RND_Queue*)malloc(sizeof(RND_Queue)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         (*queue)->data = data;
@@ -35,10 +38,13 @@ void *RND_queuePeek(RND_Queue **queue)
 int RND_queuePop(RND_Queue **queue, int (*dtor)(void*))
 {
     if (!*queue) {
+        RND_WARN("the queue is already empty");
         return 1;
     }
     RND_Queue *next = (*queue)->next;
-    if (dtor && dtor((*queue)->data)) {
+    int error;
+    if (dtor && (error = dtor((*queue)->data))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*queue)->data);
         return 2;
     }
     free(*queue);
@@ -51,7 +57,9 @@ int RND_queueClear(RND_Queue **queue, int (*dtor)(void*))
     RND_Queue *i = *queue;
     while (i) {
         RND_Queue *j = i->next;
-        if (dtor && dtor(i->data)) {
+        int error;
+        if (dtor && (error = dtor(i->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, i->data);
             return 1;
         }
         free(i);
@@ -83,11 +91,14 @@ int RND_queueDtorFree(void *data)
 int RND_queueMap(RND_Queue **queue, int (*map)(RND_Queue*, size_t))
 {
     if (!*queue || !map) {
+        RND_WARN("queue or map function empty");
         return 1;
     }
     size_t p = 0;
     for (RND_Queue *q = *queue; q; q = q->next, p++) {
-        if (map(q, p)) {
+        int error;
+        if ((error = map(q, p))) {
+            RND_ERROR("map function %p returned %d for element no. %lu (%p)", map, error, p, q);
             return 2;
         }
     }

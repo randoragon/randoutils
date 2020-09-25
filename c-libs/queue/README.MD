@@ -5,6 +5,11 @@
 This is a small self-written library implementing a queue struct and related functions.
 I wrote it so that I can use it in my other C projects.
 
+## Dependencies
+
+- [RND\_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
+- [RND\_LinkedList](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist)
+
 ## Installation
 
 Run the following code, if necessary as root:

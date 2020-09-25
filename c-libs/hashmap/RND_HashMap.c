@@ -1,17 +1,20 @@
 #include <malloc.h>
 #include <string.h>
+#include <RND_ErrMsg.h>
 #include "RND_HashMap.h"
 
 RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(char *key, size_t size))
 {
     RND_HashMap *new;
     if (!(new = (RND_HashMap*)malloc(sizeof(RND_HashMap)))) {
+        RND_ERROR("malloc");
         return NULL;
     }
     new->size = size;
     new->hash = hash? hash : RND_hashMapDefaultHashFunction;
 
     if (!(new->data = (RND_LinkedList**)malloc(sizeof(RND_LinkedList*) * size))) {
+        RND_ERROR("malloc");
         free(new);
         return NULL;
     }
@@ -38,20 +41,25 @@ size_t RND_hashMapDefaultHashFunction(char *key, size_t size)
 int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return 1;
     }
     size_t index = map->hash(key, map->size);
     RND_HashMapPair *new;
     if (!(new = (RND_HashMapPair*)malloc(sizeof(RND_HashMapPair)))) {
+        RND_ERROR("malloc");
         return 2;
     }
     if (!(new->key = (char*)malloc(sizeof(char) * (strlen(key) + 1)))) {
+        RND_ERROR("malloc");
         free(new);
         return 3;
     }
     strcpy(new->key, key);
     new->value = value;
-    if (RND_linkedListAdd(map->data + index, new)) {
+    int error;
+    if ((error = RND_linkedListAdd(map->data + index, new))) {
+        RND_ERROR("RND_linkedListAdd returned %d for hash index %lu, data %p", error, index, new);
         return 3;
     }
     return 0;
@@ -60,6 +68,7 @@ int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
 void *RND_hashMapGet(RND_HashMap *map, char *key)
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return NULL;
     }
     RND_LinkedList *list;
@@ -78,21 +87,30 @@ void *RND_hashMapGet(RND_HashMap *map, char *key)
 int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*))
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return 1;
     }
     size_t p = map->hash(key, map->size), q = 0;
     for (RND_LinkedList *elem = map->data[p]; elem; elem = elem->next, q++) {
         RND_HashMapPair *pair = elem->data;
         if (elem && strcmp(pair->key, key) == 0) {
-            return RND_linkedListRemove(map->data + p, q, dtor)? 2 : 0;
+            int error;
+            if ((error = RND_linkedListRemove(map->data + p, q, dtor))) {
+                RND_ERROR("RND_linkedListRemove returned %d for hash index %lu, list index %lu, dtor %p", error, p, q, dtor);
+                return 2;
+            } else {
+                return 0;
+            }
         }
     }
-    return 3;
+    RND_WARN("key \"%s\" not found", key);
+    return 0;
 }
 
 size_t RND_hashMapSize(RND_HashMap *map)
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return 0;
     }
     size_t ret = 0;
@@ -105,6 +123,7 @@ size_t RND_hashMapSize(RND_HashMap *map)
 RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index)
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return NULL;
     }
     size_t p = 0, q = 0, s = 0;
@@ -119,10 +138,13 @@ RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index)
 int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*))
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return 1;
     }
     for (size_t i = 0; i < map->size; i++) {
-        if (RND_linkedListClear(map->data + i, dtor)) {
+        int error;
+        if ((error = RND_linkedListClear(map->data + i, dtor))) {
+            RND_ERROR("RND_linkedListClear returned %d for hash index %lu, dtor %p", error, i, dtor);
             return 2;
         }
     }
@@ -131,7 +153,9 @@ int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*))
 
 int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
 {
-    if (RND_hashMapClear(map, dtor)) {
+    int error;
+    if ((error = RND_hashMapClear(map, dtor))) {
+        RND_ERROR("RND_hashMapClear returned %d for map %p, dtor %p", error, map, dtor);
         return 1;
     }
     free(map->data);
@@ -142,6 +166,7 @@ int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
 int RND_hashMapDtorFree(void *data)
 {
     if (!data) {
+        RND_ERROR("hashmap does not exist");
         return 1;
     }
     free(((RND_HashMapPair*)data)->key);
@@ -153,6 +178,7 @@ int RND_hashMapDtorFree(void *data)
 void RND_hashMapPrint(RND_HashMap *map)
 {
     if (!map) {
+        RND_ERROR("hashmap does not exist");
         return;
     }
     for (size_t i = 0; i < map->size; i++) {

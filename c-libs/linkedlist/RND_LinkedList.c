@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <RND_ErrMsg.h>
 #include "RND_LinkedList.h"
 
 RND_LinkedList *RND_linkedListCreate()
@@ -13,12 +14,14 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data)
         RND_LinkedList *new, *last = *list;
         for (; last->next; last = last->next);
         if (!(new = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         new->data = data;
         last->next = new;
     } else {
         if (!(*list = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
+            RND_ERROR("malloc");
             return 1;
         }
         (*list)->data = data;
@@ -31,6 +34,7 @@ int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data)
 {
     RND_LinkedList *new;
     if (!(new = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
+        RND_ERROR("malloc");
         return 1;
     }
     new->data = data;
@@ -44,6 +48,7 @@ int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data)
             if (prev->next) {
                 prev = prev->next;
             } else {
+                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_linkedListSize(list));
                 free(new);
                 return 2;
             }
@@ -57,6 +62,7 @@ int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data)
 void *RND_linkedListGet(RND_LinkedList **list, size_t index)
 {
     if (!*list) {
+        RND_ERROR("the list is empty");
         return NULL;
     }
     RND_LinkedList *ret = *list;
@@ -64,6 +70,7 @@ void *RND_linkedListGet(RND_LinkedList **list, size_t index)
         if (ret->next) {
             ret = ret->next;
         } else {
+            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_linkedListSize(list));
             return NULL;
         }
     }
@@ -73,10 +80,13 @@ void *RND_linkedListGet(RND_LinkedList **list, size_t index)
 int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *))
 {
     if (!*list) {
+        RND_WARN("the list is already empty");
         return 1;
     }
     if (index == 0) {
-        if (dtor && dtor((*list)->data)) {
+        int error;
+        if (dtor && (error = dtor((*list)->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*list)->data);
             return 2;
         }
         RND_LinkedList *tmp = *list;
@@ -88,14 +98,18 @@ int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *
             if (prev->next) {
                 prev = prev->next;
             } else {
-                return 1;
+                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_linkedListSize(list));
+                return 3;
             }
         }
         if (!prev->next) {
-            return 1;
+            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_linkedListSize(list));
+            return 3;
         }
-        if (dtor && dtor(prev->next->data)) {
-            return 2;
+        int error;
+        if (dtor && (error = dtor(prev->next->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, prev->next->data);
+            return 4;
         }
         RND_LinkedList *tmp;
         tmp = prev->next->next;
@@ -142,11 +156,14 @@ int RND_linkedListDtorFree(void *data)
 int RND_linkedListMap(RND_LinkedList **list, int (*map)(RND_LinkedList*, size_t))
 {
     if (!*list || !map) {
+        RND_WARN("list or map function empty");
         return 1;
     }
     size_t p = 0;
     for (RND_LinkedList *q = *list; q; q = q->next, p++) {
-        if (map(q, p)) {
+        int error;
+        if ((error = map(q, p))) {
+            RND_ERROR("map function %p returned %d for element no. %lu (%p)", map, error, p, q);
             return 2;
         }
     }
@@ -157,6 +174,7 @@ int RND_linkedListMap(RND_LinkedList **list, int (*map)(RND_LinkedList*, size_t)
 int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(void*))
 {
     if (!*list || !filter) {
+        RND_WARN("list or filter function empty");
         return 1;
     }
     size_t p = 0, q = 0;

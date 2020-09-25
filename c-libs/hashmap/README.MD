@@ -9,8 +9,10 @@ The hashmap uses the djb2 hash function by default, you can also use your own by
 an appropriate function pointer at the moment of creating the hashmap. Internally, linked
 lists are used to avoid name collisions (theoretical worst lookup time is O(n)).
 
-This library depends on my other library for [linked lists](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist).
-Keep that in mind if you run into problems compiling.
+## Dependencies
+
+- [RND\_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
+- [RND\_LinkedList](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist)
 
 ## Installation
 
