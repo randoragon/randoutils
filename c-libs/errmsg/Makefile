@@ -10,4 +10,4 @@ install:
 	cp -- RND_ErrMsg.h /usr/include/
 
 example: example.o
-	$(CC) $(CFLAGS) example.o -o a.out
+	$(CC) $(CFLAGS) example.c -o a.out

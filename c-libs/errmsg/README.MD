@@ -26,15 +26,20 @@ a few macros.
 The following code...
 
 ```c
-RND_INFO("This is an info message: %d", 1);
-RND_WARN("This is a warning message: %d", 2);
-RND_ERROR("This is an error message: %d", 3);
+#include <RND_ErrMsg.h>
+
+int main()
+{
+    RND_INFO("This is an info message: %d", 1);
+    RND_WARN("This is a warning message: %d", 2);
+    RND_ERROR("This is an error message: %d", 3);
+}
 ```
 
 ...produces the following output:
 
 ```
-[INFO]  (example.c:5) This is an info message: 1
-[WARN]  (example.c:6) This is a warning message: 2
-[ERROR] (example.c:7) This is an error message: 3
+ [INFO] (example.c:5) (main) This is an info message: 1
+ [WARN] (example.c:6) (main) This is a warning message: 2
+[ERROR] (example.c:7) (main) This is an error message: 3
 ```
