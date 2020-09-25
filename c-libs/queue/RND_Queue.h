@@ -2,7 +2,6 @@
 #define RND_QUEUE_H
 
 #include <stdlib.h>
-#include <stdbool.h>
 
 typedef struct RND_Queue RND_Queue;
 struct RND_Queue
