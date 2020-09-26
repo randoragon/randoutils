@@ -164,7 +164,7 @@ void RND_gameHandlersRun(RND_GameHandler *handlers)
             int error;
             if ((error = handlers[inst->index](inst->data))) {
                 RND_ERROR("handler %p returned %d for instance id %u of object %u (%s)",
-                        handlers + inst->index, error, id, RND_objects_meta[inst->index].name);
+                        handlers + inst->index, error, id, inst->index, RND_objects_meta[inst->index].name);
             }
         }
     }
