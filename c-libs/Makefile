@@ -1,6 +1,9 @@
 all: main
 
 main:
+	@printf -- "--- ERRMSG ---\n"
+	$(MAKE) -C errmsg $@
+	@printf -- "--------------\n\n"
 	@printf -- "--- LINKEDLIST ---\n"
 	$(MAKE) -C linkedlist $@
 	@printf -- "------------------\n\n"
@@ -19,11 +22,11 @@ main:
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
-	@printf -- "--- ERRMSG ---\n"
-	$(MAKE) -C errmsg $@
-	@printf -- "--------------\n\n"
 
 clean:
+	@printf -- "--- ERRMSG ---\n"
+	$(MAKE) -C errmsg $@
+	@printf -- "--------------\n\n"
 	@printf -- "--- LINKEDLIST ---\n"
 	$(MAKE) -C linkedlist $@
 	@printf -- "------------------\n\n"
@@ -42,11 +45,11 @@ clean:
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
-	@printf -- "--- ERRMSG ---\n"
-	$(MAKE) -C errmsg $@
-	@printf -- "--------------\n\n"
 
 install:
+	@printf -- "--- ERRMSG ---\n"
+	$(MAKE) -C errmsg $@
+	@printf -- "--------------\n\n"
 	@printf -- "--- LINKEDLIST ---\n"
 	$(MAKE) -C linkedlist $@
 	@printf -- "------------------\n\n"
@@ -65,6 +68,3 @@ install:
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
-	@printf -- "--- ERRMSG ---\n"
-	$(MAKE) -C errmsg $@
-	@printf -- "--------------\n\n"
