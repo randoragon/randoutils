@@ -54,6 +54,6 @@ inline char *RND_gameObjectGetName(RND_GameObjectIndex index);
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
 int   RND_gameInstanceKill(RND_GameInstanceId id);
 RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex));
-void  RND_gameHandlersRun(RND_GameHandler *handler);
+int  RND_gameHandlersRun(RND_GameHandler *handler);
 
 #endif

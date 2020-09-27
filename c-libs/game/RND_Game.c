@@ -189,8 +189,9 @@ RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex
     return new;
 }
 
-void RND_gameHandlersRun(RND_GameHandler *handler)
+int RND_gameHandlersRun(RND_GameHandler *handler)
 {
+    int ret = 0;
     for (RND_PriorityQueue *elem = handler->queue; elem; elem = elem->next) {
         RND_GameInstanceId id  = *(RND_GameInstanceId*)elem->data;
         RND_GameInstance *inst = RND_instances + id;
@@ -199,7 +200,9 @@ void RND_gameHandlersRun(RND_GameHandler *handler)
             if ((error = handler->handlers[inst->index](inst->data))) {
                 RND_ERROR("handler %p returned %d for instance id %u of object %u (%s)",
                         handler + inst->index, error, id, inst->index, RND_objects_meta[inst->index].name);
+                ret++;
             }
         }
     }
+    return ret;
 }
