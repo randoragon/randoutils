@@ -150,7 +150,7 @@ a warning message and peacefully exit, returning 0 for success.
 
 ### 2.3 The `RND_instances` Array
 
-All spawned instances that have not yet been despawned reside in a global
+All spawned instances that have not yet been killed reside in a global
 `RND_instances` array. The array is composed of `RND_GameInstance` structs:
 
 ```c
@@ -186,26 +186,42 @@ For example, for each object type there's separate code that gets executed
 every step, but there also might be code that gets executed on button events,
 or some custom events orchestrated by the developer that run scripts.
 
-This library uses the `RND_Handler` type to create arrays of function
-pointers. Internally, `RND_Handler` is just a typedef to a function pointer:
-
-```c
-typedef int (*RND_Handler)(void*);
-```
-
-A good example of handlers being used is the previously mentioned `RND_ctors`
-and `RND_dtors` variables. They are nothing more than arrays of handlers:
-
-```c
-RND_Handler *RND_ctors, *RND_dtors;
-```
+In short, the right way to handle events for all spawned instances is to
+create a new event handler. If execution order is important, then you will need
+a **priority function**, which is basically a function that intakes object indices
+and returns `int` values that represent that object's priority.  For example,
+in the context of handling a draw event, lower priority means instances of that
+object will be drawn earlier, meaning any instances of a higher priority will
+be drawn on top.
 
 ---
 
 Here's an example of how to create a button event handler
-for our `ObjectPlayer` which will cut its health in half:
+for our `ObjectPlayer` which will cut its health in half.
 
-First, write a handler function:
+First, we need to decide whether or not we need a priority function. For this
+example we will skip this step, because it is not needed when we're considering
+a button even with only one receiving object type. However, to illustrate what
+priority functions look like, here's an arbitrary example:
+
+```c
+int examplePriorityFunc(RND_GameObjectIndex index)
+{
+    switch(index) {
+        case ObjectPlayer: return 2;
+        case ObjectWall:   return -2;
+        case ObjectEnemy:  return 1;
+        default:           return 0;
+    }
+}
+```
+
+The important thing to note is that it doesn't matter what numbers you use
+for priorities, it's only the relations between them that matter.
+
+Step 2, write a handler function for each object that needs it (in our case
+it's only the player, but normally you would have multiple functions, one
+for each object type that's relevant):
 
 ```c
 int objectPlayerEventButtonHandler(void *object)
@@ -218,25 +234,33 @@ int objectPlayerEventButtonHandler(void *object)
 Then, initialize a new handlers array and add the handler to it:
 
 ```c
-RND_Handler *button_handlers = RND_gameHandlersCreate();
+/* RND_gameHandlerCreate intakes a priority function pointer,
+ * but you can pass it NULL and everything will be treated equally
+ * (like a normal, non-priority queue).
+ */
+RND_GameHandler *button_handlers = RND_gameHandlerCreate(NULL);
 if (button_handlers) {
-    button_handlers[OBJECT_INDEX_PLAYER] = objectPlayerEventButtonHandler;
+    // Assign the right handler function to an object index
+    RND_gameHandlerAdd(button_handlers, OBJECT_INDEX_PLAYER, objectPlayerEventButtonHandler);
 } else {
-    fprintf(stderr, "failed to allocate array on the heap\n");
+    fprintf(stderr, "failed to allocate heap memory\n");
 }
 ```
 
-Finally, run all handlers stored this way when it's appropriate:
+That's everything as far as setting up goes. From this point onward, every single
+instance that gets spawned or dies will be added or removed from the handler's
+priority queue. This makes executing the handler code as simple as iterating through
+the priority queue and calling each instance's respective handler function, which is
+precisely what the `RND_gameHandlerRun` function does:
 
 ```c
 if (button_event_received) {
-    /* The call below iterates through all instances, and those of them
-     * that have a handler stored in button_handlers will have that 
-     * handler run with their unique copy of object struct data.
-     * If any handler returns non-0, a warning will be printed to stderr.
-     */
     RND_gameHandlersRun(button_handlers);
 }
 ```
+
+That's all there is to it. Please note that event handlers have nothing to do with event
+detection, they merely **handle** them. In the above code snippet, it is up to some external
+library to detect when the button in question is actually pressed (`button_event_received`).
 
 ---
