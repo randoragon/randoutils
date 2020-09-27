@@ -179,7 +179,9 @@ for (RND_GameInstanceId id = 1; id < RND_INSTANCE_MAX; id++) {
 Instances that are not "alive" will have their id pointer equal to NULL
 (hence the `inst->id_ptr` condition inside the if statement).
 
-### 1.3 Handling Events
+## 3. Event Handlers
+
+### 3.1 Overview
 
 The majority of game engines operates on events which execute specific code.
 For example, for each object type there's separate code that gets executed
@@ -194,7 +196,7 @@ in the context of handling a draw event, lower priority means instances of that
 object will be drawn earlier, meaning any instances of a higher priority will
 be drawn on top.
 
----
+### 3.2 Example Usage
 
 Here's an example of how to create a button event handler
 for our `ObjectPlayer` which will cut its health in half.
@@ -263,4 +265,3 @@ That's all there is to it. Please note that event handlers have nothing to do wi
 detection, they merely **handle** them. In the above code snippet, it is up to some external
 library to detect when the button in question is actually pressed (`button_event_received`).
 
----
