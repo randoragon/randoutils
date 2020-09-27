@@ -20,6 +20,7 @@ RND_PriorityQueue *RND_priorityQueueCreate();
 int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority);
 void *RND_priorityQueuePeek(RND_PriorityQueue **queue);
 int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*));
+int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)(void *));
 int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*));
 int RND_priorityQueueDestroy(RND_PriorityQueue **queue, int (*dtor)(void*));
 size_t RND_priorityQueueSize(RND_PriorityQueue **queue);

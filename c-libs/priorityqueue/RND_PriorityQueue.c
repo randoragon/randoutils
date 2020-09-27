@@ -68,6 +68,48 @@ int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*))
     return 0;
 }
 
+int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)(void *))
+{
+    if (!*queue) {
+        RND_WARN("the queue is already empty");
+        return 1;
+    }
+    if (index == 0) {
+        int error;
+        if (dtor && (error = dtor((*queue)->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*queue)->data);
+            return 2;
+        }
+        RND_PriorityQueue *tmp = *queue;
+        *queue = (*queue)->next;
+        free(tmp);
+    } else {
+        RND_PriorityQueue *prev = *queue;
+        for (int i = 0; i < index - 1; i++) {
+            if (prev->next) {
+                prev = prev->next;
+            } else {
+                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueSize(queue));
+                return 3;
+            }
+        }
+        if (!prev->next) {
+            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueSize(queue));
+            return 3;
+        }
+        int error;
+        if (dtor && (error = dtor(prev->next->data))) {
+            RND_ERROR("dtor %p returned %d for data %p", dtor, error, prev->next->data);
+            return 4;
+        }
+        RND_PriorityQueue *tmp;
+        tmp = prev->next->next;
+        free(prev->next);
+        prev->next = tmp;
+    }
+    return 0;
+}
+
 int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*))
 {
     RND_PriorityQueue *i = *queue;
