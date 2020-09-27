@@ -121,7 +121,7 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
     }
     for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
         RND_GameHandler *h = elem->data;
-        int priority = h->priority_func(index);
+        int priority = h->priority_func? h->priority_func(index) : 0;
         int error;
         if ((error = RND_priorityQueuePush(&h->queue, id, priority))) {
             RND_ERROR("RND_priorityQueuePush returned %d for instance id %u, object %u (%s), priority %d",
@@ -171,7 +171,7 @@ int RND_gameInstanceKill(RND_GameInstanceId id)
     return 0;
 }
 
-RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex))
+RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex))
 {
     RND_GameHandler *new;
     if (!(new = (RND_GameHandler*)malloc(sizeof(RND_GameHandler)))) {
@@ -189,7 +189,12 @@ RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex
     return new;
 }
 
-int RND_gameHandlersRun(RND_GameHandler *handler)
+inline void RND_gameHandlerAdd(RND_GameHandler *handler, RND_GameObjectIndex index, RND_GameHandlerFunc func)
+{
+    handler->handlers[index] = func;
+}
+
+int RND_gameHandlerRun(RND_GameHandler *handler)
 {
     int ret = 0;
     for (RND_PriorityQueue *elem = handler->queue; elem; elem = elem->next) {

@@ -53,7 +53,8 @@ int   RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
 inline char *RND_gameObjectGetName(RND_GameObjectIndex index);
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
 int   RND_gameInstanceKill(RND_GameInstanceId id);
-RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex));
-int  RND_gameHandlersRun(RND_GameHandler *handler);
+RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex));
+inline void  RND_gameHandlerAdd(RND_GameHandler *handler, RND_GameObjectIndex, RND_GameHandlerFunc func);
+int   RND_gameHandlerRun(RND_GameHandler *handler);
 
 #endif
