@@ -8,7 +8,8 @@
 RND_GameObjectMeta *RND_objects_meta;
 RND_GameInstance *RND_instances;
 RND_LinkedList *RND_free_instance_ids;
-RND_GameHandler *RND_ctors, *RND_dtors;
+RND_GameHandlerFunc *RND_ctors, *RND_dtors;
+RND_LinkedList *RND_handlers;
 
 // Function Definitions
 int RND_gameInit()
@@ -30,10 +31,10 @@ int RND_gameInit()
         }
         RND_linkedListAdd(&RND_free_instance_ids, id);
     }
-    if (!(RND_ctors = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
+    if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
     }
-    if (!(RND_dtors = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
+    if (!(RND_dtors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
     }
     return 0;
@@ -118,6 +119,16 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
             RND_WARN("RND_ctors[%u] (%s) returned %d", index, RND_objects_meta[index].name, error);
         }
     }
+    for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
+        RND_GameHandler *h = elem->data;
+        int priority = h->priority_func(index);
+        int error;
+        if ((error = RND_priorityQueuePush(&h->queue, id, priority))) {
+            RND_ERROR("RND_priorityQueuePush returned %d for instance id %u, object %u (%s), priority %d",
+                    error, *id, index, RND_gameObjectGetName(index), priority);
+            return 0;
+        }
+    }
     return *id;
 }
 
@@ -142,29 +153,52 @@ int RND_gameInstanceKill(RND_GameInstanceId id)
         RND_ERROR("RND_linkedListAdd returned %d for instance id %u", error, id);
         return 2;
     }
+    for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
+        RND_GameHandler *h = elem->data;
+        size_t index = 0;
+        for (RND_PriorityQueue *i = h->queue; i; i = i->next, index++) {
+            if (inst->id_ptr == (RND_GameInstanceId*)(((RND_PriorityQueuePair*)i->data)->data)) {
+                int error;
+                if ((error = RND_priorityQueueRemove(&h->queue, index, NULL))) {
+                    RND_ERROR("RND_priorityQueueRemove returned %d for instance id %u, index %lu",
+                            error, *inst->id_ptr, index);
+                }
+                break;
+            }
+        }
+    }
     inst->id_ptr = NULL;
     return 0;
 }
 
-RND_GameHandler *RND_gameHandlersCreate()
+RND_GameHandler *RND_gameHandlersCreate(int (*priority_func)(RND_GameObjectIndex))
 {
     RND_GameHandler *new;
-    if (!(new = (RND_GameHandler*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandler)))) {
-        RND_ERROR("calloc");
+    if (!(new = (RND_GameHandler*)malloc(sizeof(RND_GameHandler)))) {
+        RND_ERROR("malloc");
         return NULL;
     }
+    if (!(new->handlers = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
+        RND_ERROR("calloc");
+        free(new);
+        return NULL;
+    }
+    new->queue = RND_priorityQueueCreate();
+    new->priority_func = priority_func;
+    RND_linkedListAdd(&RND_handlers, new);
     return new;
 }
 
-void RND_gameHandlersRun(RND_GameHandler *handlers)
+void RND_gameHandlersRun(RND_GameHandler *handler)
 {
-    for (RND_GameInstanceId id = 0; id < RND_INSTANCE_MAX; id++) {
+    for (RND_PriorityQueue *elem = handler->queue; elem; elem = elem->next) {
+        RND_GameInstanceId id  = *(RND_GameInstanceId*)elem->data;
         RND_GameInstance *inst = RND_instances + id;
-        if (inst->data && handlers[inst->index]) {
+        if (inst->data && handler->handlers[inst->index]) {
             int error;
-            if ((error = handlers[inst->index](inst->data))) {
+            if ((error = handler->handlers[inst->index](inst->data))) {
                 RND_ERROR("handler %p returned %d for instance id %u of object %u (%s)",
-                        handlers + inst->index, error, id, inst->index, RND_objects_meta[inst->index].name);
+                        handler + inst->index, error, id, inst->index, RND_objects_meta[inst->index].name);
             }
         }
     }
