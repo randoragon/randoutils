@@ -21,7 +21,7 @@ main:
 	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
 	$(MAKE) -C priorityqueue $@
-	@printf -- "--------------n\n"
+	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
@@ -47,7 +47,7 @@ clean:
 	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
 	$(MAKE) -C priorityqueue $@
-	@printf -- "--------------n\n"
+	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
@@ -73,7 +73,7 @@ install:
 	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
 	$(MAKE) -C priorityqueue $@
-	@printf -- "--------------n\n"
+	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
