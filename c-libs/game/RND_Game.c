@@ -116,7 +116,7 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
     if (RND_ctors[index]) {
         int error;
         if ((error = RND_ctors[index](new->data))) {
-            RND_WARN("RND_ctors[%u] (%s) returned %d", index, RND_objects_meta[index].name, error);
+            RND_WARN("RND_ctors[%u] (%s) returned %d", index, RND_gameObjectGetName(index), error);
         }
     }
     for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
@@ -204,7 +204,7 @@ int RND_gameHandlerRun(RND_GameHandler *handler)
             int error;
             if ((error = handler->handlers[inst->index](inst->data))) {
                 RND_ERROR("handler %p returned %d for instance id %u of object %u (%s)",
-                        handler + inst->index, error, id, inst->index, RND_objects_meta[inst->index].name);
+                        handler + inst->index, error, id, inst->index, RND_gameObjectGetName(inst->index));
                 ret++;
             }
         }
