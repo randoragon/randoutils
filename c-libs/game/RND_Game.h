@@ -50,11 +50,19 @@ extern RND_LinkedList *RND_handlers;
 int   RND_gameInit();
 void  RND_gameCleanup();
 int   RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
-inline char *RND_gameObjectGetName(RND_GameObjectIndex index);
 RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index);
 int   RND_gameInstanceKill(RND_GameInstanceId id);
 RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex));
-inline void  RND_gameHandlerAdd(RND_GameHandler *handler, RND_GameObjectIndex, RND_GameHandlerFunc func);
 int   RND_gameHandlerRun(RND_GameHandler *handler);
+
+inline char *RND_gameObjectGetName(RND_GameObjectIndex index)
+{
+    return RND_objects_meta[index].name;
+}
+
+inline void RND_gameHandlerAdd(RND_GameHandler *handler, RND_GameObjectIndex index, RND_GameHandlerFunc func)
+{
+    handler->handlers[index] = func;
+}
 
 #endif
