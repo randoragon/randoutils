@@ -12,7 +12,6 @@ int main()
     RND_gameObjectAdd("ObjectWall"  , OBJECT_INDEX_WALL  , sizeof(ObjectWall));
     RND_gameObjectAdd("ObjectEnemy" , OBJECT_INDEX_ENEMY , sizeof(ObjectEnemy));
 
-
     // Free library resources
     RND_gameCleanup();
 

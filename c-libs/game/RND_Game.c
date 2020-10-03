@@ -23,14 +23,26 @@ int RND_gameInit()
         return 1;
     }
     RND_free_instance_ids = RND_linkedListCreate();
-    for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
-        RND_GameInstanceId *id;
-        if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
-            RND_ERROR("malloc");
-            return 1;
+    {
+        RND_LinkedList *last = RND_free_instance_ids;
+        for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
+            RND_GameInstanceId *id;
+            if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
+                RND_ERROR("malloc");
+                return 1;
+            }
+            *id = i;
+            int error;
+            if ((error = RND_linkedListAdd(&last, id))) {
+                RND_ERROR("RND_linkedListAdd returned %d", error);
+                return 2;
+            }
+            if (i == 1) {
+                RND_free_instance_ids = last;
+            } else {
+                last = last->next;
+            }
         }
-        *id = i;
-        RND_linkedListAdd(&RND_free_instance_ids, id);
     }
     if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
