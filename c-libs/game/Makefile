@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-std=c99
-LDFLAGS=-lrnd_linkedlist
+LDFLAGS=-lrnd_linkedlist -lrnd_priorityqueue
 OBJS=RND_Game.o
 OUT=librnd_game.so
 
@@ -21,4 +21,4 @@ install: clean all
 	cp -- $(OUT) /usr/lib/
 
 example: example.o
-	$(CC) $(CFLAGS) -g -Og $(LDFLAGS) example.o -o a.out
+	$(CC) $(CFLAGS) -g -Og -lrnd_game example.o -o a.out
