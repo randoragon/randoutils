@@ -25,10 +25,11 @@ int RND_gameInit()
     RND_free_instance_ids = RND_linkedListCreate();
     for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
         RND_GameInstanceId *id;
-        if (!(id = (RND_GameInstanceId*)calloc(1, sizeof(RND_GameInstanceId)))) {
-            RND_ERROR("calloc");
+        if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
+            RND_ERROR("malloc");
             return 1;
         }
+        *id = i;
         RND_linkedListAdd(&RND_free_instance_ids, id);
     }
     if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
