@@ -8,7 +8,7 @@ typedef struct
 
 int objectWallCtor(void *data)
 {
-    ObjectWall *obj = data;
+    ObjectWall *obj = (ObjectWall*)data;
     obj->x = 0;
     obj->y = 0;
     obj->durability = 15;

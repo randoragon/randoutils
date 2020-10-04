@@ -10,7 +10,7 @@ typedef struct
 
 int objectEnemyCtor(void *data)
 {
-    ObjectEnemy *obj = data;
+    ObjectEnemy *obj = (ObjectEnemy*)data;
     obj->x = 0;
     obj->y = 0;
     obj->health = 20.0;

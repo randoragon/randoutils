@@ -12,7 +12,7 @@ typedef struct
 
 int objectPlayerCtor(void *data)
 {
-    ObjectPlayer *obj = data;
+    ObjectPlayer *obj = (ObjectPlayer*)data;
     if (!(obj->name = (char*)malloc(sizeof(char) * OBJECT_PLAYER_MAX_NAME_LENGTH))) {
         RND_ERROR("malloc");
         return 1;
@@ -26,7 +26,7 @@ int objectPlayerCtor(void *data)
 
 int objectPlayerDtor(void *data)
 {
-    ObjectPlayer *obj = data;
+    ObjectPlayer *obj = (ObjectPlayer*)data;
     free(obj->name);
     return 0;
 }
