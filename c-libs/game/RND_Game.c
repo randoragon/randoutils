@@ -14,18 +14,18 @@ RND_LinkedList *RND_handlers;
 // Function Definitions
 int RND_gameInit()
 {
-    if (!(RND_objects_meta = (RND_GameObjectMeta*)calloc(RND_OBJECT_MAX, sizeof(RND_GameObjectMeta)))) {
+    if (!(RND_objects_meta = (RND_GameObjectMeta*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameObjectMeta)))) {
         RND_ERROR("calloc");
         return 1;
     }
-    if (!(RND_instances = (RND_GameInstance*)calloc(RND_INSTANCE_MAX, sizeof(RND_GameInstance)))) {
+    if (!(RND_instances = (RND_GameInstance*)calloc(RND_GAME_INSTANCE_MAX, sizeof(RND_GameInstance)))) {
         RND_ERROR("calloc");
         return 1;
     }
     RND_free_instance_ids = RND_linkedListCreate();
     {
         RND_LinkedList *last = RND_free_instance_ids;
-        for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
+        for (RND_GameInstanceId i = 1; i < RND_GAME_INSTANCE_MAX; i++) {
             RND_GameInstanceId *id;
             if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
                 RND_ERROR("malloc");
@@ -44,10 +44,10 @@ int RND_gameInit()
             }
         }
     }
-    if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
+    if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
     }
-    if (!(RND_dtors = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
+    if (!(RND_dtors = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
     }
     return 0;
@@ -55,7 +55,7 @@ int RND_gameInit()
 
 void RND_gameCleanup()
 {
-    for (RND_GameInstanceId i = 1; i < RND_INSTANCE_MAX; i++) {
+    for (RND_GameInstanceId i = 1; i < RND_GAME_INSTANCE_MAX; i++) {
         RND_GameInstance *inst = RND_instances + i;
         if (inst->id_ptr && RND_dtors[inst->index]) {
             free(inst->id_ptr);
@@ -68,7 +68,7 @@ void RND_gameCleanup()
         }
     }
     free(RND_instances);
-    for (RND_GameObjectIndex i = 0; i < RND_OBJECT_MAX; i++) {
+    for (RND_GameObjectIndex i = 0; i < RND_GAME_OBJECT_MAX; i++) {
         if (RND_objects_meta[i].name)
             free(RND_objects_meta[i].name);
     }
@@ -188,7 +188,7 @@ RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex)
         RND_ERROR("malloc");
         return NULL;
     }
-    if (!(new->handlers = (RND_GameHandlerFunc*)calloc(RND_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
+    if (!(new->handlers = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
         free(new);
         return NULL;
