@@ -23,3 +23,10 @@ int objectPlayerCtor(void *data)
     obj->health = 20.0;
     return 0;
 }
+
+int objectPlayerDtor(void *data)
+{
+    ObjectPlayer *obj = data;
+    free(obj->name);
+    return 0;
+}
