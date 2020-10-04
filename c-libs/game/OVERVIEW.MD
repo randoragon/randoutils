@@ -149,7 +149,32 @@ RND_GameInstanceId id = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
 in various instance functions. Pretty much all functions that operate on
 instances use the instance id as an identifier.
 
-### 2.3 Killing an Instance
+### 2.3 Accessing an Instance
+
+In order to access instance variables (variables from the object struct),
+you need its unique instance id and the corresponding object type:
+
+```c
+ObjectPlayer *data = (ObjectPlayer*)(RND_instances[id].data);
+data->x = 15;
+```
+
+Since it is very common to operate on instance variables, and a little
+encumbering to have to recast void pointers every single time, there's
+a macro that slightly simplifies this process:
+
+```c
+#define RND_GAME_INST(id, struct) (*((struct*)(RND_instances[id].data))) 
+```
+
+Here's the equivalent of the first operation on `ObjectPlayer`, this time
+using the macro shortcut:
+
+```c
+RND_GAME_INST(id, ObjectPlayer).x = 15;
+```
+
+### 2.4 Killing an Instance
 
 Once an instance's job is finished, you should deallocate its memory and
 return its instance id to the pool of free ones. This can be accomplished

@@ -10,6 +10,7 @@
 #define RND_GAME_OBJECT_MAX   0xffff
 #define RND_GAME_INSTANCE_MAX 0xffff
 #define RND_GAME_OBJECT_ADD(struct, index) RND_gameObjectAdd(#struct, index, sizeof(struct))
+#define RND_GAME_INST(id, struct) (*((struct*)(RND_instances[id].data))) 
 
 // Type declarations
 typedef uint16_t RND_GameObjectIndex;

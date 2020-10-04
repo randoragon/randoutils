@@ -25,8 +25,12 @@ int main()
 
     // Spawn player at x=15, y=18
     IID iplayer = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
-    ((ObjectPlayer*)RND_instances[iplayer].data)->x = 15;
-    ((ObjectPlayer*)RND_instances[iplayer].data)->y = 18;
+    RND_GAME_INST(iplayer, ObjectPlayer).x = 15;
+    RND_GAME_INST(iplayer, ObjectPlayer).y = 18;
+
+    printf("player.x = %d\nplayer.y = %d\n",
+            RND_GAME_INST(iplayer, ObjectPlayer).x,
+            RND_GAME_INST(iplayer, ObjectPlayer).y);
 
     // Free library resources
     RND_gameCleanup();
