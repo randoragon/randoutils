@@ -6,8 +6,9 @@
 
 // Variable Definitions
 RND_GameObjectMeta *RND_objects_meta;
-RND_GameInstance *RND_instances;
-RND_LinkedList *RND_free_instance_ids;
+RND_GameInstance  *RND_instances;
+RND_GameInstanceId RND_instances_size;
+RND_GameInstanceId RND_next_instance_id;
 RND_GameHandlerFunc *RND_ctors, *RND_dtors;
 RND_LinkedList *RND_handlers;
 
@@ -18,31 +19,11 @@ int RND_gameInit()
         RND_ERROR("calloc");
         return 1;
     }
-    if (!(RND_instances = (RND_GameInstance*)calloc(RND_GAME_INSTANCE_MAX, sizeof(RND_GameInstance)))) {
+    RND_next_instance_id = 1;
+    RND_instances_size   = RND_GAME_INSTANCES_INIT_SIZE;
+    if (!(RND_instances = (RND_GameInstance*)calloc(RND_instances_size, sizeof(RND_GameInstance)))) {
         RND_ERROR("calloc");
         return 1;
-    }
-    RND_free_instance_ids = RND_linkedListCreate();
-    {
-        RND_LinkedList *last = RND_free_instance_ids;
-        for (RND_GameInstanceId i = 1; i < RND_GAME_INSTANCE_MAX; i++) {
-            RND_GameInstanceId *id;
-            if (!(id = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
-                RND_ERROR("malloc");
-                return 1;
-            }
-            *id = i;
-            int error;
-            if ((error = RND_linkedListAdd(&last, id))) {
-                RND_ERROR("RND_linkedListAdd returned %d", error);
-                return 2;
-            }
-            if (i == 1) {
-                RND_free_instance_ids = last;
-            } else {
-                last = last->next;
-            }
-        }
     }
     if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
@@ -55,13 +36,12 @@ int RND_gameInit()
 
 void RND_gameCleanup()
 {
-    for (RND_GameInstanceId i = 1; i < RND_GAME_INSTANCE_MAX; i++) {
+    for (RND_GameInstanceId i = 1; i < RND_instances_size; i++) {
         RND_GameInstance *inst = RND_instances + i;
-        if (inst->id_ptr && RND_dtors[inst->index]) {
-            free(inst->id_ptr);
+        if (inst->is_alive && RND_dtors[inst->index]) {
             int error;
             if ((error = RND_dtors[inst->index](inst->data))) {
-                RND_WARN("object %d (%s)'s destructor returned %d for instance id %u",
+                RND_WARN("object %d (%s)'s destructor returned %d for instance id %lu",
                         inst->index, RND_gameObjectGetName(inst->index), error, i);
             }
             free(inst->data);
@@ -73,7 +53,6 @@ void RND_gameCleanup()
             free(RND_objects_meta[i].name);
     }
     free(RND_objects_meta);
-    RND_linkedListDestroy(&RND_free_instance_ids, RND_linkedListDtorFree);
     free(RND_ctors);
     free(RND_dtors);
 }
@@ -105,20 +84,28 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
         RND_ERROR("object indexed %u does not exist!", index);
         return 0;
     }
-    if (!RND_linkedListSize(&RND_free_instance_ids)) {
-        RND_ERROR("free_instance_ids list is empty!");
-        return 0;
+
+    // If instance ids exhausted, try to double array size
+    if (RND_next_instance_id >= RND_instances_size) {
+        if (RND_instances_size & (1lu << 63)) {
+            RND_ERROR("maximum instance id reached (%lu)", RND_instances_size);
+            return 0;
+        }
+        RND_GameInstance *new;
+        if (!(new = realloc(RND_instances, sizeof(RND_GameInstance) * RND_instances_size * 2))) {
+            RND_ERROR("realloc");
+            return 0;
+        }
+        RND_instances = new;
+        uint64_t half = sizeof(RND_GameInstance) * RND_instances_size;
+        memset(RND_instances + half, 0, half);
+        RND_instances_size *= 2;
     }
 
-    RND_GameInstanceId *id;
-    if (!(id = RND_linkedListGet(&RND_free_instance_ids, 0))) {
-        RND_ERROR("RND_linkedListGet returned NULL");
-        return 0;
-    }
-    RND_GameInstance *new = RND_instances + (*id);
-    new->id_ptr = id;
-    RND_linkedListRemove(&RND_free_instance_ids, 0, NULL);
-    new->index = index;
+    RND_GameInstanceId id = RND_next_instance_id++;
+    RND_GameInstance *new = RND_instances + id;
+    new->is_alive = true;
+    new->index    = index;
     if (!(new->data = malloc(RND_objects_meta[index].size))) {
         RND_ERROR("malloc");
         return 0;
@@ -129,55 +116,58 @@ RND_GameInstanceId RND_gameInstanceSpawn(RND_GameObjectIndex index)
             RND_WARN("RND_ctors[%u] (%s) returned %d", index, RND_gameObjectGetName(index), error);
         }
     }
+
     for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
         RND_GameHandler *h = elem->data;
+        RND_GameInstanceId *newid;
+        if (!(newid = (RND_GameInstanceId*)malloc(sizeof(RND_GameInstanceId)))) {
+            RND_ERROR("malloc");
+            return 0;
+        }
+        *newid = id;
         int priority = h->priority_func? h->priority_func(index) : 0;
         int error;
-        if ((error = RND_priorityQueuePush(&h->queue, id, priority))) {
-            RND_ERROR("RND_priorityQueuePush returned %d for instance id %u, object %u (%s), priority %d",
-                    error, *id, index, RND_gameObjectGetName(index), priority);
+        if ((error = RND_priorityQueuePush(&h->queue, newid, priority))) {
+            RND_ERROR("RND_priorityQueuePush returned %d for instance id %lu, object %u (%s), priority %d",
+                    error, *newid, index, RND_gameObjectGetName(index), priority);
             return 0;
         }
     }
-    return *id;
+    return id;
 }
 
 int RND_gameInstanceKill(RND_GameInstanceId id)
 {
-    if (!RND_instances[id].id_ptr) {
-        RND_WARN("instance id %u is not alive", id);
+    if (!RND_instances[id].is_alive) {
+        RND_WARN("instance id %lu is not alive", id);
         return 0;
     }
     RND_GameInstance *inst = RND_instances + id;
+    inst->is_alive = false;
     if (RND_dtors[inst->index]) {
         int error;
         if ((error = RND_dtors[inst->index](inst->data))) {
-            RND_ERROR("RND_dtors[%u] (%s) returned %d for instance id %u",
+            RND_ERROR("RND_dtors[%u] (%s) returned %d for instance id %lu",
                     inst->index, RND_gameObjectGetName(inst->index), error, id);
             return 1;
         }
     }
     inst->data = NULL;
-    int error;
-    if ((error = RND_linkedListAdd(&RND_free_instance_ids, inst->id_ptr))) {
-        RND_ERROR("RND_linkedListAdd returned %d for instance id %u", error, id);
-        return 2;
-    }
+
     for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
         RND_GameHandler *h = elem->data;
         size_t index = 0;
         for (RND_PriorityQueue *i = h->queue; i; i = i->next, index++) {
-            if (inst->id_ptr == (RND_GameInstanceId*)(((RND_PriorityQueuePair*)i->data)->data)) {
+            if (id == *(RND_GameInstanceId*)(((RND_PriorityQueuePair*)i->data)->data)) {
                 int error;
-                if ((error = RND_priorityQueueRemove(&h->queue, index, NULL))) {
-                    RND_ERROR("RND_priorityQueueRemove returned %d for instance id %u, index %lu",
-                            error, *inst->id_ptr, index);
+                if ((error = RND_priorityQueueRemove(&h->queue, index, RND_priorityQueueDtorFree))) {
+                    RND_ERROR("RND_priorityQueueRemove returned %d for instance id %lu, index %lu",
+                            error, id, index);
                 }
                 break;
             }
         }
     }
-    inst->id_ptr = NULL;
     return 0;
 }
 
@@ -208,7 +198,7 @@ int RND_gameHandlerRun(RND_GameHandler *handler)
         if (inst->data && handler->handlers[inst->index]) {
             int error;
             if ((error = handler->handlers[inst->index](inst->data))) {
-                RND_ERROR("handler %p returned %d for instance id %u of object %u (%s)",
+                RND_ERROR("handler %p returned %d for instance id %lu of object %u (%s)",
                         handler + inst->index, error, id, inst->index, RND_gameObjectGetName(inst->index));
                 ret++;
             }

@@ -145,11 +145,51 @@ Once you've created an object, you can create an instance of it like so:
 RND_GameInstanceId id = RND_gameInstanceSpawn(OBJECT_INDEX_PLAYER);
 ```
 
-`RND_gameInstanceSpawn()` will return a unique instance id which can be used
+`RND_gameInstanceSpawn()` will return a unique **instance id** which can be used
 in various instance functions. Pretty much all functions that operate on
 instances use the instance id as an identifier.
 
-### 2.3 Accessing an Instance
+An instance id is a 64-bit unsigned integer, and every single instance must
+have a unique one during a single runtime, so theoretically if you ran out of
+(2^64-1) numbers (0 is reserved for errors and exceptions), the library would
+crash with a fatal error.  To give some perspective though, to grind through
+2^64 ids you would need to spawn 1000000 instances per tick in a 60FPS game
+over the course of nearly 10 thousand years, so you would most definitely
+run out of memory first anyway.
+
+### 2.3 The Instances Array
+
+All spawned instances that have not yet been killed reside in the global
+`RND_instances` array. The array is composed of `RND_GameInstance` structs:
+
+```c
+struct RND_GameInstance
+{
+    bool is_alive;
+    RND_GameObjectIndex index;
+    void *data;
+};
+```
+
+The array is indexed by instance ids with `id=0` reserved as "no instance".
+Instance ids are 64-bit integers and it's impossible to allocate that big
+of an array, so the starting size is 2^16 elements, and if the instance
+count during runtime crosses that threshold, the array size is doubled.
+The array's current size is stored in `RND_instances_size`.
+It is therefore possible to iterate through all existing instances and
+access their object structs by doing the following:
+
+```c
+for (RND_GameInstanceId id = 1; id < RND_instances_size; id++) {
+    RND_GameInstance *inst = RND_instances + id;
+    // For example, to set all players' health to 0:
+    if (inst->is_alive && inst->index == OBJECT_INDEX_PLAYER) {
+        ((ObjectPlayer*)inst->data)->health = 0;
+    }
+}
+```
+
+### 2.4 Accessing an Instance
 
 In order to access instance variables (variables from the object struct),
 you need its unique instance id and the corresponding object type:
@@ -174,10 +214,10 @@ using the macro shortcut:
 RND_GAME_INST(id, ObjectPlayer).x = 15;
 ```
 
-### 2.4 Killing an Instance
+### 2.5 Killing an Instance
 
 Once an instance's job is finished, you should deallocate its memory and
-return its instance id to the pool of free ones. This can be accomplished
+set its `is_alive` member variable to `false`. This can be accomplished
 by using the `RND_gameInstanceKill` function:
 
 ```c
@@ -186,37 +226,6 @@ RND_gameInstanceKill(id);
 
 If no instance with the supplied id is alive, the function will print
 a warning message and peacefully exit, returning 0 for success.
-
-### 2.3 The `RND_instances` Array
-
-All spawned instances that have not yet been killed reside in a global
-`RND_instances` array. The array is composed of `RND_GameInstance` structs:
-
-```c
-struct RND_GameInstance
-{
-    RND_GameInstanceId *id_ptr;
-    RND_GameObjectIndex index;
-    void *data;
-};
-```
-
-The array is indexed by instance ids with `id=0` reserved as "no instance".
-It is therefore possible to iterate through all existing instances and
-access their object structs by doing the following:
-
-```c
-for (RND_GameInstanceId id = 1; id < RND_INSTANCE_MAX; id++) {
-    RND_GameInstance *inst = RND_instances + id;
-    // For example, to set all players' health to 0:
-    if (inst->id_ptr && inst->index == OBJECT_INDEX_PLAYER) {
-        ((ObjectPlayer*)inst->data)->health = 0;
-    }
-}
-```
-
-Instances that are not "alive" will have their id pointer equal to NULL
-(hence the `inst->id_ptr` condition inside the if statement).
 
 ## 3. Event Handlers
 
