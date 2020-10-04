@@ -89,10 +89,11 @@ int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
         return 2;
     }
     char *newname;
-    if (!(newname = (char*)malloc(sizeof(char) * strlen(name)))) {
+    if (!(newname = (char*)malloc(sizeof(char) * (strlen(name) + 1)))) {
         RND_ERROR("malloc");
         return 3;
     }
+    strcpy(newname, name);
     RND_objects_meta[index].name = newname;
     RND_objects_meta[index].size = size;
     return 0;

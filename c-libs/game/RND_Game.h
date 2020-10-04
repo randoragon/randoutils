@@ -9,6 +9,7 @@
 // Macros
 #define RND_OBJECT_MAX   0xffff
 #define RND_INSTANCE_MAX 0xffff
+#define RND_GAME_OBJECT_ADD(struct, index) RND_gameObjectAdd(#struct, index, sizeof(struct))
 
 // Type declarations
 typedef uint16_t RND_GameObjectIndex;

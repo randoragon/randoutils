@@ -71,7 +71,21 @@ want, but it cannot be empty. This string is used for example in warning/error
 messages to make it easier to identify objects, because for humans it's faster
 to recognize than an index number.
 
-You can obtain an object's name string from its index with `RND_gameObjectGetName`.
+Typically you want the name string to be the same as the name of the object struct.
+Because it's a bit painful to have to write the same thing twice, there's a macro
+that automatically calls `RND_gameObjectAdd` with the right parameters:
+
+```c
+#define RND_GAME_OBJECT_ADD(struct, index) RND_gameObjectAdd(#struct, index, sizeof(struct))
+```
+
+Hence, this is the **recommended** way of adding new objects:
+
+```c
+RND_GAME_OBJECT_ADD(ObjectPlayer, OBJECT_INDEX_PLAYER);
+```
+
+You can obtain an object's name string with `RND_gameObjectGetName(index)`.
 
 ---
 

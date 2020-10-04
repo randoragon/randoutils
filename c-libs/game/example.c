@@ -11,9 +11,9 @@ int main()
     RND_gameInit();
 
     // Create game objects
-    RND_gameObjectAdd("ObjectPlayer", OBJECT_INDEX_PLAYER, sizeof(ObjectPlayer));
-    RND_gameObjectAdd("ObjectWall"  , OBJECT_INDEX_WALL  , sizeof(ObjectWall));
-    RND_gameObjectAdd("ObjectEnemy" , OBJECT_INDEX_ENEMY , sizeof(ObjectEnemy));
+    RND_GAME_OBJECT_ADD(ObjectPlayer, OBJECT_INDEX_PLAYER);
+    RND_GAME_OBJECT_ADD(ObjectWall  , OBJECT_INDEX_WALL);
+    RND_GAME_OBJECT_ADD(ObjectEnemy , OBJECT_INDEX_ENEMY);
 
     /* All ctors and dtors are initialized to NULL by default, so there's
      * no need to explicitly set dtors of wall and enemy to NULL.
