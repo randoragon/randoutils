@@ -183,7 +183,7 @@ Instances that are not "alive" will have their id pointer equal to NULL
 
 ### 3.1 Overview
 
-The majority of game engines operates on events which execute specific code.
+The majority of game engines operate on events which execute specific code.
 For example, for each object type there's separate code that gets executed
 every step, but there also might be code that gets executed on button events,
 or some custom events orchestrated by the developer that run scripts.
