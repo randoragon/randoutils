@@ -64,6 +64,7 @@ void RND_gameCleanup()
                 RND_WARN("object %d (%s)'s destructor returned %d for instance id %u",
                         inst->index, RND_gameObjectGetName(inst->index), error, i);
             }
+            free(inst->data);
         }
     }
     free(RND_instances);
