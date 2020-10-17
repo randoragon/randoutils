@@ -18,15 +18,20 @@ and the source code for more details.
 
 ## Features
 
-WORK IN PROGRESS
+- create objects and spawn instances
+- manage instances (access their variables, despawn, etc.)
+- write and run custom event handlers (WIP)
+
+See [OVERVIEW.MD](https://github.com/randoragon/randoutils/tree/master/c-libs/game/OVERVIEW.MD) for
+a general outline and documentation.
 
 ## Installation
 
 You will need to install these libraries as runtime dependencies:
 
-- [RND_LinkedList](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist)
-- [RND_HashMap](https://github.com/randoragon/randoutils/tree/master/c-libs/hashmap)
-- [RND_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
+- [RND\_LinkedList](https://github.com/randoragon/randoutils/tree/master/c-libs/linkedlist)
+- [RND\_HashMap](https://github.com/randoragon/randoutils/tree/master/c-libs/hashmap)
+- [RND\_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
 
 Run the following code, if necessary as root:
 
