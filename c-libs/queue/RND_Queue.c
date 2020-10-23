@@ -84,7 +84,7 @@ int RND_queueRemove(RND_Queue **queue, size_t index, int (*dtor)(void *))
         int error;
         if (dtor && (error = dtor(prev->next->data))) {
             RND_ERROR("dtor %p returned %d for data %p", dtor, error, prev->next->data);
-            return 4;
+            return 2;
         }
         RND_Queue *tmp;
         tmp = prev->next->next;

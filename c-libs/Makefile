@@ -77,3 +77,8 @@ install:
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
 	@printf -- "------------\n\n"
+
+docs: FORCE
+	doxygen Doxyfile
+
+FORCE: ;

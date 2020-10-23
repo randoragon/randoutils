@@ -27,9 +27,11 @@ int RND_gameInit()
     }
     if (!(RND_ctors = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
+        return 1;
     }
     if (!(RND_dtors = (RND_GameHandlerFunc*)calloc(RND_GAME_OBJECT_MAX, sizeof(RND_GameHandlerFunc)))) {
         RND_ERROR("calloc");
+        return 1;
     }
     return 0;
 }

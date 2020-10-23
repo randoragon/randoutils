@@ -100,7 +100,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)
         int error;
         if (dtor && (error = dtor(prev->next->data))) {
             RND_ERROR("dtor %p returned %d for data %p", dtor, error, prev->next->data);
-            return 4;
+            return 2;
         }
         RND_PriorityQueue *tmp;
         tmp = prev->next->next;

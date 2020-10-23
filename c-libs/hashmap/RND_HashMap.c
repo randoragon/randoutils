@@ -53,7 +53,7 @@ int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
     if (!(new->key = (char*)malloc(sizeof(char) * (strlen(key) + 1)))) {
         RND_ERROR("malloc");
         free(new);
-        return 3;
+        return 2;
     }
     strcpy(new->key, key);
     new->value = value;
