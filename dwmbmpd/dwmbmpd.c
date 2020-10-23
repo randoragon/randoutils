@@ -40,7 +40,7 @@
 #define COL_DK      "#333333"
 #define ELLIPSIS    "…"
 #define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
-#define CMDLENGTH   1024        /* this must be equal to CMDLENGTH in dwmblocks.c */
+#define CMDLENGTH   300         /* this must be equal to CMDLENGTH in dwmblocks.c */
 #define BAR_HEIGHT  19          /* must be equal to "user_bh" in dwm's config.h */
 
 #define MM_TO_IN(x) ((int)((float)x * 0.03937))
