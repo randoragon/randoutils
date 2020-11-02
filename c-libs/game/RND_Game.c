@@ -195,7 +195,7 @@ int RND_gameHandlerRun(RND_GameHandler *handler)
 {
     int ret = 0;
     for (RND_PriorityQueue *elem = handler->queue; elem; elem = elem->next) {
-        RND_GameInstanceId id  = *(RND_GameInstanceId*)elem->data;
+        RND_GameInstanceId id  = *(RND_GameInstanceId*)elem->data->data;
         RND_GameInstance *inst = RND_instances + id;
         if (inst->data && handler->handlers[inst->index]) {
             int error;
