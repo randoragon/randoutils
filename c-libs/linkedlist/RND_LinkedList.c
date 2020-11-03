@@ -18,6 +18,7 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data)
             return 1;
         }
         new->data = data;
+        new->next = NULL;
         last->next = new;
     } else {
         if (!(*list = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
