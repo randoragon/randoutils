@@ -314,6 +314,46 @@ RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex)
  */
 int RND_gameHandlerRun(RND_GameHandler *handler);
 
+/** Frees all memory associated with an instance event handler.
+ *
+ * This function is a counterpart to @ref RND_gameHandlerCreate.
+ * It does not @e need to be used for every created handler though,
+ * as @ref RND_gameCleanup takes care of all of them automatically.
+ * Still, if there's a need to destroy a handler before the
+ * end of a program, this function does exactly that.
+ *
+ * @param[in] handler A pointer to the event handler.
+ * @returns
+ * - 0 - success
+ * - 1 - failed to destroy priority queue
+ */
+int RND_gameHandlerDestroy(RND_GameHandler *handler);
+
+/** A dtor function passed to @ref RND_linkedListDestroy when
+ * freeing the @ref RND_handlers list in @ref RND_gameCleanup.
+ *
+ * This function is only meant to be used internally by the
+ * library, but it can be used for any linked list of
+ * initialized @ref RND_GameHandler pointers.
+ *
+ * Differences with @ref RND_gameHandlerDestroy:
+ * 1. @c void* parameter type instead of @c RND_GameHandler*.
+ * 2. This function does not free @e handler, only its
+ * inner variables (@ref RND_GameHandler::queue, @ref
+ * RND_GameHandler::handlers). It can therefore be considered
+ * a subset of @ref RND_gameHandlerDestroy.
+ * 3. This function returns an error if @e handler is NULL,
+ * whereas @ref RND_gameHandlerDestroy is more permissive
+ * and will only produce a warning and return success.
+ *
+ * @param[in] handler A void pointer to the event handler.
+ * @returns
+ * - 0 - success
+ * - 1 - @e handler is a NULL pointer
+ * - 2 - failed to destroy priority queue
+ */
+int RND_gameHandlerListDtor(void *handler);
+
 /** Returns whether or not a specific instance is alive, by instance ID.
  *
  * @param[in] id The instance ID.

@@ -58,13 +58,7 @@ void RND_gameCleanup()
     free(RND_objects_meta);
     free(RND_ctors);
     free(RND_dtors);
-    for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
-        RND_GameHandler *h = elem->data;
-        RND_priorityQueueDestroy(&h->queue, RND_priorityQueueDtorFree);
-        free(h->handlers);
-        free(h);
-    }
-    RND_linkedListDestroy(&RND_handlers, NULL);
+    RND_linkedListDestroy(&RND_handlers, RND_gameHandlerListDtor);
 }
 
 int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
@@ -215,4 +209,36 @@ int RND_gameHandlerRun(RND_GameHandler *handler)
         }
     }
     return ret;
+}
+
+int RND_gameHandlerDestroy(RND_GameHandler *handler)
+{
+    if (!handler) {
+        RND_WARN("handler does not exist!");
+        return 1;
+    }
+    free(handler->handlers);
+    int error;
+    if ((error = RND_priorityQueueDestroy(&handler->queue, RND_priorityQueueDtorFree))) {
+        RND_ERROR("RND_priorityQueueDestroy returned %d for handler %p\n", error, handler);
+        return 1;
+    }
+    free(handler);
+    return 0;
+}
+
+int RND_gameHandlerListDtor(void *handler)
+{
+    if (!handler) {
+        RND_ERROR("handler does not exist!");
+        return 1;
+    }
+    RND_GameHandler *h = handler;
+    free(h->handlers);
+    int error;
+    if ((error = RND_priorityQueueDestroy(&h->queue, RND_priorityQueueDtorFree))) {
+        RND_ERROR("RND_priorityQueueDestroy returned %d for handler %p\n", error, h);
+        return 2;
+    }
+    return 0;
 }
