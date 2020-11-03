@@ -90,6 +90,7 @@ struct RND_GameObjectMeta
      * when calling @ref RND_gameObjectAdd.
      */
     char *name;
+
     /** The object struct's size, in bytes.
      *
      * This is directly copied from the @e size argument
@@ -103,10 +104,12 @@ struct RND_GameInstance
 {
     /// Stores whether or not an instance is alive.
     bool is_alive;
+
     /** The index of the object that served as the
      * instance's template.
      */
     RND_GameObjectIndex index;
+
     /// A pointer to a corresponding object struct.
     void *data;
 };
@@ -119,6 +122,7 @@ struct RND_GameHandler
      * The function indices match object indices.
      */
     RND_GameHandlerFunc *handlers;
+
     /** A queue storing the order in which instances
      * should be handled.
      *
@@ -126,6 +130,7 @@ struct RND_GameHandler
      * its ID is added or removed from this queue.
      */
     RND_PriorityQueue *queue;
+
     /** The priority function for inserting elements into
      * @ref RND_GameHandler::queue.
      *

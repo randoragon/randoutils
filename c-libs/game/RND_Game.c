@@ -33,6 +33,7 @@ int RND_gameInit()
         RND_ERROR("calloc");
         return 1;
     }
+    RND_handlers = RND_linkedListCreate();
     return 0;
 }
 
@@ -57,6 +58,13 @@ void RND_gameCleanup()
     free(RND_objects_meta);
     free(RND_ctors);
     free(RND_dtors);
+    for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
+        RND_GameHandler *h = elem->data;
+        RND_priorityQueueDestroy(&h->queue, RND_priorityQueueDtorFree);
+        free(h->handlers);
+        free(h);
+    }
+    RND_linkedListDestroy(&RND_handlers, NULL);
 }
 
 int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
