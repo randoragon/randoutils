@@ -41,11 +41,13 @@ void RND_gameCleanup()
 {
     for (RND_GameInstanceId i = 1; i < RND_instances_size; i++) {
         RND_GameInstance *inst = RND_instances + i;
-        if (inst->is_alive && RND_dtors[inst->index]) {
-            int error;
-            if ((error = RND_dtors[inst->index](inst->data))) {
-                RND_WARN("object %d (%s)'s destructor returned %d for instance id %lu",
-                        inst->index, RND_gameObjectGetName(inst->index), error, i);
+        if (inst->is_alive) {
+            if (RND_dtors[inst->index]) {
+                int error;
+                if ((error = RND_dtors[inst->index](inst->data))) {
+                    RND_WARN("object %d (%s)'s destructor returned %d for instance id %lu",
+                            inst->index, RND_gameObjectGetName(inst->index), error, i);
+                }
             }
             free(inst->data);
         }
@@ -156,6 +158,7 @@ int RND_gameInstanceKill(RND_GameInstanceId id)
             return 1;
         }
     }
+    free(inst->data);
     inst->data = NULL;
 
     for (RND_LinkedList *elem = RND_handlers; elem; elem = elem->next) {
