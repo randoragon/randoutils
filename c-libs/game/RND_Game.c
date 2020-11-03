@@ -168,7 +168,7 @@ int RND_gameInstanceKill(RND_GameInstanceId id)
         RND_GameHandler *h = elem->data;
         size_t index = 0;
         for (RND_PriorityQueue *i = h->queue; i; i = i->next, index++) {
-            if (id == *(RND_GameInstanceId*)(((RND_PriorityQueuePair*)i->data)->data)) {
+            if (id == *(RND_GameInstanceId*)(i->data->data)) {
                 int error;
                 if ((error = RND_priorityQueueRemove(&h->queue, index, RND_priorityQueueDtorFree))) {
                     RND_ERROR("RND_priorityQueueRemove returned %d for instance id %lu, index %lu",
