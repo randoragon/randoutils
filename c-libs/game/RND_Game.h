@@ -336,13 +336,15 @@ int RND_gameHandlerDestroy(RND_GameHandler *handler);
  * library, but it can be used for any linked list of
  * initialized @ref RND_GameHandler pointers.
  *
- * Differences with @ref RND_gameHandlerDestroy:
- * 1. @c void* parameter type instead of @c RND_GameHandler*.
- * 2. This function does not free @e handler, only its
+ * @remarks Differences with @ref RND_gameHandlerDestroy :
+ * - @c void* parameter type instead of @c RND_GameHandler*
+ *   (requires an extra cast).
+ * - This function does not free @e handler, only its
  * inner variables (@ref RND_GameHandler::queue, @ref
  * RND_GameHandler::handlers). It can therefore be considered
- * a subset of @ref RND_gameHandlerDestroy.
- * 3. This function returns an error if @e handler is NULL,
+ * a subset of @ref RND_gameHandlerDestroy, which frees
+ * its @e handler argument at the end.
+ * - This function returns an error if @e handler is NULL,
  * whereas @ref RND_gameHandlerDestroy is more permissive
  * and will only produce a warning and return success.
  *
