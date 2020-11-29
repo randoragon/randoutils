@@ -27,8 +27,8 @@ The header file will be copied to `/usr/include/` and the library file to `/usr/
 
 ## Usage
 
-Make sure to `#include <RND_PriorityQueue.h>` and link with `librnd_priorityqueue.so` (this is usually
-done by passing the `-lrnd_priorityqueue` flag to the compiler).
+Make sure to `#include <RND_PriorityQueue.h>` and link with `librnd_priorityqueuell.so` (this is usually
+done by passing the `-lrnd_priorityqueuell` flag to the compiler).
 
 ## Examples
 

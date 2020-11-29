@@ -28,8 +28,8 @@ The header file will be copied to `/usr/include/` and the library file to `/usr/
 
 ## Usage
 
-Make sure to `#include <RND_Queue.h>` and link with `librnd_queue.so` (this is usually
-done by passing the `-lrnd_queue` flag to the compiler).
+Make sure to `#include <RND_Queue.h>` and link with `librnd_queuell.so` (this is usually
+done by passing the `-lrnd_queuell` flag to the compiler).
 
 ## Examples
 
