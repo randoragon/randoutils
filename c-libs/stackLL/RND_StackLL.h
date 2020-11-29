@@ -1,12 +1,17 @@
 /** @file
- * The header file of the RND_Stack library.
+ * The header file of the RND_StackLL library.
+ * This library is perfectly functional, although I don't
+ * use it anymore because linked lists perform worse than
+ * regular arrays on modern computers due to CPU caches.
+ * That's why I set out to rewrite this library with an array
+ * implementation and that's what I'll be using instead.
  *
- * @example stack/example.c
- * Here's an example usage of the RND_Stack library.
+ * @example stackLL/example.c
+ * Here's an example usage of the RND_StackLL library.
  */
 
-#ifndef RND_STACK_H
-#define RND_STACK_H
+#ifndef RND_STACK_LL_H
+#define RND_STACK_LL_H
 
 #include <stdlib.h>
 
@@ -15,7 +20,7 @@
  ********************************************************/
 
 /// @cond
-typedef struct RND_Stack RND_Stack;
+typedef struct RND_StackLL RND_StackLL;
 /// @endcond
 
 /** A LIFO stack structure for arbitrary data.
@@ -25,12 +30,12 @@ typedef struct RND_Stack RND_Stack;
  * to the 3rd and so on. The last element points to
  * NULL.
  */
-struct RND_Stack
+struct RND_StackLL
 {
     /// A pointer to the stored data.
     void *data;
     /// A pointer to the next stack element.
-    RND_Stack *next;
+    RND_StackLL *next;
 };
 
 
@@ -43,7 +48,7 @@ struct RND_Stack
  * You'll actually find in the implementation that
  * this function will always simply return NULL.
  * That is because each stack element is an initialized
- * @ref RND_Stack struct, so an empty stack is equivalent
+ * @ref RND_StackLL struct, so an empty stack is equivalent
  * to the absence of such structs, i.e. @c NULL.
  *
  * An inevitable side-effect of such implementation is
@@ -52,11 +57,11 @@ struct RND_Stack
  * because as elements get added/removed the pointer may
  * have to change its value back and forth from NULL to
  * some meaningful memory location (hence all stack
- * functions intake @c RND_Stack** instead of @c
- * RND_Stack*).
+ * functions intake @c RND_StackLL** instead of @c
+ * RND_StackLL*).
  * @returns @c NULL
  */
-RND_Stack *RND_stackCreate();
+RND_StackLL *RND_stackLLCreate();
 
 /** Adds an element in front of a stack.
  *
@@ -66,22 +71,22 @@ RND_Stack *RND_stackCreate();
  * - 0 - success
  * - 1 - insufficient memory
  */
-int RND_stackPush(RND_Stack **stack, void *data);
+int RND_stackLLPush(RND_StackLL **stack, void *data);
 
 /** Returns a pointer to a stack's top element.
  *
  * @param[in] stack The address of the stack's pointer.
  * @returns
- * - the top element's @ref RND_Stack::data - success
+ * - the top element's @ref RND_StackLL::data - success
  * - @c NULL - the stack is empty
  */
-void *RND_stackPeek(RND_Stack **stack);
+void *RND_stackLLPeek(RND_StackLL **stack);
 
 /** Removes a stack's topmost element.
  *
  * @param[inout] stack The address of the stack's pointer.
  * @param[in] dtor A pointer to a function which intakes
- * @ref RND_Stack::data and frees it, returning 0 for
+ * @ref RND_StackLL::data and frees it, returning 0 for
  * success and anything else for failure @b OR @c NULL
  * if the data doesn't need to be freed.
  * @returns
@@ -89,13 +94,13 @@ void *RND_stackPeek(RND_Stack **stack);
  * - 1 - the stack is empty
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_stackPop(RND_Stack **stack, int (*dtor)(void*));
+int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*));
 
 /** Removes all elements from a stack.
  *
  * @param[inout] stack The address of the stack's pointer.
  * @param[in] dtor A pointer to a function which intakes
- * @ref RND_Stack::data and frees it, returning 0 for
+ * @ref RND_StackLL::data and frees it, returning 0 for
  * success and anything else for failure @b OR @c NULL
  * if the data doesn't need to be freed.
  * @returns
@@ -104,24 +109,24 @@ int RND_stackPop(RND_Stack **stack, int (*dtor)(void*));
  *   clearing the stack was interrupted, so a
  *   potentially serious error)
  */
-int RND_stackClear(RND_Stack **stack, int (*dtor)(void*));
+int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*));
 
 /** Frees all memory associated with a stack.
  *
- * This is a wrapper for @ref RND_stackClear, because
+ * This is a wrapper for @ref RND_stackLLClear, because
  * due to implementation details, an empty stack does
  * not occupy any memory. Still, it feels more complete
- * to be calling @c RND_stackDestroy instead of @c
- * RND_stackClear when we mean to destroy it.
+ * to be calling @c RND_stackLLDestroy instead of @c
+ * RND_stackLLClear when we mean to destroy it.
  */
-int RND_stackDestroy(RND_Stack **stack, int (*dtor)(void*));
+int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(void*));
 
 /** Returns the number of elements in a stack.
  *
  * @param[in] stack The address of the stack's pointer.
  * @returns The number of elements in the stack.
  */
-size_t RND_stackSize(RND_Stack **stack);
+size_t RND_stackLLSize(RND_StackLL **stack);
 
 /** Passes each of a stack's elements through a custom function.
  *
@@ -134,7 +139,7 @@ size_t RND_stackSize(RND_Stack **stack);
  *
  * @param[inout] stack The address of the stack's pointer.
  * @param[in] map A pointer to a function which intakes
- * a stack element pointer (@c RND_Stack*) and
+ * a stack element pointer (@c RND_StackLL*) and
  * that element's index within the stack (@c size_t).
  * The function must return 0 for success, and any
  * other value for failure.
@@ -145,7 +150,7 @@ size_t RND_stackSize(RND_Stack **stack);
  *   mapping the stack was interrupted, so a
  *   potentially serious error)
  */
-int RND_stackMap(RND_Stack **stack, int (*map)(RND_Stack*, size_t));
+int RND_stackLLMap(RND_StackLL **stack, int (*map)(RND_StackLL*, size_t));
 
 /** Prints the contents of a stack
  *
@@ -153,24 +158,24 @@ int RND_stackMap(RND_Stack **stack, int (*map)(RND_Stack*, size_t));
  * peek at a stack's contents. Its only applicable
  * use is probably debugging.
  *
- * Internally, this function calls @ref RND_stackMap
- * with the @p map parameter set to @ref RND_stackPrintMap.
+ * Internally, this function calls @ref RND_stackLLMap
+ * with the @p map parameter set to @ref RND_stackLLPrintMap.
  *
  * @param[in] stack The address of the stack's pointer.
- * @returns The value returned by @ref RND_stackMap
- * (using @p stack and @ref RND_stackPrintMap as
+ * @returns The value returned by @ref RND_stackLLMap
+ * (using @p stack and @ref RND_stackLLPrintMap as
  * parameters).
  */
-int RND_stackPrint(RND_Stack **stack);
+int RND_stackLLPrint(RND_StackLL **stack);
 
 /** Prints a single stack element
  *
  * This function is not meant to be called directly,
  * it is an auxiliary function that's used by
- * @ref RND_stackPrint, in conjunction with @ref
- * RND_stackMap.
+ * @ref RND_stackLLPrint, in conjunction with @ref
+ * RND_stackLLMap.
  */
-int RND_stackPrintMap(RND_Stack *elem, size_t index);
+int RND_stackLLPrintMap(RND_StackLL *elem, size_t index);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -179,11 +184,11 @@ int RND_stackPrintMap(RND_Stack *elem, size_t index);
  * a simple @c free() function from libc. This function
  * does literally that, and it exists so that you don't
  * have to create it yourself when removing elements with
- * @ref RND_stackPop, @ref RND_stackClear or @ref
- * RND_stackDestroy.
+ * @ref RND_stackLLPop, @ref RND_stackLLClear or @ref
+ * RND_stackLLDestroy.
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_stackDtorFree(void *data);
+int RND_stackLLDtorFree(void *data);
 
 #endif

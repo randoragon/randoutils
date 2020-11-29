@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <RND_PriorityQueue.h>
+#include <RND_PriorityQueueLL.h>
 
-int push(RND_PriorityQueue **queue, int val, int priority)
+int push(RND_PriorityQueueLL **queue, int val, int priority)
 {
     int *new;
     if (!(new = (int*)malloc(sizeof(int)))) {
@@ -9,12 +9,12 @@ int push(RND_PriorityQueue **queue, int val, int priority)
         exit(1);
     }
     *new = val;
-    return RND_priorityQueuePush(queue, new, priority);
+    return RND_priorityQueueLLPush(queue, new, priority);
 }
 
 int main(int argc, char **argv)
 {
-    RND_PriorityQueue *test = RND_priorityQueueCreate();
+    RND_PriorityQueueLL *test = RND_priorityQueueLLCreate();
     push(&test, 5, 10);
     push(&test, 1, 1);
     push(&test, 5, 8);
@@ -30,13 +30,13 @@ int main(int argc, char **argv)
     push(&test, 9, 12);
     push(&test, 3, 9);
     push(&test, 7, 13);
-    RND_priorityQueuePrint(&test);
+    RND_priorityQueueLLPrint(&test);
     int *val;
-    val = (int*)RND_priorityQueuePeek(&test);
+    val = (int*)RND_priorityQueueLLPeek(&test);
     printf("Peeked element with lowest priority: %p -> %d\n", val, *val);
-    RND_priorityQueuePop(&test, RND_priorityQueueDtorFree);
-    RND_priorityQueuePrint(&test);
-    RND_priorityQueueDestroy(&test, RND_priorityQueueDtorFree);
+    RND_priorityQueueLLPop(&test, RND_priorityQueueLLDtorFree);
+    RND_priorityQueueLLPrint(&test);
+    RND_priorityQueueLLDestroy(&test, RND_priorityQueueLLDtorFree);
 
     return EXIT_SUCCESS;
 }

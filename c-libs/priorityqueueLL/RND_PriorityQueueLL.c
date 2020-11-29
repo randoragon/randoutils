@@ -1,23 +1,23 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <RND_ErrMsg.h>
-#include "RND_PriorityQueue.h"
+#include "RND_PriorityQueueLL.h"
 
-RND_PriorityQueue *RND_priorityQueueCreate()
+RND_PriorityQueueLL *RND_priorityQueueLLCreate()
 {
     return NULL;
 }
 
-int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority)
+int RND_priorityQueueLLPush(RND_PriorityQueueLL **queue, void *data, int priority)
 {
     if (*queue) {
-        RND_PriorityQueue *new, *next = *queue, *prev = NULL;
-        for (; next && ((RND_PriorityQueuePair*)next->data)->priority <= priority; prev = next, next = next->next);
-        if (!(new = (RND_PriorityQueue*)malloc(sizeof(RND_PriorityQueue)))) {
+        RND_PriorityQueueLL *new, *next = *queue, *prev = NULL;
+        for (; next && ((RND_PriorityQueueLLPair*)next->data)->priority <= priority; prev = next, next = next->next);
+        if (!(new = (RND_PriorityQueueLL*)malloc(sizeof(RND_PriorityQueueLL)))) {
             RND_ERROR("malloc");
             return 1;
         }
-        if (!(new->data = (RND_PriorityQueuePair*)malloc(sizeof(RND_PriorityQueuePair)))) {
+        if (!(new->data = (RND_PriorityQueueLLPair*)malloc(sizeof(RND_PriorityQueueLLPair)))) {
             RND_ERROR("malloc");
             free(new);
             return 1;
@@ -30,11 +30,11 @@ int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority)
         else
             *queue = new;
     } else {
-        if (!(*queue = (RND_PriorityQueue*)malloc(sizeof(RND_PriorityQueue)))) {
+        if (!(*queue = (RND_PriorityQueueLL*)malloc(sizeof(RND_PriorityQueueLL)))) {
             RND_ERROR("malloc");
             return 1;
         }
-        if (!((*queue)->data = (RND_PriorityQueuePair*)malloc(sizeof(RND_PriorityQueuePair)))) {
+        if (!((*queue)->data = (RND_PriorityQueueLLPair*)malloc(sizeof(RND_PriorityQueueLLPair)))) {
             RND_ERROR("malloc");
             return 1;
         }
@@ -45,18 +45,18 @@ int RND_priorityQueuePush(RND_PriorityQueue **queue, void *data, int priority)
     return 0;
 }
 
-void *RND_priorityQueuePeek(RND_PriorityQueue **queue)
+void *RND_priorityQueueLLPeek(RND_PriorityQueueLL **queue)
 {
     return (*queue)? (*queue)->data->data : NULL;
 }
 
-int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*))
+int RND_priorityQueueLLPop(RND_PriorityQueueLL **queue, int (*dtor)(void*))
 {
     if (!*queue) {
         RND_WARN("the queue is already empty");
         return 1;
     }
-    RND_PriorityQueue *next = (*queue)->next;
+    RND_PriorityQueueLL *next = (*queue)->next;
     int error;
     if (dtor && (error = dtor((*queue)->data->data))) {
         RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*queue)->data->data);
@@ -68,7 +68,7 @@ int RND_priorityQueuePop(RND_PriorityQueue **queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)(void *))
+int RND_priorityQueueLLRemove(RND_PriorityQueueLL **queue, size_t index, int (*dtor)(void *))
 {
     if (!*queue) {
         RND_WARN("the queue is already empty");
@@ -80,21 +80,21 @@ int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)
             RND_ERROR("dtor %p returned %d for data %p", dtor, error, (*queue)->data);
             return 2;
         }
-        RND_PriorityQueue *tmp = *queue;
+        RND_PriorityQueueLL *tmp = *queue;
         *queue = (*queue)->next;
         free(tmp);
     } else {
-        RND_PriorityQueue *prev = *queue;
+        RND_PriorityQueueLL *prev = *queue;
         for (int i = 0; i < index - 1; i++) {
             if (prev->next) {
                 prev = prev->next;
             } else {
-                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueSize(queue));
+                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueLLSize(queue));
                 return 3;
             }
         }
         if (!prev->next) {
-            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueSize(queue));
+            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_priorityQueueLLSize(queue));
             return 3;
         }
         int error;
@@ -102,7 +102,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)
             RND_ERROR("dtor %p returned %d for data %p", dtor, error, prev->next->data);
             return 2;
         }
-        RND_PriorityQueue *tmp;
+        RND_PriorityQueueLL *tmp;
         tmp = prev->next->next;
         free(prev->next);
         prev->next = tmp;
@@ -110,11 +110,11 @@ int RND_priorityQueueRemove(RND_PriorityQueue **queue, size_t index, int (*dtor)
     return 0;
 }
 
-int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*))
+int RND_priorityQueueLLClear(RND_PriorityQueueLL **queue, int (*dtor)(void*))
 {
-    RND_PriorityQueue *i = *queue;
+    RND_PriorityQueueLL *i = *queue;
     while (i) {
-        RND_PriorityQueue *j = i->next;
+        RND_PriorityQueueLL *j = i->next;
         int error;
         if (dtor && (error = dtor(i->data->data))) {
             RND_ERROR("dtor %p returned %d for data %p", dtor, error, i->data->data);
@@ -128,33 +128,33 @@ int RND_priorityQueueClear(RND_PriorityQueue **queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_priorityQueueDestroy(RND_PriorityQueue **queue, int (*dtor)(void*))
+int RND_priorityQueueLLDestroy(RND_PriorityQueueLL **queue, int (*dtor)(void*))
 {
-    return RND_priorityQueueClear(queue, dtor);
+    return RND_priorityQueueLLClear(queue, dtor);
 }
 
-size_t RND_priorityQueueSize(RND_PriorityQueue **queue)
+size_t RND_priorityQueueLLSize(RND_PriorityQueueLL **queue)
 {
     size_t ret = 0;
-    for (RND_PriorityQueue *e = *queue; e; e = e->next, ret++);
+    for (RND_PriorityQueueLL *e = *queue; e; e = e->next, ret++);
     return ret;
 }
 
-int RND_priorityQueueDtorFree(void *data)
+int RND_priorityQueueLLDtorFree(void *data)
 {
     free(data);
     return 0;
 }
 
 // Run a function for every queue element
-int RND_priorityQueueMap(RND_PriorityQueue **queue, int (*map)(RND_PriorityQueue*, size_t))
+int RND_priorityQueueLLMap(RND_PriorityQueueLL **queue, int (*map)(RND_PriorityQueueLL*, size_t))
 {
     if (!*queue || !map) {
         RND_WARN("queue or map function empty");
         return 1;
     }
     size_t p = 0;
-    for (RND_PriorityQueue *q = *queue; q; q = q->next, p++) {
+    for (RND_PriorityQueueLL *q = *queue; q; q = q->next, p++) {
         int error;
         if ((error = map(q, p))) {
             RND_ERROR("map function %p returned %d for element no. %lu (%p)", map, error, p, q);
@@ -165,14 +165,14 @@ int RND_priorityQueueMap(RND_PriorityQueue **queue, int (*map)(RND_PriorityQueue
 }
 
 // Map function used for the default method of printing queue contents
-int RND_priorityQueuePrintMap(RND_PriorityQueue *elem, size_t index)
+int RND_priorityQueueLLPrintMap(RND_PriorityQueueLL *elem, size_t index)
 {
     printf("| %5lu | %8d | %14p | %14p |\n", index, elem->data->priority, elem, elem->data->data);
     return 0;
 }
 
 // Default method of printing queue contents (for convenience)
-int RND_priorityQueuePrint(RND_PriorityQueue **queue)
+int RND_priorityQueueLLPrint(RND_PriorityQueueLL **queue)
 {
     /* The table will break visually if index exceeds 5 digits (99999)
      * or if the pointers' hexadecimal representation exceeds 14 characters
@@ -181,7 +181,7 @@ int RND_priorityQueuePrint(RND_PriorityQueue **queue)
     printf("+----------------------------------------------------+\n");
     printf("| INDEX | PRIORITY |    ADDRESS     |      DATA      |\n");
     printf("|-------+----------+----------------+----------------|\n");
-    int ret = RND_priorityQueueMap(queue, RND_priorityQueuePrintMap);
+    int ret = RND_priorityQueueLLMap(queue, RND_priorityQueueLLPrintMap);
     printf("+----------------------------------------------------+\n");
     return ret;
 }

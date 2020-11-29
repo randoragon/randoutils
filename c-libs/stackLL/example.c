@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <RND_Stack.h>
+#include <RND_StackLL.h>
 
-int push(RND_Stack **stack, int val)
+int push(RND_StackLL **stack, int val)
 {
     int *new;
     if (!(new = (int*)malloc(sizeof(int)))) {
@@ -9,12 +9,12 @@ int push(RND_Stack **stack, int val)
         exit(1);
     }
     *new = val;
-    return RND_stackPush(stack, new);
+    return RND_stackLLPush(stack, new);
 }
 
 int main(int argc, char **argv)
 {
-    RND_Stack *test = RND_stackCreate();
+    RND_StackLL *test = RND_stackLLCreate();
     push(&test, 9);
     push(&test, 7);
     push(&test, 9);
@@ -30,13 +30,13 @@ int main(int argc, char **argv)
     push(&test, 4);
     push(&test, 1);
     push(&test, 3);
-    RND_stackPrint(&test);
+    RND_stackLLPrint(&test);
     int *val;
-    val = (int*)RND_stackPeek(&test);
+    val = (int*)RND_stackLLPeek(&test);
     printf("value on top: %p -> %d\n", val, *val);
-    RND_stackPop(&test, RND_stackDtorFree);
-    RND_stackPrint(&test);
-    RND_stackDestroy(&test, RND_stackDtorFree);
+    RND_stackLLPop(&test, RND_stackLLDtorFree);
+    RND_stackLLPrint(&test);
+    RND_stackLLDestroy(&test, RND_stackLLDtorFree);
 
     return EXIT_SUCCESS;
 }

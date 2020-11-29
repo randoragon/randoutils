@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99
-OBJS=RND_Stack.o
-OUT=librnd_stack.so
+OBJS=RND_StackLL.o
+OUT=librnd_stackll.so
 
 all: main
 
@@ -19,8 +19,8 @@ debug: clean all
 
 install: CFLAGS += -O3
 install: clean all
-	cp -- RND_Stack.h /usr/include/
+	cp -- RND_StackLL.h /usr/include/
 	cp -- $(OUT) /usr/lib/
 
 example: example.o
-	$(CC) $(CFLAGS) example.o -lrnd_stack -o a.out
+	$(CC) $(CFLAGS) example.o -lrnd_stackll -o a.out

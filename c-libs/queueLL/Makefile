@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99
-OBJS=RND_PriorityQueue.o
-OUT=librnd_priorityqueue.so
+OBJS=RND_QueueLL.o
+OUT=librnd_queuell.so
 
 all: main
 
@@ -19,8 +19,8 @@ debug: clean all
 
 install: CFLAGS += -O3
 install: clean all
-	cp -- RND_PriorityQueue.h /usr/include/
+	cp -- RND_QueueLL.h /usr/include/
 	cp -- $(OUT) /usr/lib/
 
 example: example.o
-	$(CC) $(CFLAGS) example.o -lrnd_priorityqueue -o a.out
+	$(CC) $(CFLAGS) example.o -lrnd_queuell -o a.out

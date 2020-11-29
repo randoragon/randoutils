@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <RND_Queue.h>
+#include <RND_QueueLL.h>
 
-int push(RND_Queue **queue, int val)
+int push(RND_QueueLL **queue, int val)
 {
     int *new;
     if (!(new = (int*)malloc(sizeof(int)))) {
@@ -10,12 +10,12 @@ int push(RND_Queue **queue, int val)
         exit(1);
     }
     *new = val;
-    return RND_queuePush(queue, new);
+    return RND_queueLLPush(queue, new);
 }
 
 int main(int argc, char **argv)
 {
-    RND_Queue *test = RND_queueCreate();
+    RND_QueueLL *test = RND_queueLLCreate();
     push(&test, 3);
     push(&test, 1);
     push(&test, 4);
@@ -31,13 +31,13 @@ int main(int argc, char **argv)
     push(&test, 9);
     push(&test, 7);
     push(&test, 9);
-    RND_queuePrint(&test);
+    RND_queueLLPrint(&test);
     int *val;
-    val = (int*)RND_queuePeek(&test);
+    val = (int*)RND_queueLLPeek(&test);
     printf("first number in line: %p -> %d\n", val, *val);
-    RND_queuePrint(&test);
-    RND_queuePop(&test, RND_queueDtorFree);
-    RND_queueDestroy(&test, RND_queueDtorFree);
+    RND_queueLLPrint(&test);
+    RND_queueLLPop(&test, RND_queueLLDtorFree);
+    RND_queueLLDestroy(&test, RND_queueLLDtorFree);
 
     return EXIT_SUCCESS;
 }
