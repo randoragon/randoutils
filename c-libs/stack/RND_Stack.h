@@ -117,7 +117,7 @@ int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*));
  * completeness, but you may use @ref RND_Stack::size
  * with the exact same effect.
  *
- * @param[inout] stack A pointer to the stack.
+ * @param[in] stack A pointer to the stack.
  * @returns
  * - the stack's size (@ref RND_Stack::size) - success
  * - 0 - if @p stack is @c NULL (or stack is empty)
@@ -141,7 +141,7 @@ int RND_stackDtorFree(void *data);
 
 /** Prints the contents of a stack
  *
- * @param[inout] stack A pointer to the stack.
+ * @param[in] stack A pointer to the stack.
  */
 int RND_stackPrint(RND_Stack *stack);
 

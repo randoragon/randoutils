@@ -12,10 +12,12 @@ RND_Stack *RND_stackCreate(size_t capacity)
     }
     if (!capacity) {
         RND_ERROR("capacity must be a positive value");
+        free(stack);
         return NULL;
     }
     if (!(stack->data = malloc(sizeof(void*) * capacity))) {
         RND_ERROR("malloc");
+        free(stack);
         return NULL;
     }
     stack->size = 0;
