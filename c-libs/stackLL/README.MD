@@ -1,4 +1,4 @@
-# Stack
+# StackLL
 
 ## Description
 
@@ -27,7 +27,7 @@ The header file will be copied to `/usr/include/` and the library file to `/usr/
 
 ## Usage
 
-Make sure to `#include <RND_Stack.h>` and link with `librnd_stackll.so` (this is usually
+Make sure to `#include <RND_StackLL.h>` and link with `librnd_stackll.so` (this is usually
 done by passing the `-lrnd_stackll` flag to the compiler).
 
 ## Examples

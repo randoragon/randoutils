@@ -1,4 +1,4 @@
-# Queue
+# QueueLL
 
 ## Description
 
@@ -9,7 +9,7 @@ I wrote it so that I can use it in my other C projects.
 
 This library is perfectly functional, although I don't use it anymore because linked lists perform worse than
 regular arrays on modern computers due to CPU caching. That's why I set out to rewrite this library with an array
-implementation and that's what I'll be using instead.
+implementation ([RND\_Queue](https://github.com/randoragon/randoutils/tree/master/c-libs/queue)) and that's what I'll be using instead.
 
 ## Dependencies
 
@@ -28,7 +28,7 @@ The header file will be copied to `/usr/include/` and the library file to `/usr/
 
 ## Usage
 
-Make sure to `#include <RND_Queue.h>` and link with `librnd_queuell.so` (this is usually
+Make sure to `#include <RND_QueueLL.h>` and link with `librnd_queuell.so` (this is usually
 done by passing the `-lrnd_queuell` flag to the compiler).
 
 ## Examples
