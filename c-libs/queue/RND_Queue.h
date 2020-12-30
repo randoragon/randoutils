@@ -141,7 +141,7 @@ size_t RND_queueSize(RND_Queue *queue);
 
 /** Prints the contents of a queue
  *
- * @param[in] A pointer to the queue.
+ * @param[in] queue A pointer to the queue.
  */
 int RND_queuePrint(RND_Queue *queue);
 
