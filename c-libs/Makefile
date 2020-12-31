@@ -13,14 +13,23 @@ main:
 	@printf -- "--- STACK ---\n"
 	$(MAKE) -C stack $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- STACKLL ---\n"
+	$(MAKE) -C stackLL $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
+	@printf -- "-------------\n\n"
+	@printf -- "--- QUEUELL ---\n"
+	$(MAKE) -C queueLL $@
 	@printf -- "-------------\n\n"
 	@printf -- "--- PRIORITY QUEUE ---\n"
 	$(MAKE) -C priorityqueue $@
 	@printf -- "----------------------\n\n"
+	@printf -- "--- PRIORITY QUEUELL ---\n"
+	$(MAKE) -C priorityqueueLL $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C priorityqueue $@
+	$(MAKE) -C bitmap $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
@@ -39,14 +48,23 @@ clean:
 	@printf -- "--- STACK ---\n"
 	$(MAKE) -C stack $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- STACKLL ---\n"
+	$(MAKE) -C stackLL $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
+	@printf -- "-------------\n\n"
+	@printf -- "--- QUEUELL ---\n"
+	$(MAKE) -C queueLL $@
 	@printf -- "-------------\n\n"
 	@printf -- "--- PRIORITY QUEUE ---\n"
 	$(MAKE) -C priorityqueue $@
 	@printf -- "----------------------\n\n"
+	@printf -- "--- PRIORITY QUEUELL ---\n"
+	$(MAKE) -C priorityqueueLL $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C priorityqueue $@
+	$(MAKE) -C bitmap $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
@@ -65,14 +83,23 @@ install:
 	@printf -- "--- STACK ---\n"
 	$(MAKE) -C stack $@
 	@printf -- "-------------\n\n"
+	@printf -- "--- STACKLL ---\n"
+	$(MAKE) -C stackLL $@
+	@printf -- "-------------\n\n"
 	@printf -- "--- QUEUE ---\n"
 	$(MAKE) -C queue $@
+	@printf -- "-------------\n\n"
+	@printf -- "--- QUEUELL ---\n"
+	$(MAKE) -C queueLL $@
 	@printf -- "-------------\n\n"
 	@printf -- "--- PRIORITY QUEUE ---\n"
 	$(MAKE) -C priorityqueue $@
 	@printf -- "----------------------\n\n"
+	@printf -- "--- PRIORITY QUEUELL ---\n"
+	$(MAKE) -C priorityqueueLL $@
+	@printf -- "----------------------\n\n"
 	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C priorityqueue $@
+	$(MAKE) -C bitmap $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
