@@ -146,7 +146,7 @@ int RND_queuePrint(RND_Queue *queue)
     printf("| INDEX |    ADDRESS     |      DATA      |\n");
     printf("|-------+----------------+----------------|\n");
     for (size_t i = 0; i < queue->size; i++) {
-        void **adr = queue->data + ((queue->head - queue->data + i) % queue->size);
+        void **adr = queue->data + ((queue->head - queue->data + i) % queue->capacity);
         printf("| %5lu | %14p | %14p |\n", i, adr, *adr);
     }
     printf("+-----------------------------------------+\n");
