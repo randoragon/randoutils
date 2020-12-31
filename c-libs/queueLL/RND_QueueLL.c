@@ -18,6 +18,7 @@ int RND_queueLLPush(RND_QueueLL **queue, void *data)
             return 1;
         }
         new->data = data;
+        new->next = NULL;
         last->next = new;
     } else {
         if (!(*queue = (RND_QueueLL*)malloc(sizeof(RND_QueueLL)))) {
