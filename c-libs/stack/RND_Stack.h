@@ -85,6 +85,22 @@ void *RND_stackPeek(RND_Stack *stack);
  */
 int RND_stackPop(RND_Stack *stack, int (*dtor)(void*));
 
+/** Removes a stack's chosen element.
+ *
+ * @param[inout] stack A pointer to the stack.
+ * @param[in] index The index of the element to remove (starting at head = 0).
+ * @param[in] dtor A pointer to a function which intakes
+ * a @ref RND_Stack::data element and frees it, returning 0
+ * for success and anything else for failure @b OR @c NULL
+ * if the data doesn't need to be freed.
+ * @returns
+ * - 0 - success
+ * - 1 - the stack is empty
+ * - 2 - @p dtor returned non-0 (error)
+ * - 3 - @p index out of range
+ */
+int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *));
+
 /** Removes all elements from a stack.
  *
  * @param[inout] stack A pointer to the stack.

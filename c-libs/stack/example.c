@@ -31,11 +31,12 @@ int main(int argc, char **argv)
     push(test, 1);
     push(test, 3);
     RND_stackPrint(test);
+    RND_stackRemove(test, 3, RND_stackDtorFree);
     int *val;
     val = (int*)RND_stackPeek(test);
     printf("value on top: %p -> %d\n", val, *val);
     printf("capacity: %lu\n", test->capacity);
-    //RND_stackPop(test, RND_stackDtorFree);
+    RND_stackPop(test, RND_stackDtorFree);
     RND_stackPrint(test);
     RND_stackDestroy(test, RND_stackDtorFree);
 

@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <string.h>
 #include <RND_ErrMsg.h>
 #include "RND_Stack.h"
 
@@ -59,6 +60,27 @@ int RND_stackPop(RND_Stack *stack, int (*dtor)(void*))
         RND_ERROR("dtor %p returned %d for data %p", dtor, error, stack->data[stack->size]);
         return 2;
     }
+    return 0;
+}
+
+int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *))
+{
+    if (!stack) {
+        RND_ERROR("the stack does not exist");
+        return 1;
+    }
+    if (index >= stack->size) {
+        RND_ERROR("index out of range");
+        return 3;
+    }
+    void **target = stack->data + stack->size - 1 - index;
+    int error;
+    if (dtor && (error = dtor(*target))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, *target);
+        return 2;
+    }
+    memcpy(target, target + 1, sizeof(void**) * index);
+    stack->size--;
     return 0;
 }
 
