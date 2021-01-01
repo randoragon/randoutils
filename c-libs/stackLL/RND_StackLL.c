@@ -42,6 +42,36 @@ int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*))
     return 0;
 }
 
+int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(void *))
+{
+    if (!*stack) {
+        RND_WARN("the stack is already empty");
+        return 1;
+    }
+    RND_StackLL *target = *stack,
+                *prev   = NULL;
+    for (int i = 0; i < index; i++) {
+        if (!target) {
+            RND_ERROR("index out of range");
+            return 3;
+        }
+        prev = target;
+        target = target->next;
+    }
+    int error;
+    if (dtor && (error = dtor(target->data))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, target->data);
+        return 2;
+    }
+    if (prev) {
+        prev->next = target->next;
+    } else {
+        *stack = target->next;
+    }
+    free(target);
+    return 0;
+}
+
 int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*))
 {
     RND_StackLL *i = *stack;

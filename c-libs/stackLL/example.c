@@ -31,6 +31,7 @@ int main(int argc, char **argv)
     push(&test, 1);
     push(&test, 3);
     RND_stackLLPrint(&test);
+    RND_stackLLRemove(&test, 4, RND_stackLLDtorFree);
     int *val;
     val = (int*)RND_stackLLPeek(&test);
     printf("value on top: %p -> %d\n", val, *val);
