@@ -258,10 +258,11 @@ priority functions look like, here's an arbitrary example:
 int examplePriorityFunc(RND_GameObjectIndex index)
 {
     switch(index) {
-        case ObjectPlayer: return 2;
-        case ObjectWall:   return -2;
-        case ObjectEnemy:  return 1;
-        default:           return 0;
+
+        case OBJECT_INDEX_PLAYER: return 2;
+        case OBJECT_INDEX_ENEMY:  return -2;
+        case OBJECT_INDEX_WALL:   return 1;
+        default:                  return 0;
     }
 }
 ```
