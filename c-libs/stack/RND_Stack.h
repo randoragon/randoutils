@@ -62,7 +62,7 @@ RND_Stack *RND_stackCreate(size_t capacity);
  */
 int RND_stackPush(RND_Stack *stack, void *data);
 
-/** Returns a pointer to a stack's top element.
+/** Returns a pointer to the top element of a stack.
  *
  * @param[inout] stack A pointer to the stack.
  * @returns
@@ -71,7 +71,7 @@ int RND_stackPush(RND_Stack *stack, void *data);
  */
 void *RND_stackPeek(RND_Stack *stack);
 
-/** Removes a stack's topmost element.
+/** Removes the top element from a stack.
  *
  * @param[inout] stack A pointer to the stack.
  * @param[in] dtor A pointer to a function which intakes
@@ -85,7 +85,7 @@ void *RND_stackPeek(RND_Stack *stack);
  */
 int RND_stackPop(RND_Stack *stack, int (*dtor)(void*));
 
-/** Removes a stack's chosen element.
+/** Removes an element from a stack by index.
  *
  * @param[inout] stack A pointer to the stack.
  * @param[in] index The index of the element to remove (starting at head = 0).
@@ -117,7 +117,7 @@ int RND_stackClear(RND_Stack *stack, int (*dtor)(void*));
 
 /** Frees all memory associated with a stack.
  *
- * First frees the stack's contents with @ref
+ * First frees the contents of the stack with @ref
  * RND_stackClear, then frees the @ref RND_Stack
  * struct itself.
  *
@@ -135,7 +135,7 @@ int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*));
  *
  * @param[in] stack A pointer to the stack.
  * @returns
- * - the stack's size (@ref RND_Stack::size) - success
+ * - the size of the stack (@ref RND_Stack::size) - success
  * - 0 - if @p stack is @c NULL (or stack is empty)
  */
 size_t RND_stackSize(RND_Stack *stack);
@@ -156,6 +156,10 @@ size_t RND_stackSize(RND_Stack *stack);
 int RND_stackDtorFree(void *data);
 
 /** Prints the contents of a stack
+ *
+ * This function is designed to be a convenient way to
+ * peek at the contents of a stack. Its only applicable
+ * use is probably debugging.
  *
  * @param[in] stack A pointer to the stack.
  */

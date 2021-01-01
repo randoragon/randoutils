@@ -31,7 +31,7 @@ struct RND_BitMap
      * and @ref RND_bitMapToggle.
      */
     uint8_t *bits;
-    /** Stores the bitmap's size (in bits)
+    /** Stores the size of the bitmap (in bits)
      *
      * The actual size of the @ref bits array is equal to
      * (@ref size / 8), because the array consists of
@@ -103,20 +103,20 @@ int  RND_bitMapToggle(RND_BitMap *bitmap, size_t index);
  */
 int  RND_bitMapDestroy(RND_BitMap *bitmap);
 
-/** Returns a bitmap's size (in bits).
+/** Returns the size of a bitmap (in bits).
  *
  * @param[in] bitmap A pointer to an initialized @ref RND_BitMap struct.
  *
  * @returns
- * - value > 0 - the bitmap's size
+ * - value > 0 - the size of the bitmap
  * - 0 - @p bitmap is a NULL-pointer
  */
 size_t RND_bitMapSize(RND_BitMap *bitmap);
 
 /** Prints a comprehensive table of all values stored in a bitmap.
  *
- * This function is designed to be a convenient way to peek at a bitmap's
- * contents. Its only applicable use is probably debugging.
+ * This function is designed to be a convenient way to peek at the
+ * contents of a bitmap. Its only applicable use is probably debugging.
  *
  * @param[in] bitmap A pointer to an initialized @ref RND_BitMap struct.
  *

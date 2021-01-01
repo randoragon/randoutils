@@ -87,12 +87,12 @@ int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void*))
         RND_ERROR("index out of range");
         return 3;
     }
-    int error;
     void **elem = queue->head,
          **src;
     for (int i = 0; i < index; i++) {
         elem = (elem == queue->data + queue->capacity - 1)? queue->data : elem + 1;
     }
+    int error;
     if (dtor && (error = dtor(*elem))) {
         RND_ERROR("dtor %p returned %d for data %p", dtor, error, *elem);
         return 2;

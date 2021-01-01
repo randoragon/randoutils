@@ -87,7 +87,7 @@ int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data);
  */
 void *RND_linkedListGet(RND_LinkedList **list, size_t index);
 
-/** Removes a list's chosen element.
+/** Removes an element from a list by index.
  *
  * @param[inout] list The address of the list's pointer.
  * @param[in] index The index of the chosen element.
@@ -135,7 +135,7 @@ int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *));
  */
 size_t RND_linkedListSize(RND_LinkedList **list);
 
-/** Passes each of a list's elements through a custom function.
+/** Passes each element of a list through a custom function.
  *
  * This function works much like a "for each" loop,
  * each element in the list (in order front->back)
@@ -189,7 +189,7 @@ int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, 
 /** Prints the contents of a list
  *
  * This function is designed to be a convenient way to
- * peek at a list's contents. Its only applicable
+ * peek at the contents of a list. Its only applicable
  * use is probably debugging.
  *
  * Internally, this function calls @ref RND_linkedListMap

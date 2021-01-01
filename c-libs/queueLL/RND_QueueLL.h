@@ -82,7 +82,7 @@ int RND_queueLLPush(RND_QueueLL **queue, void *data);
  */
 void *RND_queueLLPeek(RND_QueueLL **queue);
 
-/** Removes a queue's front element.
+/** Removes the front element from a queue.
  *
  * @param[inout] queue The address of the queue's pointer.
  * @param[in] dtor A pointer to a function which intakes
@@ -96,7 +96,7 @@ void *RND_queueLLPeek(RND_QueueLL **queue);
  */
 int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(void*));
 
-/** Removes a queue's chosen element.
+/** Removes an element from a queue by index.
  *
  * @param[inout] queue The address of the queue's pointer.
  * @param[in] index The index of the element to remove (starting at front = 0).
@@ -144,7 +144,7 @@ int RND_queueLLDestroy(RND_QueueLL **queue, int (*dtor)(void*));
  */
 size_t RND_queueLLSize(RND_QueueLL **queue);
 
-/** Passes each of a queue's elements through a custom function.
+/** Passes each element of a queue through a custom function.
  *
  * This function works much like a "for each" loop,
  * each element in the queue (in order front->back)
@@ -171,7 +171,7 @@ int RND_queueLLMap(RND_QueueLL **queue, int (*map)(RND_QueueLL*, size_t));
 /** Prints the contents of a queue
  *
  * This function is designed to be a convenient way to
- * peek at a queue's contents. Its only applicable
+ * peek at the contents of a queue. Its only applicable
  * use is probably debugging.
  *
  * Internally, this function calls @ref RND_queueLLMap

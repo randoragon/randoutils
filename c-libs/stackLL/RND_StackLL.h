@@ -73,7 +73,7 @@ RND_StackLL *RND_stackLLCreate();
  */
 int RND_stackLLPush(RND_StackLL **stack, void *data);
 
-/** Returns a pointer to a stack's top element.
+/** Returns a pointer to the top element of a stack.
  *
  * @param[in] stack The address of the stack's pointer.
  * @returns
@@ -82,7 +82,7 @@ int RND_stackLLPush(RND_StackLL **stack, void *data);
  */
 void *RND_stackLLPeek(RND_StackLL **stack);
 
-/** Removes a stack's topmost element.
+/** Removes the top element of a stack.
  *
  * @param[inout] stack The address of the stack's pointer.
  * @param[in] dtor A pointer to a function which intakes
@@ -96,7 +96,7 @@ void *RND_stackLLPeek(RND_StackLL **stack);
  */
 int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*));
 
-/** Removes a stack's chosen element.
+/** Removes an element from a stack by index.
  *
  * @param[inout] stack A pointer to the stack.
  * @param[in] index The index of the element to remove (starting at head = 0).
@@ -144,7 +144,7 @@ int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(void*));
  */
 size_t RND_stackLLSize(RND_StackLL **stack);
 
-/** Passes each of a stack's elements through a custom function.
+/** Passes each element of a stack through a custom function.
  *
  * This function works much like a "for each" loop,
  * each element in the stack (in order top->bottom)
@@ -171,7 +171,7 @@ int RND_stackLLMap(RND_StackLL **stack, int (*map)(RND_StackLL*, size_t));
 /** Prints the contents of a stack
  *
  * This function is designed to be a convenient way to
- * peek at a stack's contents. Its only applicable
+ * peek at the contents of a stack. Its only applicable
  * use is probably debugging.
  *
  * Internally, this function calls @ref RND_stackLLMap

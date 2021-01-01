@@ -109,7 +109,7 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority);
  */
 void *RND_priorityQueuePeek(RND_PriorityQueue *queue);
 
-/** Removes a queue's front element.
+/** Removes the front element of a queue.
  *
  * @param[inout] queue A pointer to the queue.
  * @param[in] dtor A pointer to a function which intakes
@@ -138,7 +138,7 @@ int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*));
  */
 int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*));
 
-/** Removes a queue's nth element (by index).
+/** Removes an element from a queue by index.
  *
  * @param[inout] queue A pointer to the queue.
  * @param[in] index The index of the element to remove (starting at head = 0).
@@ -156,7 +156,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(
 
 /** Frees all memory associated with a queue.
  *
- * First frees the queue's contents with @ref
+ * First frees the contents of a queue with @ref
  * RND_priorityQueueClear, then frees the @ref RND_PriorityQueue
  * struct itself.
  *
@@ -174,7 +174,7 @@ int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(void*));
  *
  * @param[in] queue A pointer to the queue.
  * @returns
- * - the queue's size (@ref RND_PriorityQueue::size) - success
+ * - the size of the queue (@ref RND_PriorityQueue::size) - success
  * - 0 - if @p queue is @c NULL (or queue is empty)
  */
 size_t RND_priorityQueueSize(RND_PriorityQueue *queue);
@@ -182,10 +182,10 @@ size_t RND_priorityQueueSize(RND_PriorityQueue *queue);
 /** Prints the contents of a queue
  *
  * This function is designed to be a convenient way to
- * peek at a queue's contents. Its only applicable
+ * peek at the contents of a queue. Its only applicable
  * use is probably debugging.
  *
- * @param[in] queue The address of the queue's pointer.
+ * @param[in] queue A pointer to the queue.
  * @returns
  * - 0 - success
  * - 1 - @p queue is @c NULL

@@ -86,7 +86,7 @@ int RND_queuePush(RND_Queue *queue, void *data);
  */
 void *RND_queuePeek(RND_Queue *queue);
 
-/** Removes a queue's front element.
+/** Removes the front element from a queue.
  *
  * @param[inout] queue A pointer to the queue.
  * @param[in] dtor A pointer to a function which intakes
@@ -100,7 +100,7 @@ void *RND_queuePeek(RND_Queue *queue);
  */
 int RND_queuePop(RND_Queue *queue, int (*dtor)(void*));
 
-/** Removes a queue's chosen element.
+/** Removes an element from a queue by index.
  *
  * @param[inout] queue A pointer to the queue.
  * @param[in] index The index of the element to remove (starting at head = 0).
@@ -132,7 +132,7 @@ int RND_queueClear(RND_Queue *queue, int (*dtor)(void*));
 
 /** Frees all memory associated with a queue.
  *
- * First frees the queue's contents with @ref
+ * First frees the contents of a queue with @ref
  * RND_queueClear, then frees the @ref RND_Queue
  * struct itself.
  *
@@ -150,12 +150,16 @@ int RND_queueDestroy(RND_Queue *queue, int (*dtor)(void*));
  *
  * @param[in] queue A pointer to the queue.
  * @returns
- * - the queue's size (@ref RND_Queue::size) - success
+ * - the size of the queue (@ref RND_Queue::size) - success
  * - 0 - if @p queue is @c NULL (or queue is empty)
  */
 size_t RND_queueSize(RND_Queue *queue);
 
 /** Prints the contents of a queue
+ *
+ * This function is designed to be a convenient way to
+ * peek at the contents of a queue. Its only applicable
+ * use is probably debugging.
  *
  * @param[in] queue A pointer to the queue.
  */

@@ -139,7 +139,7 @@ void *RND_hashMapGet(RND_HashMap *map, char *key);
  */
 int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*));
 
-/** Returns a hashmap's size (number of stored elements)
+/** Returns the size of a hashmap (number of stored elements)
  *
  * Contrary to @ref RND_HashMap::size, this function iterates
  * over all linked lists in the @ref RND_HashMap::data array
@@ -213,7 +213,7 @@ int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*));
 /** Prints the contents of a hashmap
  *
  * This function is designed to be a convenient way to
- * peek at a hashmap's contents. Its only applicable
+ * peek at the contents of a hashmap. Its only applicable
  * use is probably debugging. The order of printed
  * elements is the same as the "indices" of elements
  * for the @ref RND_hashMapIndex function.
