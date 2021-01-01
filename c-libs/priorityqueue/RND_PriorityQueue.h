@@ -138,6 +138,22 @@ int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*));
  */
 int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*));
 
+/** Removes a queue's nth element (by index).
+ *
+ * @param[inout] queue A pointer to the queue.
+ * @param[in] index The index of the element to remove (starting at head = 0).
+ * @param[in] dtor A pointer to a function which intakes
+ * a @ref RND_PriorityQueuePair::value element and frees it, returning 0
+ * for success and anything else for failure @b OR @c NULL
+ * if the data doesn't need to be freed.
+ * @returns
+ * - 0 - success
+ * - 1 - the queue is empty
+ * - 2 - @p dtor returned non-0 (error)
+ * - 3 - @p index out of range
+ */
+int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(void *));
+
 /** Frees all memory associated with a queue.
  *
  * First frees the queue's contents with @ref

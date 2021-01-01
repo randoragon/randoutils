@@ -34,12 +34,12 @@ int main(int argc, char **argv)
     push(test, 3, 9);
     push(test, 7, 13);
     RND_priorityQueuePrint(test);
+    RND_priorityQueueRemove(test, 3, RND_priorityQueueDtorFree);
+    RND_priorityQueueRemove(test, 13, RND_priorityQueueDtorFree);
     int *val;
     val = (int*)RND_priorityQueuePeek(test);
     printf("Peeked element with lowest priority: %p -> %d\n", val, *val);
-    printf("head: %p, tail: %p, size: %lu\n", test->head, test->tail, test->size);
     RND_priorityQueuePop(test, RND_priorityQueueDtorFree);
-    printf("head: %p, tail: %p, size: %lu\n", test->head, test->tail, test->size);
     RND_priorityQueuePrint(test);
     RND_priorityQueueDestroy(test, RND_priorityQueueDtorFree);
 

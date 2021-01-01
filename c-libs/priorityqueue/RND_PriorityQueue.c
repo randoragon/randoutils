@@ -95,6 +95,38 @@ int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*))
     return 0;
 }
 
+int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(void *))
+{
+    if (!queue) {
+        RND_ERROR("the queue does not exist");
+        return 1;
+    }
+    if (index >= queue->size) {
+        RND_ERROR("index out of range");
+        return 3;
+    }
+    int error;
+    RND_PriorityQueuePair *elem = queue->head,
+                          *src;
+    for (int i = 0; i < index; i++) {
+        elem = (elem == queue->data + queue->capacity - 1)? queue->data : elem + 1;
+    }
+    if (dtor && (error = dtor(elem->value))) {
+        RND_ERROR("dtor %p returned %d for data %p", dtor, error, elem->value);
+        return 2;
+    }
+    src = (elem == queue->data + queue->capacity - 1)? queue->data : elem + 1;
+    while (elem != queue->tail) {
+        elem->value = src->value;
+        elem->priority = src->priority;
+        elem = src;
+        src = (src == queue->data + queue->capacity - 1)? queue->data : src + 1;
+    }
+    queue->tail = (queue->tail == queue->data)? queue->data + queue->capacity - 1 : queue->tail - 1;
+    queue->size--;
+    return 0;
+}
+
 int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*))
 {
     if (!queue) {
