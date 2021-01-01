@@ -100,6 +100,22 @@ void *RND_queuePeek(RND_Queue *queue);
  */
 int RND_queuePop(RND_Queue *queue, int (*dtor)(void*));
 
+/** Removes a queue's chosen element.
+ *
+ * @param[inout] queue A pointer to the queue.
+ * @param[in] index The index of the element to remove (starting at head = 0).
+ * @param[in] dtor A pointer to a function which intakes
+ * a @ref RND_Queue::data element and frees it, returning 0
+ * for success and anything else for failure @b OR @c NULL
+ * if the data doesn't need to be freed.
+ * @returns
+ * - 0 - success
+ * - 1 - the queue is empty
+ * - 2 - @p dtor returned non-0 (error)
+ * - 3 - @p index out of range
+ */
+int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void *));
+
 /** Removes all elements from a queue.
  *
  * @param[inout] queue A pointer to the queue.

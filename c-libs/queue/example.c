@@ -36,6 +36,8 @@ int main(int argc, char **argv)
     push(test, 7);
     push(test, 9);
     RND_queuePrint(test);
+    RND_queueRemove(test, 8, RND_queueDtorFree);
+    RND_queuePrint(test);
     int *val;
     val = (int*)RND_queuePeek(test);
     printf("first number in line: %p -> %d\n", val, *val);
