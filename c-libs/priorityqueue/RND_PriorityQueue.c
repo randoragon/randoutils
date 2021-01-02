@@ -34,14 +34,14 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
         return 1;
     }
     if (queue->size == queue->capacity) {
-        RND_PriorityQueuePair *new;
         queue->capacity *= 2;
+        RND_PriorityQueuePair *new;
         if (!(new = malloc(sizeof(RND_PriorityQueuePair) * queue->capacity))) {
             RND_ERROR("malloc");
             return 2;
         }
         for (size_t i = 0; i < queue->size; i++) {
-            new[i] = queue->data[((queue->head - queue->data + i) % queue->size)];
+            new[i] = queue->data[(queue->head - queue->data + i) % queue->size];
         }
         free(queue->data);
         queue->data = new;
@@ -53,10 +53,39 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
         queue->tail->priority = priority;
         queue->size++;
     } else {
-        RND_PriorityQueuePair *pos = queue->data,
-                              *end = (queue->tail == queue->data + queue->capacity - 1)? queue->data : queue->tail + 1;
-        for (;pos != end && priority > pos->priority;
-                pos = (pos == queue->data + queue->capacity - 1)? queue->data : pos + 1);
+        RND_PriorityQueuePair *edge = queue->data + queue->capacity - 1,
+                              *pos  = queue->head,
+                              *end  = (queue->tail == edge)? queue->data : queue->tail + 1;
+
+        if (queue->size > 4) {
+            /* Binary search doublets of adjacent elements to find the right spot for insertion.
+             * The first and last spots are checked separately before starting bsearch for
+             * simplicity.
+             */
+            if (priority >= queue->tail->priority) {
+                pos = end;
+            } else if (priority >= queue->head->priority) {
+                size_t lidx = 0,
+                       ridx = queue->size;
+                while (1) {
+                    size_t idx = (lidx + ridx) / 2;
+                    pos = queue->data + ((queue->head - queue->data + idx) % queue->capacity);
+                    RND_PriorityQueuePair *left  = (pos == queue->data)? edge : pos - 1;
+                    if (priority >= pos->priority) {
+                        lidx = idx;
+                    } else if (priority < left->priority) {
+                        ridx = idx;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+            }
+        } else {
+            // Fallback to linear search
+            for (;pos != end && priority > pos->priority;
+                    pos = (pos == edge)? queue->data : pos + 1);
+        }
         for (
                 RND_PriorityQueuePair *dest = end,
                                       *src  = queue->tail;
@@ -197,7 +226,7 @@ int RND_priorityQueuePrint(RND_PriorityQueue *queue)
     printf("|-------+----------+----------------+----------------|\n");
     for (size_t i = 0; i < queue->size; i++) {
         RND_PriorityQueuePair *adr = queue->data + ((queue->head - queue->data + i) % queue->capacity);
-        printf("| %5lu | %8d | %14p | %14p |\n", adr - queue->data, adr->priority, adr, adr->value);
+        printf("| %5lu | %8d | %14p | %14p |\n", i, adr->priority, adr, adr->value);
     }
     printf("+----------------------------------------------------+\n");
     return 0;

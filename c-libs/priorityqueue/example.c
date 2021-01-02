@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <RND_PriorityQueue.h>
-#include <RND_Queue.h>
 
 int push(RND_PriorityQueue *queue, int val, int priority)
 {
@@ -15,8 +14,6 @@ int push(RND_PriorityQueue *queue, int val, int priority)
 
 int main(int argc, char **argv)
 {
-    printf("%lu\n", sizeof(RND_Queue));
-    printf("%lu\n", sizeof(RND_PriorityQueuePair));
     RND_PriorityQueue *test = RND_priorityQueueCreate(20);
     push(test, 5, 10);
     push(test, 1, 1);
