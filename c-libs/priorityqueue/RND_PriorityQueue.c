@@ -72,7 +72,7 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
                     pos = queue->data + ((queue->head - queue->data + idx) % queue->capacity);
                     RND_PriorityQueuePair *left  = (pos == queue->data)? edge : pos - 1;
                     if (priority >= pos->priority) {
-                        lidx = idx;
+                        lidx = idx + 1;
                     } else if (priority < left->priority) {
                         ridx = idx;
                     } else {
