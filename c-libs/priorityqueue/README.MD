@@ -10,6 +10,13 @@ library. I wrote the LL version first using linked lists - then I found out that
 you usually want to use regular arrays, as due to CPU-caching and memory locality linked lists are
 almost always outperformed by them. Hence, this implementation uses the dynamic array approach.
 
+## Benchmarks
+
+The library employs binary search for finding the right spot to insert an element while preserving
+sorted (by priority) order.
+
+![image](https://github.com/randoragon/randoutils/tree/master/c-libs/priorityqueue/benchmark.png)
+
 ## Dependencies
 
 - [RND\_ErrMsg](https://github.com/randoragon/randoutils/tree/master/c-libs/errmsg)
