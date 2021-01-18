@@ -3,13 +3,41 @@
 #include <stdio.h>
 #include <string.h>
 
+#define MAX(a, b) ((a) > (b)? (a) : (b))
+#define START_SIZE 0xffff
+
 RND_HashMap *rules;
-char *str, *new_str;
+char *str;
+size_t size;
+
+int alloc(size_t min_size)
+{
+    size = MAX(min_size, START_SIZE);
+    if (!(str = malloc(sizeof(char) * size))) {
+        fprintf(stderr, "out of memory\n");
+        return 2;
+    }
+    if (!(rules = RND_hashMapCreate(10, NULL))) {
+        fprintf(stderr, "out of memory\n");
+        free(str);
+        return 3;
+    }
+    return 0;
+}
+
+int srealloc(size_t new_size)
+{
+    size = new_size;
+    if (!(str = realloc(str, sizeof(char) * size))) {
+        fprintf(stderr, "out of memory\n");
+        return 2;
+    }
+    return 0;
+}
 
 void cleanup()
 {
     free(str);
-    free(new_str);
     RND_hashMapDestroy(rules, NULL);
 }
 
@@ -19,45 +47,45 @@ int main(int argc, char **argv)
         fprintf(stderr, "Exactly 2 arguments (str, iterations) required\n");
         return 1;
     }
-
-    if (!(new_str = malloc(sizeof(char) * (strlen(argv[1]) + 1)))) {
-        fprintf(stderr, "out of memory\n");
+    if (alloc(strlen(argv[1]) + 1)) {
         return 2;
     }
-    strcpy(new_str, argv[1]);
+    strcpy(str, argv[1]);
     int iters = atoi(argv[2]);
 
-    rules = RND_hashMapCreate(10, NULL);
     char *v1 = "bc", *v2 = "a", *v3 = "ba";
     RND_hashMapAdd(rules, "a", v1);
     RND_hashMapAdd(rules, "b", v2);
     RND_hashMapAdd(rules, "c", v3);
 
     for (int i = 0; i < iters; i++) {
-        if (!(str = realloc(str, sizeof(char) * strlen(new_str) + 1))) {
-            fprintf(stderr, "out of memory\n");
-            cleanup();
-            return 2;
-        }
-        strcpy(str, new_str);
+        char *new_str;
+        char key[2]; key[1] = '\0';
         size_t new_len = 1;
         for (char *let = str; *let; let++) {
-            char key[2] = {*let, '\0'};
+            key[0] = *let;
             char *val = RND_hashMapGet(rules, key);
             new_len += strlen(val);
         }
-        if (!(new_str = realloc(new_str, sizeof(char) * new_len))) {
+        if (new_len >= size) {
+            if (srealloc(new_len * 2 + 1)) {
+                return 2;
+            }
+        }
+        if (!(new_str = malloc(sizeof(char) * size + 1))) {
             fprintf(stderr, "out of memory\n");
             cleanup();
             return 2;
         }
         new_str[0] = '\0';
+        char *dest = new_str;
         for (char *let = str; *let; let++) {
-            char key[2] = {*let, '\0'};
-            sprintf(new_str + strlen(new_str), "%s", (char*)RND_hashMapGet(rules, key));
+            key[0] = *let;
+            dest = stpcpy(dest, (char*)RND_hashMapGet(rules, key));
         }
+        str = new_str;
     }
     
-    printf("%s\n", new_str);
+    printf("%s\n", str);
     cleanup();
 }
