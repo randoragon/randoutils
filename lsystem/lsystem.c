@@ -7,7 +7,7 @@
 #define START_SIZE 0xffff
 
 RND_HashMap *rules;
-char *str;
+char *str, *new_str;
 size_t size;
 
 int alloc(size_t min_size)
@@ -17,9 +17,15 @@ int alloc(size_t min_size)
         fprintf(stderr, "out of memory\n");
         return 2;
     }
+    if (!(new_str = malloc(sizeof(char) * size))) {
+        fprintf(stderr, "out of memory\n");
+        free(str);
+        return 2;
+    }
     if (!(rules = RND_hashMapCreate(10, NULL))) {
         fprintf(stderr, "out of memory\n");
         free(str);
+        free(new_str);
         return 3;
     }
     return 0;
@@ -32,12 +38,17 @@ int srealloc(size_t new_size)
         fprintf(stderr, "out of memory\n");
         return 2;
     }
+    if (!(new_str = realloc(new_str, sizeof(char) * size))) {
+        fprintf(stderr, "out of memory\n");
+        return 2;
+    }
     return 0;
 }
 
 void cleanup()
 {
     free(str);
+    free(new_str);
     RND_hashMapDestroy(rules, NULL);
 }
 
@@ -59,7 +70,6 @@ int main(int argc, char **argv)
     RND_hashMapAdd(rules, "c", v3);
 
     for (int i = 0; i < iters; i++) {
-        char *new_str;
         char key[2]; key[1] = '\0';
         size_t new_len = 1;
         for (char *let = str; *let; let++) {
@@ -69,13 +79,9 @@ int main(int argc, char **argv)
         }
         if (new_len >= size) {
             if (srealloc(new_len * 2 + 1)) {
+                cleanup();
                 return 2;
             }
-        }
-        if (!(new_str = malloc(sizeof(char) * size + 1))) {
-            fprintf(stderr, "out of memory\n");
-            cleanup();
-            return 2;
         }
         new_str[0] = '\0';
         char *dest = new_str;
@@ -83,7 +89,9 @@ int main(int argc, char **argv)
             key[0] = *let;
             dest = stpcpy(dest, (char*)RND_hashMapGet(rules, key));
         }
+        char *tmp = str;
         str = new_str;
+        new_str = tmp;
     }
     
     printf("%s\n", str);
