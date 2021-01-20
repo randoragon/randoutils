@@ -1,8 +1,8 @@
-# BitMap
+# BitArray
 
 ## Description
 
-This is a small self-written library implementing a bitmap (or bitarray) struct and related functions.
+This is a small self-written library implementing a bitarray struct and related functions.
 I wrote it so that I can use it in my other C projects.
 
 ## Dependencies
@@ -21,8 +21,8 @@ The header file will be copied to `/usr/include/` and the library file to `/usr/
 
 ## Usage
 
-Make sure to `#include <RND_BitMap.h>` and link with `librnd_bitmap.so` (this is usually
-done by passing the `-lrnd_bitmap` flag to the compiler).
+Make sure to `#include <RND_BitArray.h>` and link with `librnd_bitarray.so` (this is usually
+done by passing the `-lrnd_bitarray` flag to the compiler).
 
 ## Examples
 

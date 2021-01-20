@@ -28,8 +28,8 @@ main:
 	@printf -- "--- PRIORITY QUEUELL ---\n"
 	$(MAKE) -C priorityqueueLL $@
 	@printf -- "----------------------\n\n"
-	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C bitmap $@
+	@printf -- "--- BITARRAY ---\n"
+	$(MAKE) -C bitarray $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
@@ -63,8 +63,8 @@ clean:
 	@printf -- "--- PRIORITY QUEUELL ---\n"
 	$(MAKE) -C priorityqueueLL $@
 	@printf -- "----------------------\n\n"
-	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C bitmap $@
+	@printf -- "--- BITARRAY ---\n"
+	$(MAKE) -C bitarray $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
@@ -98,8 +98,8 @@ install:
 	@printf -- "--- PRIORITY QUEUELL ---\n"
 	$(MAKE) -C priorityqueueLL $@
 	@printf -- "----------------------\n\n"
-	@printf -- "--- BITMAP ---\n"
-	$(MAKE) -C bitmap $@
+	@printf -- "--- BITARRAY ---\n"
+	$(MAKE) -C bitarray $@
 	@printf -- "--------------\n\n"
 	@printf -- "--- GAME ---\n"
 	$(MAKE) -C game $@
