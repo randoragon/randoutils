@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99
+CFLAGS=-std=c99 -Wpedantic -Werror
 OBJS=RND_HashMap.o
 OUT=librnd_hashmap.so
 

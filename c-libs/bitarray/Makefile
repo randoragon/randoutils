@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99
+CFLAGS=-std=c99 -Wpedantic -Werror
 OBJS=RND_BitArray.o
 OUT=librnd_bitarray.so
 

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99
+CFLAGS=-std=c99 -Wpedantic -Werror
 LDFLAGS=-lrnd_linkedlist -lrnd_priorityqueue
 OBJS=RND_Game.o
 OUT=librnd_game.so
