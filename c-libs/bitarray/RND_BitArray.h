@@ -81,6 +81,37 @@ bool RND_bitArrayGet(RND_BitArray *bitarray, size_t index);
  */
 int  RND_bitArraySet(RND_BitArray *bitarray, size_t index, bool value);
 
+/** Sets the entire bitarray to a value denoted by a formatted string.
+ *
+ * It is often the case that the user wants to overwrite the state of the entire
+ * bitarray, and doing it by calling @ref RND_bitArraySet for every single bit
+ * is simply unfeasible. This function allows you to pass in a formatted string
+ * which describes the target state for every bit in a bitarray.
+ *
+ * The functionality is best understood with examples:
+ * @code
+ * RND_BitArray *bits = RND_bitArrayCreate(32);
+ *
+ * // The below lines all do the same thing:
+ * RND_bitArraySetf(bits, "0xDEADbeef");    // mixed-case hexadecimal
+ * RND_bitArraySetf(bits, "033653337357");  // octal
+ * RND_bitArraySetf(bits, "0b11011110101011011011111011101111"); // binary
+ * @endcode
+ *
+ * ADDITIONAL FORMAT RULES:
+ * - all spaces and tabs are ignored (e.g. you can write "0b1011 1001" or even " 0 x B  9")
+ * - if string length exceedes bitarray size, leftmost extra bits are ignored
+ * - if string length is shorter than bitarray size, the extra space is padded with 0s from the left
+ *
+ * @param[inout] bitarray A pointer to an initialized @ref RND_BitArray struct.
+ * @param[in] format A formatted string denoting the new bitarray.
+ * @returns
+ * - 0 - success
+ * - 1 - @p bitarray is a NULL-pointer
+ * - 2 - invalid @p format string
+ */
+int  RND_bitArraySetf(RND_BitArray *bitarray, const char *format);
+
 /** Toggles a selected bit to the opposite value.
  *
  * @param[inout] bitarray A pointer to an initialized @ref RND_BitArray struct.

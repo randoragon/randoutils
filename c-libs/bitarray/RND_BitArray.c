@@ -1,6 +1,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <RND_ErrMsg.h>
+#include <string.h>
 #include "RND_BitArray.h"
 
 RND_BitArray *RND_bitArrayCreate(size_t size)
@@ -45,6 +46,99 @@ int RND_bitArraySet(RND_BitArray *bitarray, size_t index, bool value)
     }
     uint8_t *field = bitarray->bits + (index / 8);
     *field = value? (*field | (0x80 >> (index % 8))) : (*field & ~(0x80 >> (index % 8)));
+    return 0;
+}
+
+int RND_bitArraySetf(RND_BitArray *bitarray, const char *format)
+{
+    if (!bitarray) {
+        RND_ERROR("the bitarray does not exist");
+        return 1;
+    }
+    const char *c = format;
+    int base = 0, i = 0;
+    if (format != NULL && *format != '\0') {
+        while (*c) {
+            if (*c != ' ' && *c != '\t') {
+                if (i == 0 && *c != '0') {
+                    break;
+                } else if (i == 1) {
+                    if (*c == 'x') {
+                        base = 16;
+                    } else if (*c == 'b') {
+                        base = 2;
+                    } else if (*c >= '0' && *c < '8') {
+                        base = 8;
+                        c--;
+                    }
+                    break;
+                }
+                i++;
+            }
+            c++;
+        }
+    }
+    if (base == 0) {
+        RND_ERROR("invalid format string");
+        return 2;
+    }
+    const char *p = format + strlen(format) - 1;
+    i = bitarray->size - 1;
+    while (p != c && i > 0) {
+        uint8_t *field, val;
+        switch (base) {
+            case 2:
+                if ('0' <= *p && *p < '2') {
+                    val = (*p - '0');
+                    field = bitarray->bits + (i / 8);
+                    *field = val? (*field | (0x80 >> (i % 8))) : (*field & ~(0x80 >> (i % 8)));
+                    i--;
+                } else if (*p != ' ' && *p != '\t') {
+                    base = 0;
+                }
+                break;
+            case 8:
+                if ('0' <= *p && *p < '8') {
+                    val = (*p - '0');
+                    for (int j = 2; j >= 0; j--) {
+                        field = bitarray->bits + (i / 8);
+                        *field = (val & (04 >> j))? (*field | (0x80 >> (i % 8))) : (*field & ~(0x80 >> (i % 8)));
+                        i--;
+                    }
+                } else if (*p != ' ' && *p != '\t') {
+                    base = 0;
+                }
+                break;
+            case 16:
+                if (('0' <= *p && *p <= '9') || ('a' <= *p && *p <= 'f') || ('A' <= *p && *p <= 'F')) {
+                    if ('0' <= *p && *p <= '9') {
+                        val = (*p - '0');
+                    } else if ('a' <= *p && *p <= 'f') {
+                        val = (*p - 'a' + 10);
+                    } else if ('A' <= *p && *p <= 'F') {
+                        val = (*p - 'A' + 10);
+                    }
+                    for (int j = 3; j >= 0; j--) {
+                        field = bitarray->bits + (i / 8);
+                        *field = (val & (0x8 >> j))? (*field | (0x80 >> (i % 8))) : (*field & ~(0x80 >> (i % 8)));
+                        i--;
+                    }
+                } else if (*p != ' ' && *p != '\t') {
+                    base = 0;
+                }
+                break;
+        }
+        if (base == 0) {
+            RND_ERROR("invalid format string");
+            return 2;
+        }
+        p--;
+    }
+    while (i > 0) {
+        uint8_t *field = bitarray->bits + (i / 8);
+        *field &= ~(0x80 >> (i % 8));
+        i--;
+    }
     return 0;
 }
 
