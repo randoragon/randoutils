@@ -67,7 +67,7 @@ RND_BitArray *RND_bitArrayCreate(size_t size);
  * (if @p index is out of range, an appropriate error message is
  * printed to @c stderr)
  */
-bool RND_bitArrayGet(RND_BitArray *bitarray, size_t index);
+bool RND_bitArrayGet(const RND_BitArray *bitarray, size_t index);
 
 /** Sets a selected bit to a chosen value.
  *
@@ -142,7 +142,7 @@ int  RND_bitArrayDestroy(RND_BitArray *bitarray);
  * - value > 0 - the size of the bitarray
  * - 0 - @p bitarray is a NULL-pointer
  */
-size_t RND_bitArraySize(RND_BitArray *bitarray);
+size_t RND_bitArraySize(const RND_BitArray *bitarray);
 
 /** Prints a comprehensive table of all values stored in a bitarray.
  *
@@ -155,6 +155,6 @@ size_t RND_bitArraySize(RND_BitArray *bitarray);
  * - 0 - success
  * - 1 - @p bitarray is a NULL-pointer
  */
-int  RND_bitArrayPrint(RND_BitArray *bitarray);
+int  RND_bitArrayPrint(const RND_BitArray *bitarray);
 
 #endif

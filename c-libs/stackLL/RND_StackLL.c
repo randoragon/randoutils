@@ -8,24 +8,24 @@ RND_StackLL *RND_stackLLCreate()
     return NULL;
 }
 
-int RND_stackLLPush(RND_StackLL **stack, void *data)
+int RND_stackLLPush(RND_StackLL **stack, const void *data)
 {
     RND_StackLL *first = *stack;
     if (!(*stack = (RND_StackLL*)malloc(sizeof(RND_StackLL)))) {
         RND_ERROR("malloc");
         return 1;
     }
-    (*stack)->data = data;
+    (*stack)->data = (void*)data;
     (*stack)->next = first;
     return 0;
 }
 
-void *RND_stackLLPeek(RND_StackLL **stack)
+void *RND_stackLLPeek(const RND_StackLL **stack)
 {
     return (*stack)? (*stack)->data : NULL;
 }
 
-int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*))
+int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(const void*))
 {
     if (!*stack) {
         RND_WARN("the stack is already empty");
@@ -42,7 +42,7 @@ int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*))
     return 0;
 }
 
-int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(void *))
+int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(const void*))
 {
     if (!*stack) {
         RND_WARN("the stack is already empty");
@@ -72,7 +72,7 @@ int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(void *))
     return 0;
 }
 
-int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*))
+int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(const void*))
 {
     RND_StackLL *i = *stack;
     while (i) {
@@ -89,21 +89,21 @@ int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*))
     return 0;
 }
 
-int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(void*))
+int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(const void*))
 {
     return RND_stackLLClear(stack, dtor);
 }
 
-size_t RND_stackLLSize(RND_StackLL **stack)
+size_t RND_stackLLSize(const RND_StackLL **stack)
 {
     size_t ret = 0;
-    for (RND_StackLL *e = *stack; e; e = e->next, ret++);
+    for (const RND_StackLL *e = *stack; e; e = e->next, ret++);
     return ret;
 }
 
-int RND_stackLLDtorFree(void *data)
+int RND_stackLLDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 
@@ -126,14 +126,14 @@ int RND_stackLLMap(RND_StackLL **stack, int (*map)(RND_StackLL*, size_t))
 }
 
 // Map function used for the default method of printing stack contents
-int RND_stackLLPrintMap(RND_StackLL *elem, size_t index)
+int RND_stackLLPrintMap(const RND_StackLL *elem, size_t index)
 {
     printf("| %5lu | %14p | %14p |\n", index, elem, elem->data);
     return 0;
 }
 
 // Default method of printing stack contents (for convenience)
-int RND_stackLLPrint(RND_StackLL **stack)
+int RND_stackLLPrint(const RND_StackLL **stack)
 {
     /* The table will break visually if index exceeds 5 digits (99999)
      * or if the pointers' hexadecimal representation exceeds 14 characters
@@ -142,7 +142,7 @@ int RND_stackLLPrint(RND_StackLL **stack)
     printf("+-----------------------------------------+\n");
     printf("| INDEX |    ADDRESS     |      DATA      |\n");
     printf("|-------+----------------+----------------|\n");
-    int ret = RND_stackLLMap(stack, RND_stackLLPrintMap);
+    int ret = RND_stackLLMap((RND_StackLL**)stack, (int (*)(RND_StackLL*, size_t))RND_stackLLPrintMap);
     printf("+-----------------------------------------+\n");
     return ret;
 }

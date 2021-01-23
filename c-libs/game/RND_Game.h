@@ -89,7 +89,7 @@ struct RND_GameObjectMeta
      * This is directly copied from the @e name argument
      * when calling @ref RND_gameObjectAdd.
      */
-    char *name;
+    const char *name;
 
     /** The object struct's size, in bytes.
      *
@@ -155,7 +155,7 @@ extern RND_GameObjectMeta *RND_objects_meta;
 /** An array of size @ref RND_instances_size holding pointers
  * to all instances, indexed by instance ID.
  */
-extern RND_GameInstance  *RND_instances;
+extern RND_GameInstance *RND_instances;
 
 /** The size of the @ref RND_instances array.
  *
@@ -258,7 +258,7 @@ void RND_gameCleanup();
  * - 2 - duplicate @e index value (object already exists)
  * - 3 - insufficient memory
  */
-int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size);
+int RND_gameObjectAdd(const char *name, RND_GameObjectIndex index, size_t size);
 
 /** Spawns a new instance and returns its unique ID.
  *
@@ -312,7 +312,7 @@ RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex)
  * - a number >0 - the number of handlers that returned
  *   an error
  */
-int RND_gameHandlerRun(RND_GameHandler *handler);
+int RND_gameHandlerRun(const RND_GameHandler *handler);
 
 /** Frees all memory associated with an instance event handler.
  *
@@ -354,7 +354,7 @@ int RND_gameHandlerDestroy(RND_GameHandler *handler);
  * - 1 - @e handler is a NULL pointer
  * - 2 - failed to destroy priority queue
  */
-int RND_gameHandlerListDtor(void *handler);
+int RND_gameHandlerListDtor(const void *handler);
 
 /** Returns whether or not a specific instance is alive, by instance ID.
  *
@@ -375,7 +375,7 @@ inline bool RND_gameInstanceIsAlive(RND_GameInstanceId id)
  * - The object's name string - success
  * - @c NULL - invalid @e index (object doesn't exist)
  */
-inline char *RND_gameObjectGetName(RND_GameObjectIndex index)
+inline const char *RND_gameObjectGetName(RND_GameObjectIndex index)
 {
     return RND_objects_meta[index].name;
 }
@@ -396,7 +396,7 @@ inline char *RND_gameObjectGetName(RND_GameObjectIndex index)
  * @param[in] func A pointer to a handler function for objects
  * of type corresponding to the @e index parameter.
  */
-inline void RND_gameHandlerAdd(RND_GameHandler *handler, RND_GameObjectIndex index, RND_GameHandlerFunc func)
+inline void RND_gameHandlerAdd(const RND_GameHandler *handler, RND_GameObjectIndex index, RND_GameHandlerFunc func)
 {
     handler->handlers[index] = func;
 }

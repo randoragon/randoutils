@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <memory.h>
 #include <RND_ErrMsg.h>
 #include "RND_PriorityQueue.h"
 
@@ -27,7 +28,7 @@ RND_PriorityQueue *RND_priorityQueueCreate(size_t capacity)
     return queue;
 }
 
-int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
+int RND_priorityQueuePush(RND_PriorityQueue *queue, const void *data, int priority)
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -41,7 +42,7 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
             return 2;
         }
         for (size_t i = 0; i < queue->size; i++) {
-            new[i] = queue->data[(queue->head - queue->data + i) % queue->size];
+            memcpy(new + i, queue->data + ((queue->head - queue->data + i) % queue->size), sizeof(RND_PriorityQueuePair));
         }
         free(queue->data);
         queue->data = new;
@@ -49,8 +50,8 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
         queue->tail = queue->data + queue->size - 1;
     }
     if (!queue->size) {
-        queue->tail->value = data;
-        queue->tail->priority = priority;
+        queue->tail->value = (void*)data;
+        memcpy((void*)(&queue->tail->priority), &priority, sizeof(int));
         queue->size++;
     } else {
         RND_PriorityQueuePair *edge = queue->data + queue->capacity - 1,
@@ -93,22 +94,22 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority)
                 dest = src,
                 src  = (src == queue->data)? queue->data + queue->capacity - 1 : src - 1) {
             dest->value = src->value;
-            dest->priority = src->priority;
+            memcpy((void*)(&dest->priority), &src->priority, sizeof(int));
         }
-        pos->value = data;
-        pos->priority = priority;
+        pos->value = (void*)data;
+        memcpy((void*)(&pos->priority), &priority, sizeof(int));
         queue->tail = end;
         queue->size++;
     }
     return 0;
 }
 
-void *RND_priorityQueuePeek(RND_PriorityQueue *queue)
+void *RND_priorityQueuePeek(const RND_PriorityQueue *queue)
 {
     return queue? queue->head->value : NULL;
 }
 
-int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*))
+int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -124,7 +125,7 @@ int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(void *))
+int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(const void *))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -147,7 +148,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(
     src = (elem == queue->data + queue->capacity - 1)? queue->data : elem + 1;
     while (elem != queue->tail) {
         elem->value = src->value;
-        elem->priority = src->priority;
+        memcpy((void*)(&elem->priority), &src->priority, sizeof(int));
         elem = src;
         src = (src == queue->data + queue->capacity - 1)? queue->data : src + 1;
     }
@@ -156,7 +157,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(
     return 0;
 }
 
-int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*))
+int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -179,7 +180,7 @@ int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(void*))
+int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -195,7 +196,7 @@ int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(void*))
     return 0;
 }
 
-size_t RND_priorityQueueSize(RND_PriorityQueue *queue)
+size_t RND_priorityQueueSize(const RND_PriorityQueue *queue)
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -204,14 +205,14 @@ size_t RND_priorityQueueSize(RND_PriorityQueue *queue)
     return queue->size;
 }
 
-int RND_priorityQueueDtorFree(void *data)
+int RND_priorityQueueDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 
 // Default method of printing queue contents (for convenience)
-int RND_priorityQueuePrint(RND_PriorityQueue *queue)
+int RND_priorityQueuePrint(const RND_PriorityQueue *queue)
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");

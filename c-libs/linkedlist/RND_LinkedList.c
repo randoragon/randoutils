@@ -8,7 +8,7 @@ RND_LinkedList *RND_linkedListCreate()
     return NULL;
 }
 
-int RND_linkedListAdd(RND_LinkedList **list, void *data)
+int RND_linkedListAdd(RND_LinkedList **list, const void *data)
 {
     if (*list) {
         RND_LinkedList *new, *last = *list;
@@ -17,7 +17,7 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data)
             RND_ERROR("malloc");
             return 1;
         }
-        new->data = data;
+        new->data = (void*)data;
         new->next = NULL;
         last->next = new;
     } else {
@@ -25,20 +25,20 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data)
             RND_ERROR("malloc");
             return 1;
         }
-        (*list)->data = data;
+        (*list)->data = (void*)data;
         (*list)->next = NULL;
     }
     return 0;
 }
 
-int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data)
+int RND_linkedListInsert(RND_LinkedList **list, size_t index, const void *data)
 {
     RND_LinkedList *new;
     if (!(new = (RND_LinkedList*)malloc(sizeof(RND_LinkedList)))) {
         RND_ERROR("malloc");
         return 1;
     }
-    new->data = data;
+    new->data = (void*)data;
 
     if (index == 0) {
         new->next = *list;
@@ -66,7 +66,7 @@ void *RND_linkedListGet(RND_LinkedList **list, size_t index)
         RND_ERROR("the list is empty");
         return NULL;
     }
-    RND_LinkedList *ret = *list;
+    const RND_LinkedList *ret = *list;
     for (int i = 0; i < index; i++) {
         if (ret->next) {
             ret = ret->next;
@@ -78,7 +78,7 @@ void *RND_linkedListGet(RND_LinkedList **list, size_t index)
     return ret->data;
 }
 
-int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *))
+int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(const void *))
 {
     if (!*list) {
         RND_WARN("the list is already empty");
@@ -120,7 +120,7 @@ int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *
     return 0;
 }
 
-int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *))
+int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(const void *))
 {
     RND_LinkedList *i = *list;
     while (i) {
@@ -135,7 +135,7 @@ int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *))
     return 0;
 }
 
-int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
+int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(const void *))
 {
     return RND_linkedListClear(list, dtor);
 }
@@ -143,13 +143,13 @@ int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *))
 size_t RND_linkedListSize(RND_LinkedList **list)
 {
     size_t ret = 0;
-    for (RND_LinkedList *e = *list; e; e = e->next, ret++);
+    for (const RND_LinkedList *e = *list; e; e = e->next, ret++);
     return ret;
 }
 
-int RND_linkedListDtorFree(void *data)
+int RND_linkedListDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 
@@ -172,7 +172,7 @@ int RND_linkedListMap(RND_LinkedList **list, int (*map)(RND_LinkedList*, size_t)
 }
 
 // Remove all elements yielding true from a filter function
-int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(void*))
+int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(const void*))
 {
     if (!*list || !filter) {
         RND_WARN("list or filter function empty");
@@ -206,7 +206,7 @@ int RND_linkedListPrint(RND_LinkedList **list)
     printf("+-----------------------------------------+\n");
     printf("| INDEX |    ADDRESS     |      DATA      |\n");
     printf("|-------+----------------+----------------|\n");
-    int ret = RND_linkedListMap(list, RND_linkedListPrintMap);
+    int ret = RND_linkedListMap((RND_LinkedList**)list, (int (*)(RND_LinkedList*, size_t))RND_linkedListPrintMap);
     printf("+-----------------------------------------+\n");
     return ret;
 }

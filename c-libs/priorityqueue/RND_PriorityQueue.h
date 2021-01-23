@@ -40,7 +40,7 @@ struct RND_PriorityQueuePair
      * inside the queue is determined by this value
      * (relative to other elements).
      */
-    int priority;
+    const int priority;
 };
 
 /** A priority queue structure for arbitrary data.
@@ -94,7 +94,7 @@ RND_PriorityQueue *RND_priorityQueueCreate(size_t capacity);
  * - 1 - @p queue is @c NULL
  * - 2 - malloc failed (insufficient memory)
  */
-int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority);
+int RND_priorityQueuePush(RND_PriorityQueue *queue, const void *data, int priority);
 
 /** Returns a pointer to the front element of a queue.
  *
@@ -102,12 +102,12 @@ int RND_priorityQueuePush(RND_PriorityQueue *queue, void *data, int priority);
  * completeness, but you may use @ref RND_PriorityQueue::head
  * with the exact same effect.
  *
- * @param[inout] queue A pointer to the queue.
+ * @param[in] queue A pointer to the queue.
  * @returns
  * - @ref RND_PriorityQueue::head - success
  * - @c NULL - @p queue is @c NULL
  */
-void *RND_priorityQueuePeek(RND_PriorityQueue *queue);
+void *RND_priorityQueuePeek(const RND_PriorityQueue *queue);
 
 /** Removes the front element of a queue.
  *
@@ -122,7 +122,7 @@ void *RND_priorityQueuePeek(RND_PriorityQueue *queue);
  * - 2 - @p dtor returned non-0 (error)
 
  */
-int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*));
+int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(const void*));
 
 /** Removes all elements from a queue.
  *
@@ -136,7 +136,7 @@ int RND_priorityQueuePop(RND_PriorityQueue *queue, int (*dtor)(void*));
  * - 1 - @p queue is @c NULL
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*));
+int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(const void*));
 
 /** Removes an element from a queue by index.
  *
@@ -152,7 +152,7 @@ int RND_priorityQueueClear(RND_PriorityQueue *queue, int (*dtor)(void*));
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - @p index out of range
  */
-int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(void *));
+int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(const void *));
 
 /** Frees all memory associated with a queue.
  *
@@ -164,7 +164,7 @@ int RND_priorityQueueRemove(RND_PriorityQueue *queue, size_t index, int (*dtor)(
  * @param [in] dtor This argument is passed directly
  * to @ref RND_priorityQueueClear.
  */
-int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(void*));
+int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(const void*));
 
 /** Returns the number of elements in a queue.
  *
@@ -177,7 +177,7 @@ int RND_priorityQueueDestroy(RND_PriorityQueue *queue, int (*dtor)(void*));
  * - the size of the queue (@ref RND_PriorityQueue::size) - success
  * - 0 - if @p queue is @c NULL (or queue is empty)
  */
-size_t RND_priorityQueueSize(RND_PriorityQueue *queue);
+size_t RND_priorityQueueSize(const RND_PriorityQueue *queue);
 
 /** Prints the contents of a queue
  *
@@ -190,7 +190,7 @@ size_t RND_priorityQueueSize(RND_PriorityQueue *queue);
  * - 0 - success
  * - 1 - @p queue is @c NULL
  */
-int RND_priorityQueuePrint(RND_PriorityQueue *queue);
+int RND_priorityQueuePrint(const RND_PriorityQueue *queue);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -204,6 +204,6 @@ int RND_priorityQueuePrint(RND_PriorityQueue *queue);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_priorityQueueDtorFree(void *data);
+int RND_priorityQueueDtorFree(const void *data);
 
 #endif

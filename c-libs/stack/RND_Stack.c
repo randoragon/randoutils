@@ -26,7 +26,7 @@ RND_Stack *RND_stackCreate(size_t capacity)
     return stack;
 }
 
-int RND_stackPush(RND_Stack *stack, void *data)
+int RND_stackPush(RND_Stack *stack, const void *data)
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -39,16 +39,16 @@ int RND_stackPush(RND_Stack *stack, void *data)
             return 2;
         }
     }
-    stack->data[stack->size++] = data;
+    stack->data[stack->size++] = (void*)data;
     return 0;
 }
 
-void *RND_stackPeek(RND_Stack *stack)
+void *RND_stackPeek(const RND_Stack *stack)
 {
     return (stack)? stack->data[stack->size - 1] : NULL;
 }
 
-int RND_stackPop(RND_Stack *stack, int (*dtor)(void*))
+int RND_stackPop(RND_Stack *stack, int (*dtor)(const void*))
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -63,7 +63,7 @@ int RND_stackPop(RND_Stack *stack, int (*dtor)(void*))
     return 0;
 }
 
-int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *))
+int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(const void*))
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -84,7 +84,7 @@ int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *))
     return 0;
 }
 
-int RND_stackClear(RND_Stack *stack, int (*dtor)(void*))
+int RND_stackClear(RND_Stack *stack, int (*dtor)(const void*))
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -105,7 +105,7 @@ int RND_stackClear(RND_Stack *stack, int (*dtor)(void*))
     return 0;
 }
 
-int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*))
+int RND_stackDestroy(RND_Stack *stack, int (*dtor)(const void*))
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -121,7 +121,7 @@ int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*))
     return 0;
 }
 
-size_t RND_stackSize(RND_Stack *stack)
+size_t RND_stackSize(const RND_Stack *stack)
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");
@@ -130,14 +130,14 @@ size_t RND_stackSize(RND_Stack *stack)
     return stack->size;
 }
 
-int RND_stackDtorFree(void *data)
+int RND_stackDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 
 // Default method of printing stack contents (for convenience)
-int RND_stackPrint(RND_Stack *stack)
+int RND_stackPrint(const RND_Stack *stack)
 {
     if (!stack) {
         RND_ERROR("the stack does not exist");

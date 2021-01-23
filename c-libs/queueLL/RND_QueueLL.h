@@ -71,7 +71,7 @@ RND_QueueLL *RND_queueLLCreate();
  * - 0 - success
  * - 1 - insufficient memory
  */
-int RND_queueLLPush(RND_QueueLL **queue, void *data);
+int RND_queueLLPush(RND_QueueLL **queue, const void *data);
 
 /** Returns a pointer to the front element of a queue.
  *
@@ -80,7 +80,7 @@ int RND_queueLLPush(RND_QueueLL **queue, void *data);
  * - the front element's @ref RND_QueueLL::data - success
  * - @c NULL - the queue is empty
  */
-void *RND_queueLLPeek(RND_QueueLL **queue);
+void *RND_queueLLPeek(const RND_QueueLL **queue);
 
 /** Removes the front element from a queue.
  *
@@ -94,7 +94,7 @@ void *RND_queueLLPeek(RND_QueueLL **queue);
  * - 1 - the queue is empty
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(void*));
+int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(const void*));
 
 /** Removes an element from a queue by index.
  *
@@ -110,7 +110,7 @@ int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(void*));
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - @p index out of range
  */
-int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(void *));
+int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(const void*));
 
 /** Removes all elements from a queue.
  *
@@ -125,7 +125,7 @@ int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(void *));
  *   clearing the queue was interrupted, so a
  *   potentially serious error)
  */
-int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(void*));
+int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(const void*));
 
 /** Frees all memory associated with a queue.
  *
@@ -135,14 +135,14 @@ int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(void*));
  * to be calling @c RND_queueLLDestroy instead of @c
  * RND_queueLLClear when we mean to destroy it.
  */
-int RND_queueLLDestroy(RND_QueueLL **queue, int (*dtor)(void*));
+int RND_queueLLDestroy(RND_QueueLL **queue, int (*dtor)(const void*));
 
 /** Returns the number of elements in a queue.
  *
  * @param[in] queue The address of the queue's pointer.
  * @returns The number of elements in the queue.
  */
-size_t RND_queueLLSize(RND_QueueLL **queue);
+size_t RND_queueLLSize(const RND_QueueLL **queue);
 
 /** Passes each element of a queue through a custom function.
  *
@@ -182,7 +182,7 @@ int RND_queueLLMap(RND_QueueLL **queue, int (*map)(RND_QueueLL*, size_t));
  * (using @p queue and @ref RND_queueLLPrintMap as
  * parameters).
  */
-int RND_queueLLPrint(RND_QueueLL **queue);
+int RND_queueLLPrint(const RND_QueueLL **queue);
 
 /** Prints a single queue element
  *
@@ -191,7 +191,7 @@ int RND_queueLLPrint(RND_QueueLL **queue);
  * @ref RND_queueLLPrint, in conjunction with @ref
  * RND_queueLLMap.
  */
-int RND_queueLLPrintMap(RND_QueueLL *elem, size_t index);
+int RND_queueLLPrintMap(const RND_QueueLL *elem, size_t index);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -205,6 +205,6 @@ int RND_queueLLPrintMap(RND_QueueLL *elem, size_t index);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_queueLLDtorFree(void *data);
+int RND_queueLLDtorFree(const void *data);
 
 #endif

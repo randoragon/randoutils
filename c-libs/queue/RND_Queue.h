@@ -71,7 +71,7 @@ RND_Queue *RND_queueCreate(size_t capacity);
  * - 1 - @p queue is @c NULL
  * - 2 - malloc failed (insufficient memory)
  */
-int RND_queuePush(RND_Queue *queue, void *data);
+int RND_queuePush(RND_Queue *queue, const void *data);
 
 /** Returns a pointer to the front element of a queue.
  *
@@ -84,7 +84,7 @@ int RND_queuePush(RND_Queue *queue, void *data);
  * - @ref RND_Queue::head - success
  * - @c NULL - @p queue is @c NULL
  */
-void *RND_queuePeek(RND_Queue *queue);
+void *RND_queuePeek(const RND_Queue *queue);
 
 /** Removes the front element from a queue.
  *
@@ -98,7 +98,7 @@ void *RND_queuePeek(RND_Queue *queue);
  * - 1 - @p queue is @c NULL
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_queuePop(RND_Queue *queue, int (*dtor)(void*));
+int RND_queuePop(RND_Queue *queue, int (*dtor)(const void*));
 
 /** Removes an element from a queue by index.
  *
@@ -114,7 +114,7 @@ int RND_queuePop(RND_Queue *queue, int (*dtor)(void*));
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - @p index out of range
  */
-int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void *));
+int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(const void*));
 
 /** Removes all elements from a queue.
  *
@@ -128,7 +128,7 @@ int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void *));
  * - 1 - @p queue is @c NULL
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_queueClear(RND_Queue *queue, int (*dtor)(void*));
+int RND_queueClear(RND_Queue *queue, int (*dtor)(const void*));
 
 /** Frees all memory associated with a queue.
  *
@@ -140,7 +140,7 @@ int RND_queueClear(RND_Queue *queue, int (*dtor)(void*));
  * @param [in] dtor This argument is passed directly
  * to @ref RND_queueClear.
  */
-int RND_queueDestroy(RND_Queue *queue, int (*dtor)(void*));
+int RND_queueDestroy(RND_Queue *queue, int (*dtor)(const void*));
 
 /** Returns the number of elements in a queue.
  *
@@ -178,6 +178,6 @@ int RND_queuePrint(RND_Queue *queue);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_queueDtorFree(void *data);
+int RND_queueDtorFree(const void *data);
 
 #endif

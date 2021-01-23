@@ -27,7 +27,7 @@ RND_Queue *RND_queueCreate(size_t capacity)
     return queue;
 }
 
-int RND_queuePush(RND_Queue *queue, void *data)
+int RND_queuePush(RND_Queue *queue, const void *data)
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -51,17 +51,17 @@ int RND_queuePush(RND_Queue *queue, void *data)
     if (queue->size) {
         queue->tail = (queue->tail == queue->data + queue->capacity - 1)? queue->data : queue->tail + 1;
     }
-    *queue->tail = data;
+    *queue->tail = (void*)data;
     queue->size++;
     return 0;
 }
 
-void *RND_queuePeek(RND_Queue *queue)
+void *RND_queuePeek(const RND_Queue *queue)
 {
     return queue? *queue->head : NULL;
 }
 
-int RND_queuePop(RND_Queue *queue, int (*dtor)(void*))
+int RND_queuePop(RND_Queue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -77,7 +77,7 @@ int RND_queuePop(RND_Queue *queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void*))
+int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -108,7 +108,7 @@ int RND_queueRemove(RND_Queue *queue, size_t index, int (*dtor)(void*))
     return 0;
 }
 
-int RND_queueClear(RND_Queue *queue, int (*dtor)(void*))
+int RND_queueClear(RND_Queue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -131,7 +131,7 @@ int RND_queueClear(RND_Queue *queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_queueDestroy(RND_Queue *queue, int (*dtor)(void*))
+int RND_queueDestroy(RND_Queue *queue, int (*dtor)(const void*))
 {
     if (!queue) {
         RND_ERROR("the queue does not exist");
@@ -156,9 +156,9 @@ size_t RND_queueSize(RND_Queue *queue)
     return queue->size;
 }
 
-int RND_queueDtorFree(void *data)
+int RND_queueDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 

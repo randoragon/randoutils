@@ -60,7 +60,7 @@ RND_Stack *RND_stackCreate(size_t capacity);
  * - 1 - @p stack is @c NULL
  * - 2 - realloc failed (insufficient memory)
  */
-int RND_stackPush(RND_Stack *stack, void *data);
+int RND_stackPush(RND_Stack *stack, const void *data);
 
 /** Returns a pointer to the top element of a stack.
  *
@@ -69,7 +69,7 @@ int RND_stackPush(RND_Stack *stack, void *data);
  * - the top element's @ref RND_Stack::data - success
  * - @c NULL - @p stack is @c NULL
  */
-void *RND_stackPeek(RND_Stack *stack);
+void *RND_stackPeek(const RND_Stack *stack);
 
 /** Removes the top element from a stack.
  *
@@ -83,7 +83,7 @@ void *RND_stackPeek(RND_Stack *stack);
  * - 1 - @p stack is @c NULL
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_stackPop(RND_Stack *stack, int (*dtor)(void*));
+int RND_stackPop(RND_Stack *stack, int (*dtor)(const void*));
 
 /** Removes an element from a stack by index.
  *
@@ -99,7 +99,7 @@ int RND_stackPop(RND_Stack *stack, int (*dtor)(void*));
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - @p index out of range
  */
-int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *));
+int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(const void*));
 
 /** Removes all elements from a stack.
  *
@@ -113,7 +113,7 @@ int RND_stackRemove(RND_Stack *stack, size_t index, int (*dtor)(void *));
  * - 1 - @p stack is @c NULL
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_stackClear(RND_Stack *stack, int (*dtor)(void*));
+int RND_stackClear(RND_Stack *stack, int (*dtor)(const void*));
 
 /** Frees all memory associated with a stack.
  *
@@ -125,7 +125,7 @@ int RND_stackClear(RND_Stack *stack, int (*dtor)(void*));
  * @param [in] dtor This argument is passed directly
  * to @ref RND_stackClear.
  */
-int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*));
+int RND_stackDestroy(RND_Stack *stack, int (*dtor)(const void*));
 
 /** Returns the number of elements in a stack.
  *
@@ -138,7 +138,7 @@ int RND_stackDestroy(RND_Stack *stack, int (*dtor)(void*));
  * - the size of the stack (@ref RND_Stack::size) - success
  * - 0 - if @p stack is @c NULL (or stack is empty)
  */
-size_t RND_stackSize(RND_Stack *stack);
+size_t RND_stackSize(const RND_Stack *stack);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -153,7 +153,7 @@ size_t RND_stackSize(RND_Stack *stack);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_stackDtorFree(void *data);
+int RND_stackDtorFree(const void *data);
 
 /** Prints the contents of a stack
  *
@@ -163,6 +163,6 @@ int RND_stackDtorFree(void *data);
  *
  * @param[in] stack A pointer to the stack.
  */
-int RND_stackPrint(RND_Stack *stack);
+int RND_stackPrint(const RND_Stack *stack);
 
 #endif

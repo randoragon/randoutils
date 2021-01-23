@@ -45,7 +45,7 @@ struct RND_HashMap
      */
     size_t size;
     /// The hash function used to convert strings into indices.
-    size_t (*hash)(char *key, size_t size);
+    size_t (*hash)(const char *key, size_t size);
     /// An array of linked lists holding all stored data.
     RND_LinkedList **data;
 };
@@ -56,7 +56,7 @@ struct RND_HashMap
 struct RND_HashMapPair
 {
     /// The key component, all keys are strings.
-    char *key;
+    const char *key;
     /// The value component, a pointer to some arbitrary data.
     void *value;
 };
@@ -76,7 +76,7 @@ struct RND_HashMapPair
  * - a pointer to @ref RND_HashMap - success
  * - @c NULL - insufficient memory
  */
-RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(char *key, size_t size));
+RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(const char *key, size_t size));
 
 /** The default hash function used by @ref RND_HashMap (djb2).
  *
@@ -85,7 +85,7 @@ RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(char *key, size_t siz
  * to @ref RND_HashMap::size).
  * @returns A number between 0 and <tt>(size - 1)</tt>.
  */
-size_t RND_hashMapDefaultHashFunction(char *key, size_t size);
+size_t RND_hashMapDefaultHashFunction(const char *key, size_t size);
 
 /** Adds a new element to a hashmap.
  *
@@ -109,7 +109,7 @@ size_t RND_hashMapDefaultHashFunction(char *key, size_t size);
  *   happens, look for the error code in @c stderr and see
  *   the reason for failure in @ref RND_LinkedList documentation.
  */
-int RND_hashMapAdd(RND_HashMap *map, char *key, void *value);
+int RND_hashMapAdd(RND_HashMap *map, const char *key, const void *value);
 
 /** Returns a pointer to a chosen hashmap element (by key).
  *
@@ -120,7 +120,7 @@ int RND_hashMapAdd(RND_HashMap *map, char *key, void *value);
  *   with a matching @ref RND_HashMapPair::key - success
  * - @c NULL - no such element @b OR @p map is a @c NULL pointer
  */
-void *RND_hashMapGet(RND_HashMap *map, char *key);
+void *RND_hashMapGet(const RND_HashMap *map, const char *key);
 
 /** Removes an element from a hashmap (by key).
  *
@@ -137,7 +137,7 @@ void *RND_hashMapGet(RND_HashMap *map, char *key);
  *   happens, look for the error code in @c stderr and see
  *   the reason for failure in @ref RND_LinkedList documentation.
  */
-int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*));
+int RND_hashMapRemove(RND_HashMap *map, const char *key, int (*dtor)(const void*));
 
 /** Returns the size of a hashmap (number of stored elements)
  *
@@ -150,7 +150,7 @@ int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*));
  * @returns The number of elements stored inside @p map.
  * If @p map is a @c NULL pointer, 0 is returned.
  */
-size_t RND_hashMapSize(RND_HashMap *map);
+size_t RND_hashMapSize(const RND_HashMap *map);
 
 /** Returns a pointer to a chosen hashmap element (by index).
  *
@@ -173,7 +173,7 @@ size_t RND_hashMapSize(RND_HashMap *map);
  * - @c NULL - @ref RND_linkedListGet returned @c NULL @b
  *   OR @p map is a @c NULL pointer
  */
-RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index);
+RND_HashMapPair *RND_hashMapIndex(const RND_HashMap *map, size_t index);
 
 /** Removes all elements from a hashmap.
  *
@@ -189,7 +189,7 @@ RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index);
  *   (this means that clearing the hashmap was interrupted,
  *   so a potentially serious error)
  */
-int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*));
+int RND_hashMapClear(RND_HashMap *map, int (*dtor)(const void*));
 
 /** Frees all memory associated with a hashmap.
  *
@@ -208,7 +208,7 @@ int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*));
  *   (this means that destroying the hashmap was interrupted,
  *   so a potentially serious error)
  */
-int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*));
+int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(const void*));
 
 /** Prints the contents of a hashmap
  *
@@ -220,7 +220,7 @@ int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*));
  *
  * @param[in] map A pointer to the hashmap.
  */
-void RND_hashMapPrint(RND_HashMap *map);
+void RND_hashMapPrint(const RND_HashMap *map);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -234,6 +234,6 @@ void RND_hashMapPrint(RND_HashMap *map);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_hashMapDtorFree(void *data);
+int RND_hashMapDtorFree(const void *data);
 
 #endif

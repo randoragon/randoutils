@@ -3,7 +3,7 @@
 #include <RND_ErrMsg.h>
 #include "RND_HashMap.h"
 
-RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(char *key, size_t size))
+RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(const char *key, size_t size))
 {
     RND_HashMap *new;
     if (!(new = (RND_HashMap*)malloc(sizeof(RND_HashMap)))) {
@@ -24,7 +24,7 @@ RND_HashMap *RND_hashMapCreate(size_t size, size_t (*hash)(char *key, size_t siz
     return new;
 }
 
-size_t RND_hashMapDefaultHashFunction(char *key, size_t size)
+size_t RND_hashMapDefaultHashFunction(const char *key, size_t size)
 {
     /* This hash function is called djb2. It was first reported
      * by Dan Bernstein.
@@ -38,7 +38,7 @@ size_t RND_hashMapDefaultHashFunction(char *key, size_t size)
     return (ret * 33 + c) % size;
 }
 
-int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
+int RND_hashMapAdd(RND_HashMap *map, const char *key, const void *value)
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -55,8 +55,8 @@ int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
         free(new);
         return 2;
     }
-    strcpy(new->key, key);
-    new->value = value;
+    strcpy((char*)new->key, key);
+    new->value = (void*)value;
     int error;
     if ((error = RND_linkedListAdd(map->data + index, new))) {
         RND_ERROR("RND_linkedListAdd returned %d for hash index %lu, data %p", error, index, new);
@@ -65,7 +65,7 @@ int RND_hashMapAdd(RND_HashMap *map, char *key, void *value)
     return 0;
 }
 
-void *RND_hashMapGet(RND_HashMap *map, char *key)
+void *RND_hashMapGet(const RND_HashMap *map, const char *key)
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -84,7 +84,7 @@ void *RND_hashMapGet(RND_HashMap *map, char *key)
     return NULL;
 }
 
-int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*))
+int RND_hashMapRemove(RND_HashMap *map, const char *key, int (*dtor)(const void*))
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -107,7 +107,7 @@ int RND_hashMapRemove(RND_HashMap *map, char *key, int (*dtor)(void*))
     return 0;
 }
 
-size_t RND_hashMapSize(RND_HashMap *map)
+size_t RND_hashMapSize(const RND_HashMap *map)
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -120,7 +120,7 @@ size_t RND_hashMapSize(RND_HashMap *map)
     return ret;
 }
 
-RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index)
+RND_HashMapPair *RND_hashMapIndex(const RND_HashMap *map, size_t index)
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -135,7 +135,7 @@ RND_HashMapPair *RND_hashMapIndex(RND_HashMap *map, size_t index)
     return (RND_HashMapPair*)RND_linkedListGet(map->data + q - 1, s - (p - index));
 }
 
-int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*))
+int RND_hashMapClear(RND_HashMap *map, int (*dtor)(const void*))
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");
@@ -151,7 +151,7 @@ int RND_hashMapClear(RND_HashMap *map, int (*dtor)(void*))
     return 0;
 }
 
-int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
+int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(const void*))
 {
     int error;
     if ((error = RND_hashMapClear(map, dtor))) {
@@ -163,19 +163,19 @@ int RND_hashMapDestroy(RND_HashMap *map, int (*dtor)(void*))
     return 0;
 }
 
-int RND_hashMapDtorFree(void *data)
+int RND_hashMapDtorFree(const void *data)
 {
     if (!data) {
         RND_ERROR("hashmap does not exist");
         return 1;
     }
-    free(((RND_HashMapPair*)data)->key);
+    free((void*)((RND_HashMapPair*)data)->key);
     free(((RND_HashMapPair*)data)->value);
-    free(data);
+    free((void*)data);
     return 0;
 }
 
-void RND_hashMapPrint(RND_HashMap *map)
+void RND_hashMapPrint(const RND_HashMap *map)
 {
     if (!map) {
         RND_ERROR("hashmap does not exist");

@@ -71,7 +71,7 @@ RND_StackLL *RND_stackLLCreate();
  * - 0 - success
  * - 1 - insufficient memory
  */
-int RND_stackLLPush(RND_StackLL **stack, void *data);
+int RND_stackLLPush(RND_StackLL **stack, const void *data);
 
 /** Returns a pointer to the top element of a stack.
  *
@@ -80,7 +80,7 @@ int RND_stackLLPush(RND_StackLL **stack, void *data);
  * - the top element's @ref RND_StackLL::data - success
  * - @c NULL - the stack is empty
  */
-void *RND_stackLLPeek(RND_StackLL **stack);
+void *RND_stackLLPeek(const RND_StackLL **stack);
 
 /** Removes the top element of a stack.
  *
@@ -94,7 +94,7 @@ void *RND_stackLLPeek(RND_StackLL **stack);
  * - 1 - the stack is empty
  * - 2 - @p dtor returned non-0 (error)
  */
-int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*));
+int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(const void*));
 
 /** Removes an element from a stack by index.
  *
@@ -110,7 +110,7 @@ int RND_stackLLPop(RND_StackLL **stack, int (*dtor)(void*));
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - @p index out of range
  */
-int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(void *));
+int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(const void*));
 
 /** Removes all elements from a stack.
  *
@@ -125,7 +125,7 @@ int RND_stackLLRemove(RND_StackLL **stack, size_t index, int (*dtor)(void *));
  *   clearing the stack was interrupted, so a
  *   potentially serious error)
  */
-int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*));
+int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(const void*));
 
 /** Frees all memory associated with a stack.
  *
@@ -135,14 +135,14 @@ int RND_stackLLClear(RND_StackLL **stack, int (*dtor)(void*));
  * to be calling @c RND_stackLLDestroy instead of @c
  * RND_stackLLClear when we mean to destroy it.
  */
-int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(void*));
+int RND_stackLLDestroy(RND_StackLL **stack, int (*dtor)(const void*));
 
 /** Returns the number of elements in a stack.
  *
  * @param[in] stack The address of the stack's pointer.
  * @returns The number of elements in the stack.
  */
-size_t RND_stackLLSize(RND_StackLL **stack);
+size_t RND_stackLLSize(const RND_StackLL **stack);
 
 /** Passes each element of a stack through a custom function.
  *
@@ -182,7 +182,7 @@ int RND_stackLLMap(RND_StackLL **stack, int (*map)(RND_StackLL*, size_t));
  * (using @p stack and @ref RND_stackLLPrintMap as
  * parameters).
  */
-int RND_stackLLPrint(RND_StackLL **stack);
+int RND_stackLLPrint(const RND_StackLL **stack);
 
 /** Prints a single stack element
  *
@@ -191,7 +191,7 @@ int RND_stackLLPrint(RND_StackLL **stack);
  * @ref RND_stackLLPrint, in conjunction with @ref
  * RND_stackLLMap.
  */
-int RND_stackLLPrintMap(RND_StackLL *elem, size_t index);
+int RND_stackLLPrintMap(const RND_StackLL *elem, size_t index);
 
 /** A basic dtor function to be used with other functions.
  *
@@ -205,6 +205,6 @@ int RND_stackLLPrintMap(RND_StackLL *elem, size_t index);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_stackLLDtorFree(void *data);
+int RND_stackLLDtorFree(const void *data);
 
 #endif

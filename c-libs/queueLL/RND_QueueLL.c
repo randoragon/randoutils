@@ -8,7 +8,7 @@ RND_QueueLL *RND_queueLLCreate()
     return NULL;
 }
 
-int RND_queueLLPush(RND_QueueLL **queue, void *data)
+int RND_queueLLPush(RND_QueueLL **queue, const void *data)
 {
     if (*queue) {
         RND_QueueLL *new, *last = *queue;
@@ -17,7 +17,7 @@ int RND_queueLLPush(RND_QueueLL **queue, void *data)
             RND_ERROR("malloc");
             return 1;
         }
-        new->data = data;
+        new->data = (void*)data;
         new->next = NULL;
         last->next = new;
     } else {
@@ -25,18 +25,18 @@ int RND_queueLLPush(RND_QueueLL **queue, void *data)
             RND_ERROR("malloc");
             return 1;
         }
-        (*queue)->data = data;
+        (*queue)->data = (void*)data;
         (*queue)->next = NULL;
     }
     return 0;
 }
 
-void *RND_queueLLPeek(RND_QueueLL **queue)
+void *RND_queueLLPeek(const RND_QueueLL **queue)
 {
     return (*queue)? (*queue)->data : NULL;
 }
 
-int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(void*))
+int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(const void*))
 {
     if (!*queue) {
         RND_WARN("the queue is already empty");
@@ -53,7 +53,7 @@ int RND_queueLLPop(RND_QueueLL **queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(void *))
+int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(const void*))
 {
     if (!*queue) {
         RND_WARN("the queue is already empty");
@@ -74,12 +74,12 @@ int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(void *))
             if (prev->next) {
                 prev = prev->next;
             } else {
-                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_queueLLSize(queue));
+                RND_ERROR("index %lu out of bounds (size %lu)", index, RND_queueLLSize((const RND_QueueLL**)queue));
                 return 3;
             }
         }
         if (!prev->next) {
-            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_queueLLSize(queue));
+            RND_ERROR("index %lu out of bounds (size %lu)", index, RND_queueLLSize((const RND_QueueLL**)queue));
             return 3;
         }
         int error;
@@ -95,7 +95,7 @@ int RND_queueLLRemove(RND_QueueLL **queue, size_t index, int (*dtor)(void *))
     return 0;
 }
 
-int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(void*))
+int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(const void*))
 {
     RND_QueueLL *i = *queue;
     while (i) {
@@ -112,21 +112,21 @@ int RND_queueLLClear(RND_QueueLL **queue, int (*dtor)(void*))
     return 0;
 }
 
-int RND_queueLLDestroy(RND_QueueLL **queue, int (*dtor)(void*))
+int RND_queueLLDestroy(RND_QueueLL **queue, int (*dtor)(const void*))
 {
     return RND_queueLLClear(queue, dtor);
 }
 
-size_t RND_queueLLSize(RND_QueueLL **queue)
+size_t RND_queueLLSize(const RND_QueueLL **queue)
 {
     size_t ret = 0;
-    for (RND_QueueLL *e = *queue; e; e = e->next, ret++);
+    for (const RND_QueueLL *e = *queue; e; e = e->next, ret++);
     return ret;
 }
 
-int RND_queueLLDtorFree(void *data)
+int RND_queueLLDtorFree(const void *data)
 {
-    free(data);
+    free((void*)data);
     return 0;
 }
 
@@ -149,14 +149,14 @@ int RND_queueLLMap(RND_QueueLL **queue, int (*map)(RND_QueueLL*, size_t))
 }
 
 // Map function used for the default method of printing queue contents
-int RND_queueLLPrintMap(RND_QueueLL *elem, size_t index)
+int RND_queueLLPrintMap(const RND_QueueLL *elem, size_t index)
 {
     printf("| %5lu | %14p | %14p |\n", index, elem, elem->data);
     return 0;
 }
 
 // Default method of printing queue contents (for convenience)
-int RND_queueLLPrint(RND_QueueLL **queue)
+int RND_queueLLPrint(const RND_QueueLL **queue)
 {
     /* The table will break visually if index exceeds 5 digits (99999)
      * or if the pointers' hexadecimal representation exceeds 14 characters
@@ -165,7 +165,7 @@ int RND_queueLLPrint(RND_QueueLL **queue)
     printf("+-----------------------------------------+\n");
     printf("| INDEX |    ADDRESS     |      DATA      |\n");
     printf("|-------+----------------+----------------|\n");
-    int ret = RND_queueLLMap(queue, RND_queueLLPrintMap);
+    int ret = RND_queueLLMap((RND_QueueLL**)queue, (int (*)(RND_QueueLL*, size_t))RND_queueLLPrintMap);
     printf("+-----------------------------------------+\n");
     return ret;
 }

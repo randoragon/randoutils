@@ -21,7 +21,7 @@ RND_BitArray *RND_bitArrayCreate(size_t size)
     return bitarray;
 }
 
-bool RND_bitArrayGet(RND_BitArray *bitarray, size_t index)
+bool RND_bitArrayGet(const RND_BitArray *bitarray, size_t index)
 {
     if (!bitarray) {
         RND_ERROR("the bitarray does not exist");
@@ -169,7 +169,7 @@ int RND_bitArrayDestroy(RND_BitArray *bitarray)
     return 0;
 }
 
-size_t RND_bitArraySize(RND_BitArray *bitarray)
+size_t RND_bitArraySize(const RND_BitArray *bitarray)
 {
     if (!bitarray) {
         RND_ERROR("the bitarray does not exist");
@@ -178,7 +178,7 @@ size_t RND_bitArraySize(RND_BitArray *bitarray)
     return bitarray->size;
 }
 
-int RND_bitArrayPrint(RND_BitArray *bitarray)
+int RND_bitArrayPrint(const RND_BitArray *bitarray)
 {
     if (!bitarray) {
         RND_ERROR("the bitarray does not exist");

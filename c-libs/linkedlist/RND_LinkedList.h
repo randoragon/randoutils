@@ -60,7 +60,7 @@ RND_LinkedList *RND_linkedListCreate();
  * - 0 - success
  * - 1 - insufficient memory
  */
-int RND_linkedListAdd(RND_LinkedList **list, void *data);
+int RND_linkedListAdd(RND_LinkedList **list, const void *data);
 
 /** Inserts an element at a custom location in a list.
  *
@@ -75,7 +75,7 @@ int RND_linkedListAdd(RND_LinkedList **list, void *data);
  * - 1 - insufficient memory
  * - 2 - @p index out of bounds
  */
-int RND_linkedListInsert(RND_LinkedList **list, size_t index, void *data);
+int RND_linkedListInsert(RND_LinkedList **list, size_t index, const void *data);
 
 /** Returns a pointer to a chosen element of a list.
  *
@@ -101,7 +101,7 @@ void *RND_linkedListGet(RND_LinkedList **list, size_t index);
  * - 2 - @p dtor returned non-0 (error)
  * - 3 - index out of bounds
  */
-int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *));
+int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(const void *));
 
 /** Removes all elements from a list.
  *
@@ -116,7 +116,7 @@ int RND_linkedListRemove(RND_LinkedList **list, size_t index, int (*dtor)(void *
  *   clearing the list was interrupted, so a
  *   potentially serious error)
  */
-int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *));
+int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(const void *));
 
 /** Frees all memory associated with a list.
  *
@@ -126,7 +126,7 @@ int RND_linkedListClear(RND_LinkedList **list, int (*dtor)(void *));
  * to be calling @c RND_linkedListDestroy instead of @c
  * RND_linkedListClear when we mean to destroy it.
  */
-int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(void *));
+int RND_linkedListDestroy(RND_LinkedList **list, int (*dtor)(const void *));
 
 /** Returns the number of elements in a list.
  *
@@ -184,7 +184,7 @@ int RND_linkedListMap(RND_LinkedList **list, int (*map)(RND_LinkedList*, size_t)
  *   filtering the list was interrupted, so a
  *   potentially serious error)
  */
-int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(void*));
+int RND_linkedListFilter(RND_LinkedList **list, bool (*filter)(RND_LinkedList*, size_t), int (*dtor)(const void*));
 
 /** Prints the contents of a list
  *
@@ -223,6 +223,6 @@ int RND_linkedListPrintMap(RND_LinkedList *elem, size_t index);
  * @param[in] data A pointer to data to be freed.
  * @returns 0
  */
-int RND_linkedListDtorFree(void *data);
+int RND_linkedListDtorFree(const void *data);
 
 #endif

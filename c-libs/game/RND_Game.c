@@ -55,7 +55,7 @@ void RND_gameCleanup()
     free(RND_instances);
     for (RND_GameObjectIndex i = 0; i < RND_GAME_OBJECT_MAX; i++) {
         if (RND_objects_meta[i].name)
-            free(RND_objects_meta[i].name);
+            free((void*)RND_objects_meta[i].name);
     }
     free(RND_objects_meta);
     free(RND_ctors);
@@ -63,7 +63,7 @@ void RND_gameCleanup()
     RND_linkedListDestroy(&RND_handlers, RND_gameHandlerListDtor);
 }
 
-int RND_gameObjectAdd(char *name, RND_GameObjectIndex index, size_t size)
+int RND_gameObjectAdd(const char *name, RND_GameObjectIndex index, size_t size)
 {
     if (!name) {
         RND_ERROR("name string must not be empty!");
@@ -197,7 +197,7 @@ RND_GameHandler *RND_gameHandlerCreate(int (*priority_func)(RND_GameObjectIndex)
     return new;
 }
 
-int RND_gameHandlerRun(RND_GameHandler *handler)
+int RND_gameHandlerRun(const RND_GameHandler *handler)
 {
     int ret = 0;
     RND_PriorityQueue *q = handler->queue;
@@ -235,13 +235,13 @@ int RND_gameHandlerDestroy(RND_GameHandler *handler)
     return 0;
 }
 
-int RND_gameHandlerListDtor(void *handler)
+int RND_gameHandlerListDtor(const void *handler)
 {
     if (!handler) {
         RND_ERROR("handler does not exist!");
         return 1;
     }
-    RND_GameHandler *h = handler;
+    const RND_GameHandler *h = handler;
     free(h->handlers);
     int error;
     if ((error = RND_priorityQueueDestroy(h->queue, RND_priorityQueueDtorFree))) {
