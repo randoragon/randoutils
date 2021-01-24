@@ -4,4 +4,3 @@ bin/
 *.so
 tags
 Session.vim
-c-libs/docs
