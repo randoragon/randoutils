@@ -14,10 +14,9 @@ I've removed variable width font
 support, because it was rather poorly written and I've been using exclusively monospace fonts
 for my status bar anyway, so I didn't want the unnecessary overhead.
 
-There is full Unicode support **as far as width calculations go**, but the code that calculates
-ellipsis and various other memory checks operate exclusively byte-wise on UTF-8 strings,
-which could potetially cause some issues if really weird characters appear, but I've had
-full on japanese titles display well, so I'm not planning on fixing anything.
+There is full Unicode support for calculating lengths of artist names/song titles and
+truncating them with an "…" ellipsis. Specifics can be adjusted to one's liking with a few
+macro definitions placed at the top of the main source file.
 
 ## Required dwm patches
 

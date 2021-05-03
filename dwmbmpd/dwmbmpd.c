@@ -23,16 +23,16 @@
 
 /* CONSTANTS */
 #define DEFAULT_CHAR_WIDTH  8           /* fallback font character width (pixels) */
-#define PADDING             " "         /* padding surrounding the artist-title segment */
+#define PADDING             " "         /* padding surrounding the entire output */
 #define COL_FG              "#ABABAB"   /* foreground (text) color */
 #define COL_UF              "#414141"   /* unfilled bar color */
-#define COL_FI              "#23C323"   /* filled bar color */
+#define COL_FI              "#63C3C3"   /* filled bar color */
 #define ELLIPSIS            "…"         /* used with artist/title is too long */
 #define PREFIX_PLAY         " "
 #define PREFIX_PAUSE        " "
 #define PREFIX_STOP         " "
 #define SEPARATOR           " - "       /* put between artist and title strings */
-#define MAX_LEN             30          /* maximum VISIBLE length of the entire module */
+#define MAX_LEN             40          /* maximum VISIBLE length of the entire module (padding not included) */
 #define UTF8_MAXSIZ         4           /* maximum byte size of a single UTF-8 character */
 #define MAX_SIZ             (MAX_LEN * UTF8_MAXSIZ + 1)
 #define CMDLENGTH           300         /* this must be equal to CMDLENGTH in dwmblocks.c */
