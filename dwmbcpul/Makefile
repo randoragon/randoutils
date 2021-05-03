@@ -1,17 +1,22 @@
 include config.mk
 
+.PHONY: all install clean debug run
+
 all: $(OBJS)
-	$(CC) $(OBJS) -lrt -O3 -o ../bin/dwmbcpul
+	$(LD) $(LDFLAGS) $(OBJS) -o ../bin/dwmbcpul
 
 %.o: %.c
-	$(CC) -c -lrt $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 install: all
 	mkdir -p -- $(DEST)
 	cp -- ../bin/dwmbcpul $(DEST)/cpuload
 
-debug: $(OBJS)
-	$(CC) $(OBJS) -g -Og -o debug.out
+clean:
+	rm -f -- $(OBJS)
+
+debug: CFLAGS += -g -Og
+debug: clean all
 
 run:
 	../bin/dwmbcpul

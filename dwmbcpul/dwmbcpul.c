@@ -7,6 +7,7 @@
  *  to a file and a signal is sent to dwmblocks to read from there.
  */
 
+#define _DEFAULT_SOURCE /* gets rid of usleep undefined warning */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@
 #include <fcntl.h>
 
 #define READFREQ    8           /* how many readings to take (Hz) */
-#define CACHE_FILE  "dwmbcpul"  /* name of the file in cache dir  */
+#define HIST_FILE  "dwmbcpul"   /* name of the file in tmp dir  */
 #define MAX_CORES   32          /* note that more cores means longer output */
 #define DWMB_SIG    8           /* dwmblocks's RTMIN+x update signal */
 #define SHM_NAME "/dwmstatus"
@@ -84,7 +85,7 @@ void send()
         // Append core bars
         if ((file = fopen(fpath, "a")) != NULL) {
             float max_h = BARH - (2 * PAD);
-            for (int i = 0; i < corec; i++) {
+            for (size_t i = 0; i < corec; i++) {
                 char col[8];
                 float load = (float)(cores[i] / cores_max[i] / readc[i]);
                 sprintf(col, "#%02x%02x00", (int)(180 + (load * 75)), (int)(255 - (load * 255)));
@@ -110,14 +111,14 @@ void cleanup()
     if (avgl_file) {
         fclose(avgl_file);
     }
-    for (int i = 0; i < sizeof(core_file) / sizeof(FILE *); i++) {
+    for (size_t i = 0; i < sizeof core_file / sizeof *core_file; i++) {
         if (core_file[i]) {
             fclose(core_file[i]);
         }
     }
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
     signal(SIGTERM, termhandler);
     signal(SIGINT, termhandler);
@@ -137,11 +138,11 @@ int main(int argc, char **argv)
 
 
     // Construct destination file path
-    const char *cachedir = getenv("XDG_CACHE_HOME");
-    if (*cachedir) {
-        sprintf(fpath, "%s/%s", cachedir, CACHE_FILE);
+    const char *destdir = getenv("TMPDIR");
+    if (destdir) {
+        sprintf(fpath, "%s/%s", destdir, HIST_FILE);
     } else {
-        sprintf(fpath, "%s/%s/%s", getenv("HOME"), ".cache", CACHE_FILE);
+        sprintf(fpath, "/tmp/%s", HIST_FILE);
     }
 
     // Get paths to all CPU cores
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
     corec = pglob.gl_pathc;
 
     // Get maximum clock speeds and cache file pointers
-    for (int i = 0; i < corec; i++) {
+    for (size_t i = 0; i < corec; i++) {
         FILE *file;
         char fp[100];
         strcpy(fp, pglob.gl_pathv[i]);
@@ -194,7 +195,7 @@ int main(int argc, char **argv)
             }
 
             // Get current clock speeds
-            for (int i = 0; i < corec; i++) {
+            for (size_t i = 0; i < corec; i++) {
                 if (core_file[i]) {
                     rewind(core_file[i]);
                     long double hz;
@@ -212,7 +213,7 @@ int main(int argc, char **argv)
             // Every READFREQ'th iteration send results to dwmblocks
             if (!(++n % READFREQ)) {
                 send();
-                for (int i = 0; i < corec; i++) {
+                for (size_t i = 0; i < corec; i++) {
                     cores[i] = 0;
                     readc[i] = 0;
                 }
