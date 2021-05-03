@@ -24,9 +24,9 @@
 /* CONSTANTS */
 #define DEFAULT_CHAR_WIDTH  8           /* fallback font character width (pixels) */
 #define PADDING             " "         /* padding surrounding the artist-title segment */
-#define COL_FG              "#9BbBbB"   /* foreground (text) color */
-#define COL_UF              "#111111"   /* unfilled bar color */
-#define COL_FI              "#236363"   /* filled bar color */
+#define COL_FG              "#ABABAB"   /* foreground (text) color */
+#define COL_UF              "#414141"   /* unfilled bar color */
+#define COL_FI              "#23C323"   /* filled bar color */
 #define ELLIPSIS            "…"         /* used with artist/title is too long */
 #define PREFIX_PLAY         " "
 #define PREFIX_PAUSE        " "
@@ -46,7 +46,6 @@ typedef struct
     int pos, duration;
     float progress;
     enum mpd_state state;
-    struct mpd_song *song;
 } SongInfo;
 
 
@@ -90,10 +89,10 @@ int main(void)
     const double char_width = val ? atof(val) : DEFAULT_CHAR_WIDTH;
 
     /* Construct visible string first (needed for progress bar measurements) */
-    const size_t seplen = u8_strlen(SEPARATOR),
-                 artlen = u8_strlen(info.artist),
-                 titlen = u8_strlen(info.title),
-                 elilen = u8_strlen(ELLIPSIS);
+    const size_t seplen = u8_strlen(SEPARATOR);
+    const size_t artlen = u8_strlen(info.artist);
+    const size_t titlen = u8_strlen(info.title);
+    const size_t elilen = u8_strlen(ELLIPSIS);
     size_t prefix_len;
     if (info.state != MPD_STATE_STOP) {
         append(0, info.state == MPD_STATE_PLAY ? PREFIX_PAUSE : PREFIX_PLAY);
@@ -143,7 +142,8 @@ int main(void)
             -textw, 0, BAR_HEIGHT - 1, scaledw, 1, textw,
             -textw + scaledw, 0, BAR_HEIGHT - 1, textw - scaledw, 1, textw - scaledw);
 
-    mpd_song_free(info.song);
+    free(info.artist);
+    free(info.title);
 
     return EXIT_SUCCESS;
 }
@@ -188,17 +188,24 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
         mpd_status_free(mpdstatus);
         return 5;
     }
-    info->artist   = (char*)mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
-    info->title    = (char*)mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+    if (!(info->artist = malloc(MAX_SIZ / 2 * sizeof *info->artist)))
+        die("malloc failed\n");
+    if (!(info->title = malloc(MAX_SIZ / 2 * sizeof *info->title)))
+        die("malloc failed\n");
+    strncpy(info->artist, mpd_song_get_tag(song, MPD_TAG_ARTIST, 0), MAX_SIZ / 2 - 1);
+    strncpy(info->title,  mpd_song_get_tag(song, MPD_TAG_TITLE, 0), MAX_SIZ / 2 - 1);
+    info->artist[MAX_SIZ / 2 - 1] = '\0';
+    info->title[MAX_SIZ / 2 - 1] = '\0';
     info->pos      = mpd_status_get_elapsed_time(mpdstatus);
     info->duration = mpd_song_get_duration(song);
     info->progress = info->pos / (float)info->duration;
-    info->song     = song;
 
     if (mpd_status_get_error(mpdstatus) != NULL) {
         fprintf(stderr, "dwmbmpd: MPD status error: %s\n", mpd_status_get_error(mpdstatus));
     }
 
+    /* Cleanup */
+    mpd_song_free(song);
     mpd_status_free(mpdstatus);
 
     return 0;
