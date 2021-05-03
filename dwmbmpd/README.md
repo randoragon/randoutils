@@ -6,10 +6,13 @@ If either the artist of the title are longer than specified, an ellipsis is put 
 
 ![preview](preview.gif)
 
-If you need variable width font support, try commit 20039976245bbcf9cdd37ac8ca4c19128bcb1904
-and before. As of b1677c0b2bb53d7e8be83fb9a4b1badacb56f6be, I've removed variable width font
+If you need variable width font support, try
+[commit 2003997](https://github.com/Randoragon/randoutils/commit/20039976245bbcf9cdd37ac8ca4c19128bcb1904)
+and before. As of
+[b1677c0](https://github.com/Randoragon/randoutils/commit/b1677c0b2bb53d7e8be83fb9a4b1badacb56f6be),
+I've removed variable width font
 support, because it was rather poorly written and I've been using exclusively monospace fonts
-for my status bar anyway.
+for my status bar anyway, so I didn't want the unnecessary overhead.
 
 There is full Unicode support **as far as width calculations go**, but the code that calculates
 ellipsis and various other memory checks operate exclusively byte-wise on UTF-8 strings,
