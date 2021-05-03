@@ -22,6 +22,7 @@
 #include "utf8.h"
 
 /* CONSTANTS */
+#define PROGRESS_BAR                    /* comment out to disable progress bar */
 #define DEFAULT_CHAR_WIDTH  8           /* fallback font character width (pixels) */
 #define PADDING             " "         /* padding surrounding the entire output */
 #define COL_FG              "#ABABAB"   /* foreground (text) color */
@@ -135,12 +136,16 @@ int main(void)
     }
 
     /* Construct formatted string */
+#ifdef PROGRESS_BAR
     int textw   = char_width * (buflen - prefix_len);
     int scaledw = (int)(info.progress * textw);
     printf("^c"COL_FG"^"PADDING"%s^c"COL_FI"^^f%d^^r%d,%d,%d,%d^^f%d^^c"COL_UF"^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
             buf,
             -textw, 0, BAR_HEIGHT - 1, scaledw, 1, textw,
             -textw + scaledw, 0, BAR_HEIGHT - 1, textw - scaledw, 1, textw - scaledw);
+#else
+    printf("^c"COL_FG"^"PADDING"%s"PADDING"\n", buf);
+#endif
 
     free(info.artist);
     free(info.title);
