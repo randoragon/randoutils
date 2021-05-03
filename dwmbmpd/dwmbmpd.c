@@ -21,7 +21,7 @@
 #include "utf8.h"
 
 /* CONSTANTS */
-#define CHAR_WIDTH  8           /* monospace font character width (pixels) */
+#define DEFAULT_CHAR_WIDTH  8   /* fallback font character width (pixels) */
 #define PADDING     " "
 #define COL_BG      "#111111"
 #define COL_FG      "#ABABAB"
@@ -71,6 +71,10 @@ int main(void)
 
     // Close MPD connection
     mpd_connection_free(conn);
+
+    // Obtain character width
+    const char *val = getenv("DWMBMPD_CHAR_WIDTH");
+    const double char_width = val ? atof(val) : DEFAULT_CHAR_WIDTH;
 
     // Construct visible string first (needed for progress bar measurements)
     char str[CMDLENGTH] = "",
@@ -132,7 +136,7 @@ int main(void)
     str[CMDLENGTH - 1] = '\0';
 
     // Construct formatted string
-    int  textw          = CHAR_WIDTH * (u8_strlen(str) - offset);
+    int  textw          = char_width * (u8_strlen(str) - offset);
     int  scaledw        = (int)(info.progress * textw);
     printf("^c"COL_FG"^"PADDING"%s^f%d^^r%d,%d,%d,%d^^f%d^^c"COL_DK"^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
             str,
