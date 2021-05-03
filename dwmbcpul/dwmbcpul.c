@@ -79,6 +79,7 @@ void send()
     if ((file = fopen(fpath, "w")) != NULL) {
 
         // Overwrite file contents with a new line beginning
+        chmod(fpath, 0600);
         fprintf(file, "^c%s^%s^f1^^c%s^^f1^%d%%^f3^", COL1, ICON, COL2, (int)(avgload * 100));
         fclose(file);
 
