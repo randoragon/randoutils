@@ -16,26 +16,33 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-// mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html
+/* mpd: https://www.musicpd.org/doc/libmpdclient/client_8h.html */
 #include <mpd/client.h>
+#include <stdarg.h>
 #include "utf8.h"
 
 /* CONSTANTS */
-#define DEFAULT_CHAR_WIDTH  8   /* fallback font character width (pixels) */
-#define PADDING     " "
-#define COL_BG      "#111111"
-#define COL_FG      "#ABABAB"
-#define COL_DK      "#333333"
-#define ELLIPSIS    "…"
-#define MAXLENGTH   40          /* maximum byte length of the visible "%artist - %title" segment. Must be lower than CMDLENGTH */
-#define CMDLENGTH   300         /* this must be equal to CMDLENGTH in dwmblocks.c */
-#define BAR_HEIGHT  19          /* must be equal to "user_bh" in dwm's config.h */
+#define DEFAULT_CHAR_WIDTH  8           /* fallback font character width (pixels) */
+#define PADDING             " "         /* padding surrounding the artist-title segment */
+#define COL_FG              "#9BbBbB"   /* foreground (text) color */
+#define COL_UF              "#111111"   /* unfilled bar color */
+#define COL_FI              "#236363"   /* filled bar color */
+#define ELLIPSIS            "…"         /* used with artist/title is too long */
+#define PREFIX_PLAY         " "
+#define PREFIX_PAUSE        " "
+#define PREFIX_STOP         " "
+#define SEPARATOR           " - "       /* put between artist and title strings */
+#define MAX_LEN             30          /* maximum VISIBLE length of the entire module */
+#define UTF8_MAXSIZ         4           /* maximum byte size of a single UTF-8 character */
+#define MAX_SIZ             (MAX_LEN * UTF8_MAXSIZ + 1)
+#define CMDLENGTH           300         /* this must be equal to CMDLENGTH in dwmblocks.c */
+#define BAR_HEIGHT          19          /* must be equal to "user_bh" in dwm's config.h */
 
 
 /* STRUCTS */
 typedef struct
 {
-    const char *artist, *title;
+    char *artist, *title;
     int pos, duration;
     float progress;
     enum mpd_state state;
@@ -47,14 +54,20 @@ typedef struct
 void die(char *msg);
 void dieMpd(struct mpd_connection *conn);
 int fetchSongInfo(SongInfo *info, struct mpd_connection *conn);
-char *stpcpy(char *dest, const char *src);
+void append(size_t n, char *src);
+void appendf(size_t n, const char *fmt, ...);
 
+
+/* GLOBAL VARIABLES */
+static char buf[MAX_SIZ];  /* holds the complete output string */
+static char *bufend = buf; /* pointer to the next byte in buf */
+static size_t buflen;      /* length of buf (in utf-8 characters) */
 
 int main(void)
 {
-    assert(MAXLENGTH <= CMDLENGTH);
+    assert(MAX_SIZ <= CMDLENGTH);
 
-    // Connect to MPD
+    /* Connect to MPD */
     struct mpd_connection *conn = mpd_connection_new(NULL, 0, 0);
     if (conn == NULL) {
         die("failed to establish connection to MPD");
@@ -63,83 +76,70 @@ int main(void)
         dieMpd(conn);
     }
 
-    // Get information about current file
+    /* Get information about current file */
     SongInfo info;
     if (fetchSongInfo(&info, conn)) {
         die("failed to fetch song info");
     }
 
-    // Close MPD connection
+    /* Close MPD connection */
     mpd_connection_free(conn);
 
-    // Obtain character width
+    /* Obtain character width */
     const char *val = getenv("DWMBMPD_CHAR_WIDTH");
     const double char_width = val ? atof(val) : DEFAULT_CHAR_WIDTH;
 
-    // Construct visible string first (needed for progress bar measurements)
-    char str[CMDLENGTH] = "",
-         sep[] = " - ";
-    const size_t seplen = strlen(sep),
-                 artlen = strlen(info.artist),
-                 titlen = strlen(info.title),
-                 elilen = strlen(ELLIPSIS);
-    size_t offset;
+    /* Construct visible string first (needed for progress bar measurements) */
+    const size_t seplen = u8_strlen(SEPARATOR),
+                 artlen = u8_strlen(info.artist),
+                 titlen = u8_strlen(info.title),
+                 elilen = u8_strlen(ELLIPSIS);
+    size_t prefix_len;
     if (info.state != MPD_STATE_STOP) {
-        strcpy(str, info.state == MPD_STATE_PLAY ? " " : " ");
-        offset = u8_strlen(str);
-        sprintf(str + strlen(str), "%02d:%02d/%02d:%02d ",
+        append(0, info.state == MPD_STATE_PLAY ? PREFIX_PAUSE : PREFIX_PLAY);
+        prefix_len = buflen;
+        appendf(16, "%02d:%02d/%02d:%02d ",
                 info.pos / 60, info.pos % 60,
                 info.duration / 60, info.duration % 60);
     } else {
-        strcpy(str, " ");
-        offset = u8_strlen(str);
-        sprintf(str + strlen(str), "%02d:%02d ",
+        append(0, PREFIX_STOP);
+        prefix_len = buflen;
+        appendf(16, "%02d:%02d ",
                 info.duration / 60, info.duration % 60);
     }
-    const size_t len = strlen(str);
-    size_t spaceleft   = CMDLENGTH - len - 1;
-    size_t spacewanted = artlen + seplen + titlen + 1;
-    assert(spaceleft > spacewanted && spaceleft > MAXLENGTH);
-    if (spacewanted - 1 <= MAXLENGTH) {
-        char *tmp = str + len;
-        tmp = stpcpy(tmp, info.artist);
-        tmp = stpcpy(tmp, sep);
-        stpcpy(tmp, info.title);
+    const size_t chars_left   = MAX_LEN - buflen,
+                 chars_wanted = artlen + seplen + titlen + 1;
+    if (chars_left >= chars_wanted) {
+        append(0, info.artist);
+        append(0, SEPARATOR);
+        append(0, info.title);
     } else {
-        // Artist and title shall both have the same amount of space available,
-        // equal to half of the total space left in str (minus the terminator and rpadding).
-        // If either artist or title exceed their respective boundaries, put an ellipsis.
-        const size_t substrlen = (MAXLENGTH < spaceleft - 1) ? MAXLENGTH : spaceleft - 1,
-                     maxlen    = (substrlen - seplen) / 2;
-        char *substr;
-        if (!(substr = malloc((substrlen + 1) * sizeof *substr)))
-            die("malloc failed");
+        /* Artist and title shall both have the same amount of space available,
+         * equal to half of the total space left in str (minus the terminator and rpadding).
+         * If either artist or title exceed their respective boundaries, put an ellipsis. */
+        size_t maxlen = (chars_left - seplen - 1) / 2;
+
         if (artlen > maxlen) {
-            strncpy(substr, info.artist, maxlen - elilen);
-            strcpy(substr + maxlen - elilen, ELLIPSIS);
+            append(maxlen - elilen, info.artist);
+            append(0, ELLIPSIS);
         } else {
-            strcpy(substr, info.artist);
+            append(0, info.artist);
+            maxlen += maxlen - artlen;
         }
-        strcpy(substr + maxlen, sep);
+        append(0, SEPARATOR);
         if (titlen > maxlen) {
-            const size_t tmp = strlen(substr);
-            strncpy(substr + tmp, info.title, maxlen - elilen);
-            strcat(substr + tmp, ELLIPSIS);
+            append(maxlen - elilen, info.title);
+            append(0, ELLIPSIS);
         } else {
-            strcat(substr, info.title);
+            append(0, info.title);
         }
-        strcat(str, substr);
-        free(substr);
     }
 
-    // Buffer overflow protection
-    str[CMDLENGTH - 1] = '\0';
-
-    // Construct formatted string
-    int  textw          = char_width * (u8_strlen(str) - offset);
-    int  scaledw        = (int)(info.progress * textw);
-    printf("^c"COL_FG"^"PADDING"%s^f%d^^r%d,%d,%d,%d^^f%d^^c"COL_DK"^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
-            str,
+    /* Construct formatted string */
+    int textw   = char_width * (buflen - prefix_len);
+    int scaledw = (int)(info.progress * textw);
+    printf("^c"COL_FG"^"PADDING"%s^c"COL_FI"^^f%d^^r%d,%d,%d,%d^^f%d^^c"COL_UF"^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
+            buf,
             -textw, 0, BAR_HEIGHT - 1, scaledw, 1, textw,
             -textw + scaledw, 0, BAR_HEIGHT - 1, textw - scaledw, 1, textw - scaledw);
 
@@ -182,14 +182,14 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
         return 3;
     }
 
-    // Poll the rest from MPD itself
+    /* Poll the rest from MPD itself */
     struct mpd_song *song;
     if ((song = mpd_recv_song(conn)) == NULL) {
         mpd_status_free(mpdstatus);
         return 5;
     }
-    info->artist   = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
-    info->title    = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+    info->artist   = (char*)mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+    info->title    = (char*)mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
     info->pos      = mpd_status_get_elapsed_time(mpdstatus);
     info->duration = mpd_song_get_duration(song);
     info->progress = info->pos / (float)info->duration;
@@ -204,9 +204,41 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
     return 0;
 }
 
-char *stpcpy(char *dest, const char *src)
+void append(size_t n, char *src)
 {
-    while ((*dest++ = *src++))
-        ;
-    return dest - 1;
+    if (n == 0) {
+        /* copy till null terminator */
+        char *const tmp = bufend;
+        while ((*bufend++ = *src++))
+            ;
+        buflen += u8_strlen(tmp);
+        --bufend;
+    } else {
+        /* copy (at most) n utf-8 characters */
+        int j = 0;
+        for (size_t i = 0; i < n; i++) {
+            uint32_t seq = u8_nextchar(src, &j);
+            if (seq == 0)
+                break;
+            u8_wc_toutf8(bufend, seq);
+            bufend += u8_seqlen(src);
+            ++buflen;
+        }
+    }
+}
+
+void appendf(size_t n, const char *fmt, ...)
+{
+    char *tmp;
+    if (!(tmp = malloc(n * sizeof *tmp)))
+        die("malloc failed\n");
+
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(tmp, fmt, ap);
+    va_end(ap);
+
+    tmp[n - 1] = '\0';
+    append(0, tmp);
+    free(tmp);
 }
