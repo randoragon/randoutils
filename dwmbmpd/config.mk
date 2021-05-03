@@ -1,22 +1,12 @@
 # general config
 CC = cc
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -O3
+LD = cc
 DEST = ~/dotfiles/scripts/.scripts/dwmblocks
-
-# freetype2
-FT_INCS = -I/usr/include/freetype2
-FT_LIBS = -lfreetype
-
-# fontconfig
-FC_INCS = 
-FC_LIBS = -lfontconfig
 
 # mpdclient
 MPD_INCS =
 MPD_LIBS = -lmpdclient
-
-# xlib
-XLIB_INCS =
-XLIB_LIBS = -lX11
 
 OBJS = dwmbmpd.o utf8.o
 INCS = $(FT_INCS) $(FC_INCS) $(MPD_INCS) $(XLIB_INCS)

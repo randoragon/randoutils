@@ -1,17 +1,20 @@
 include config.mk
 
 all: $(OBJS)
-	$(CC) $(OBJS) $(INCS) $(LIBS) -O3 -o ../bin/dwmbmpd
+	$(LD) $(OBJS) $(LIBS) -o ../bin/dwmbmpd
 
 %.o: %.c
-	$(CC) -c $(INCS) $(LIBS) $< -o $@
+	$(CC) $(CFLAGS) -c $(INCS) $< -o $@
 
 install: all
 	mkdir -p -- $(DEST)
 	cp -- ../bin/dwmbmpd $(DEST)/mpd
 
-debug: $(OBJS)
-	$(CC) $(OBJS) $(INCS) $(LIBS) -g -Og -o debug.out
+clean:
+	rm -f -- $(OBJS)
+
+debug: CFLAGS += -g -Og
+debug: clean all
 
 run:
 	../bin/dwmbmpd
