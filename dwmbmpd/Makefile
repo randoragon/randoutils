@@ -6,7 +6,7 @@ all: $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $(INCS) $< -o $@
 
-install: all
+install: clean all
 	mkdir -p -- $(DEST)
 	cp -- ../bin/dwmbmpd $(DEST)/mpd
 
