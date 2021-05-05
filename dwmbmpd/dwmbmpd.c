@@ -25,9 +25,14 @@
 #define PROGRESS_BAR                    /* comment out to disable progress bar */
 #define DEFAULT_CHAR_WIDTH  8           /* fallback font character width (pixels) */
 #define PADDING             " "         /* padding surrounding the entire output */
-#define COL_FG              "#ABABAB"   /* foreground (text) color */
-#define COL_UF              "#414141"   /* unfilled bar color */
-#define COL_FI              "#63C3C3"   /* filled bar color */
+#define COL_FG_PLAY         "#999999"   /* foreground (text) color */
+#define COL_FG_PAUSE        "#978777"   /* foreground (text) color */
+#define COL_FG_STOP         "#CB5555"   /* foreground (text) color */
+#define COL_UF_PLAY         "#414141"   /* unfilled bar color */
+#define COL_UF_PAUSE        "#414141"   /* unfilled bar color */
+#define COL_UF_STOP         "#AD1E1E"   /* unfilled bar color */
+#define COL_FI_PLAY         "#63C3C3"   /* filled bar color */
+#define COL_FI_PAUSE        "#FF7702"   /* filled bar color */
 #define ELLIPSIS            "…"         /* used with artist/title is too long */
 #define PREFIX_PLAY         " "
 #define PREFIX_PAUSE        " "
@@ -139,12 +144,17 @@ int main(void)
 #ifdef PROGRESS_BAR
     int textw   = char_width * (buflen - prefix_len);
     int scaledw = (int)(info.progress * textw);
-    printf("^c"COL_FG"^"PADDING"%s^c"COL_FI"^^f%d^^r%d,%d,%d,%d^^f%d^^c"COL_UF"^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
+    printf("^c%s^"PADDING"%s^c%s^^f%d^^r%d,%d,%d,%d^^f%d^^c%s^^f%d^^r%d,%d,%d,%d^^f%d^"PADDING"\n",
+            info.state == MPD_STATE_PLAY ? COL_FG_PLAY : info.state == MPD_STATE_PAUSE ? COL_FG_PAUSE : COL_FG_STOP,
             buf,
+            info.state == MPD_STATE_PLAY ? COL_FI_PLAY : COL_FI_PAUSE,
             -textw, 0, BAR_HEIGHT - 1, scaledw, 1, textw,
+            info.state == MPD_STATE_PLAY ? COL_UF_PLAY : info.state == MPD_STATE_PAUSE ? COL_UF_PAUSE : COL_UF_STOP,
             -textw + scaledw, 0, BAR_HEIGHT - 1, textw - scaledw, 1, textw - scaledw);
 #else
-    printf("^c"COL_FG"^"PADDING"%s"PADDING"\n", buf);
+    printf("^c%s^"PADDING"%s"PADDING"\n",
+            info.state == MPD_STATE_PLAY ? COL_FG_PLAY : info.state == MPD_STATE_PAUSE ? COL_FG_PAUSE : COL_FG_STOP,
+            buf);
 #endif
 
     free(info.artist);
