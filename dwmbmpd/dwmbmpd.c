@@ -42,7 +42,7 @@
 #define UTF8_MAXSIZ         4           /* maximum byte size of a single UTF-8 character */
 #define MAX_SIZ             (MAX_LEN * UTF8_MAXSIZ + 1)
 #define CMDLENGTH           300         /* this must be equal to CMDLENGTH in dwmblocks.c */
-#define BAR_HEIGHT          19          /* must be equal to "user_bh" in dwm's config.h */
+#define BAR_HEIGHT          20          /* must be equal to "user_bh" in dwm's config.h */
 
 
 /* STRUCTS */
