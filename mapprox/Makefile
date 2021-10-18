@@ -15,7 +15,6 @@ OBJS := $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(SRCS:.c=.o))
 TARGET = mapprox
 DESTDIR =
 PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/share/man
 
 .PHONY: directories all main clean debug profile install uninstall
 
@@ -45,11 +44,7 @@ install: LDFLAGS += -O3
 install: clean all
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -- $(TARGET) $(DESTDIR)$(PREFIX)/bin
-	@chmod -- 755 $(DESTDIR)$(PREFIX)/$(TARGET)
-	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	cp -- $(TARGET).1 $(DESTDIR)$(MANPREFIX)/man1
-	@chmod -- 644 $(DESTDIR)$(MANPREFIX)/man1/$(TARGET).1
+	@chmod -- 755 $(DESTDIR)$(PREFIX)/bin/$(TARGET)
 
 uninstall:
 	rm -f -- $(DESTDIR)$(PREFIX)/bin/$(TARGET)
-	rm -f -- $(DESTDIR)$(MANPREFIX)/man1/$(TARGET).1
