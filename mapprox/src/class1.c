@@ -129,10 +129,8 @@ void count_chars(FILE *input, void *charm, size_t degree)
 		 * If illegal characters exist in history, skip evaluation */
 		for (size_t i = 0; i < degree; i++) {
 			idx[i] = c2idx(hist[i]);
-			if (idx[i] == SIZE_MAX) {
-				fprintf(stderr, "warning: illegal character '%c', skipping...\n", hist[i]);
+			if (idx[i] == SIZE_MAX)
 				goto skip;
-			}
 		}
 
 		/* Increment no. exact occurrences */
