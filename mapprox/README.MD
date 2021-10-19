@@ -9,11 +9,15 @@ that is able to generate infinite streams of text.
 
 ## Usage
 
-./mapprox DEGREE LENGTH [FILE...]
+	./mapprox DEGREE LENGTH [FILE...]
 
-DEGREE must be a natural number (0 included).  
-LENGTH denotes the length of the output (pass -1 to get very, very large amounts of output).  
-FILE is an simple text file. Only A-Z, a-z, 0-9 and space characters are considered.
+- `DEGREE` must be a natural number (0 included). N-th degree means that for
+  each output character, N previous characters were taken into account. 0th
+  degree approximation is pure randomness.
+- `LENGTH` denotes the length of the output (pass -1 to get `size_t` underflow
+  amount of output, which is most likely **very** large).
+- `FILE` is any text file. Only A-Z, a-z, 0-9 and whitespace characters are considered,
+the rest is gracefully skipped.
 
 ## Caveats
 

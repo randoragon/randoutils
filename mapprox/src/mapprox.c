@@ -6,7 +6,6 @@
 
 FILE **files;
 size_t no_files;
-void *charm;
 size_t deg;
 size_t len;
 
@@ -19,7 +18,6 @@ int main(int argc, char **argv)
 
 	srand(time(NULL));
 
-	/* Initialize data */
 	deg = atol(argv[1]);
 	len = atol(argv[2]);
 
@@ -28,7 +26,6 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	charm = charm_create(deg);
 	no_files = argc - 3;
 	if ((files = malloc(no_files * sizeof(*files))) == NULL) {
 		fprintf(stderr, "malloc\n");
