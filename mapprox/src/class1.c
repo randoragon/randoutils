@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
+#include <ctype.h>
 #include "utils.h"
 
 void gen0(unsigned len)
@@ -40,7 +41,7 @@ size_t c2idx(char c)
 		return c - 'A';
 	} else if (c >= '0' && c <= '9') {
 		return c - '0' + 26;
-	} else if (c == ' ') {
+	} else if (isspace(c)) {
 		return 36;
 	}
 	return SIZE_MAX;
