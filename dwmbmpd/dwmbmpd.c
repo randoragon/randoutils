@@ -43,6 +43,7 @@
 #define MAX_SIZ             (MAX_LEN * UTF8_MAXSIZ + 1)
 #define CMDLENGTH           300         /* this must be equal to CMDLENGTH in dwmblocks.c */
 #define BAR_HEIGHT          20          /* must be equal to "user_bh" in dwm's config.h */
+#define TITLE_EMPTY_STR     "<unknown>" /* displays when the title tag is empty */
 
 
 /* STRUCTS */
@@ -113,10 +114,12 @@ int main(void)
                 info.duration / 60, info.duration % 60);
     }
     const size_t chars_left   = MAX_LEN - buflen,
-                 chars_wanted = artlen + seplen + titlen + 1;
+                 chars_wanted = artlen + (artlen != 0 ? seplen : 0) + titlen + 1;
     if (chars_left >= chars_wanted) {
-        append(0, info.artist);
-        append(0, SEPARATOR);
+        if (artlen != 0) {
+            append(0, info.artist);
+            append(0, SEPARATOR);
+        }
         append(0, info.title);
     } else {
         /* Artist and title shall both have the same amount of space available,
@@ -131,7 +134,8 @@ int main(void)
             append(0, info.artist);
             maxlen += maxlen - artlen;
         }
-        append(0, SEPARATOR);
+        if (artlen != 0)
+            append(0, SEPARATOR);
         if (titlen > maxlen) {
             append(maxlen - elilen, info.title);
             append(0, ELLIPSIS);
@@ -207,10 +211,19 @@ int fetchSongInfo(SongInfo *info, struct mpd_connection *conn)
         die("malloc failed\n");
     if (!(info->title = malloc(MAX_SIZ / 2 * sizeof *info->title)))
         die("malloc failed\n");
-    strncpy(info->artist, mpd_song_get_tag(song, MPD_TAG_ARTIST, 0), MAX_SIZ / 2 - 1);
-    strncpy(info->title,  mpd_song_get_tag(song, MPD_TAG_TITLE, 0), MAX_SIZ / 2 - 1);
-    info->artist[MAX_SIZ / 2 - 1] = '\0';
-    info->title[MAX_SIZ / 2 - 1] = '\0';
+    *info->artist = '\0';
+    strncpy(info->title,  TITLE_EMPTY_STR,  MAX_SIZ / 2 - 1);
+
+    const char *const artist = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0),
+               *const title  = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+    if (artist != NULL) {
+        strncpy(info->artist, artist, MAX_SIZ / 2 - 1);
+        info->artist[MAX_SIZ / 2 - 1] = '\0';
+    }
+    if (title != NULL) {
+        strncpy(info->title, title, MAX_SIZ / 2 - 1);
+        info->title[MAX_SIZ / 2 - 1] = '\0';
+    }
     info->pos      = mpd_status_get_elapsed_time(mpdstatus);
     info->duration = mpd_song_get_duration(song);
     info->progress = info->pos / (float)info->duration;
